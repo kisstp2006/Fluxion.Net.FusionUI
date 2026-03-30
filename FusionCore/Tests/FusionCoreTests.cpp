@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "Fusion/FusionCore.h"
+#include "Fusion/Core.h"
 
 #include <thread>
 #include <vector>
@@ -227,7 +227,7 @@ TEST(PtrTest, ThreadSafety)
     };
 
     // Shared strong ref — all threads copy from this
-    Ptr<FTestObject> shared(new FTestObject());
+    Ptr<FTestObject> shared = NewObject<FTestObject>();
 
     constexpr int threadCount    = 8;
     constexpr int opsPerThread   = 10000;

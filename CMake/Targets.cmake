@@ -187,6 +187,15 @@ function(add_fusion_target NAME TARGET_TYPE)
     set(multiValueArgs PRIVATE PUBLIC INTERFACE)
     cmake_parse_arguments(add_fusion_target_COMPILE_DEFINITIONS "" "" "${multiValueArgs}" ${add_fusion_target_COMPILE_DEFINITIONS})
 
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        list(APPEND add_fusion_target_COMPILE_DEFINITIONS_PUBLIC "FUSION_64BIT=1")
+    endif()
+
+    if(FUSION_ENABLE_EXCEPTIONS)
+        list(APPEND add_fusion_target_COMPILE_DEFINITIONS_PUBLIC "FUSION_EXCEPTIONS=1")
+    endif()
+    
+
     string(TOUPPER ${NAME} NAME_UPPER)
     if(FUSION_PLATFORM_WINDOWS AND TARGET_TYPE_${TARGET_TYPE}_IS_SHAREDLIB)
         list(APPEND add_fusion_target_COMPILE_DEFINITIONS_PRIVATE   "${NAME_UPPER}_API=__declspec(dllexport)")

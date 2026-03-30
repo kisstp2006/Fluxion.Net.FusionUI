@@ -5,6 +5,18 @@
 #include <exception>
 #include "cpptrace/cpptrace.hpp"
 
+#if FUSION_EXCEPTIONS
+
+#define FUSION_TRY try
+#define FUSION_CATCH(exceptionStatement) catch (exceptionStatement)
+
+#else
+
+#define FUSION_TRY if constexpr (true)
+#define FUSION_CATCH(exceptionStatement) else if constexpr (false)
+
+#endif
+
 namespace Fusion
 {
 
@@ -42,5 +54,5 @@ namespace Fusion
         FString message;
         cpptrace::stacktrace stackTrace;
     };
-    
+
 } // namespace Fusion

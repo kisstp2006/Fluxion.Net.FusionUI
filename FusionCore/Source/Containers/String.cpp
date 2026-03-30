@@ -235,6 +235,11 @@ namespace Fusion
         return other && std::strcmp(Data(), other) == 0;
     }
 
+    SizeT FString::GetHash() const
+    {
+        return CalculateHash(Data(), m_Size);
+    }
+
     // ------------------------------------------------------------------
 
     void FString::Assign(const char* str, size_t length)

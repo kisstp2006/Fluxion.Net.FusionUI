@@ -13,7 +13,7 @@ namespace Fusion::Internal
         if (m_StrongRefs.fetch_sub(1, std::memory_order_acq_rel) == 1)
         {
             m_Object->m_Control.store(nullptr, std::memory_order_release);
-            m_Object->OnDestroy();
+            m_Object->OnBeforeDestroy();
             delete m_Object;
             m_Object = nullptr;
 

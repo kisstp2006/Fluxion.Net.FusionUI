@@ -24,6 +24,10 @@ if(PROJECT_IS_TOP_LEVEL)
     option(FUSION_ENABLE_TRACY   "Enable Tracy profiler integration" OFF)
 endif()
 
+option(FUSION_BUILD_SAMPLES "Build Fusion tests" ${PROJECT_IS_TOP_LEVEL})
+
+option(FUSION_ENABLE_EXCEPTIONS "Enable exceptions, for safe C++." ON)
+
 include(CMake/ThirdParty.cmake)
 
 if (FUSION_BUILD_TESTS)
@@ -31,5 +35,21 @@ if (FUSION_BUILD_TESTS)
 endif()
 
 add_subdirectory(FusionCore)
+add_subdirectory(FusionPlatform)
 
+if(FUSION_USE_SDL3)
+    add_subdirectory(FusionSDL3Platform)
+endif()
+
+add_subdirectory(FusionRHI)
+
+if(FUSION_USE_VULKAN)
+    add_subdirectory(FusionVulkanRHI)
+endif()
+
+add_subdirectory(FusionWidgets)
+
+if(FUSION_BUILD_SAMPLES AND FUSION_USE_SDL3 AND FUSION_USE_VULKAN)
+    add_subdirectory(Samples)
+endif()
 

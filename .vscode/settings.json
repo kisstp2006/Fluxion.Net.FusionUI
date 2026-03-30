@@ -5,6 +5,19 @@
     },
     "C_Cpp.default.defines": [
         "FUSIONCORE_API=",
+        "FUSIONPLATFORM_API=",
+        "FUSIONSDL3PLATFORM_API=",
+        "FUSIONRHI_API=",
+        "FUSIONVULKANRHI_API=",
+        "FUSIONWIDGETS_API=",
+    ],
+    "C_Cpp.default.systemIncludePath": [
+        "FusionCore/Include",
+        "FusionPlatform/Include",
+        "FusionSDL3Platform/Include",
+        "FusionRHI/Include",
+        "FusionVulkanRHI/Include",
+        "FusionWidgets/Include",
     ],
     "esbonio.sphinx.confDir": "",
     "binary-file-viewer.parserFolders": [

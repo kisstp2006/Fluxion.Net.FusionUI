@@ -29,7 +29,7 @@ namespace Fusion
         FString& operator=(std::string_view str);
 
         // Returns the raw UTF-8 byte buffer, null-terminated.
-        const char*      CStr()       const;
+        const char* CStr()       const;
         std::string_view View()       const;
         std::string      ToStdString() const;
 
@@ -56,6 +56,8 @@ namespace Fusion
         bool operator!=(const std::string& other)  const { return !(*this == other); }
         bool operator!=(std::string_view other)    const { return !(*this == other); }
         bool operator!=(const char* other)         const { return !(*this == other); }
+
+        SizeT GetHash() const;
 
         // ----------------------------------------------------------------
         // Formatting

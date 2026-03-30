@@ -26,5 +26,17 @@ namespace Fusion
 
     template<typename T, template <typename> class U>
     struct TFIsTemplate<U<T>> : TFTrueType {};
+
+    template<typename T, typename = void>
+    struct TFHasGetHashFunction : TFFalseType
+    {
+        static SizeT GetHash(const T* instance) { return 0; }
+    };
+
+    template<typename T>
+    struct TFHasGetHashFunction<T, std::void_t<decltype(std::declval<T>().GetHash())>> : TFTrueType
+    {
+        static SizeT GetHash(const T* instance) { return instance->GetHash(); }
+    };
     
 } // namespace Fusion

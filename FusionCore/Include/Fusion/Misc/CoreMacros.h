@@ -41,3 +41,28 @@
 #   define __FUSION_GET_ARG_COUNT_PRIVATE(_0, _1_, _2_, _3_, _4_, _5_, _6_, _7_, _8_, _9_, _10_, _11_, _12_, _13_, _14_, _15_, _16_, _17_, _18_, _19_, _20_, _21_, _22_, _23_, _24_, _25_, _26_, _27_, _28_, _29_, _30_, _31_, _32_, _33_, _34_, _35_, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63, _64, _65, _66, _67, _68, _69, _70, count, ...) count
 
 #endif
+
+
+#define FUSION_ENUM_CLASS(Enum)\
+	inline			 bool  operator==(Enum E, i32 Rhs) { return E == (Enum)Rhs; }\
+	inline			 bool  operator!=(Enum E, i32 Rhs) { return E != (Enum)Rhs; }\
+    inline           bool  operator==(Enum E, i64 Rhs) { return E == (Enum)Rhs; }\
+    inline           bool  operator!=(Enum E, i64 Rhs) { return E != (Enum)Rhs; }
+
+#define FUSION_ENUM_CLASS_FLAGS(Enum) \
+	inline           Enum& operator|=(Enum& Lhs, Enum Rhs) { return Lhs = (Enum)((__underlying_type(Enum))Lhs | (__underlying_type(Enum))Rhs); } \
+	inline           Enum& operator&=(Enum& Lhs, Enum Rhs) { return Lhs = (Enum)((__underlying_type(Enum))Lhs & (__underlying_type(Enum))Rhs); } \
+	inline           Enum& operator^=(Enum& Lhs, Enum Rhs) { return Lhs = (Enum)((__underlying_type(Enum))Lhs ^ (__underlying_type(Enum))Rhs); } \
+	inline constexpr Enum  operator| (Enum  Lhs, Enum Rhs) { return (Enum)((__underlying_type(Enum))Lhs | (__underlying_type(Enum))Rhs); } \
+	inline constexpr Enum  operator& (Enum  Lhs, Enum Rhs) { return (Enum)((__underlying_type(Enum))Lhs & (__underlying_type(Enum))Rhs); } \
+	inline constexpr Enum  operator^ (Enum  Lhs, Enum Rhs) { return (Enum)((__underlying_type(Enum))Lhs ^ (__underlying_type(Enum))Rhs); } \
+	inline constexpr bool  operator! (Enum  E)             { return !(__underlying_type(Enum))E; } \
+	inline constexpr Enum  operator~ (Enum  E)             { return (Enum)~(__underlying_type(Enum))E; }\
+	inline			 bool  operator==(Enum E, i32 Rhs) { return E == (Enum)Rhs; }\
+	inline			 bool  operator!=(Enum E, i32 Rhs) { return E != (Enum)Rhs; }\
+    inline           bool  operator==(Enum E, i64 Rhs) { return E == (Enum)Rhs; }\
+    inline           bool  operator!=(Enum E, i64 Rhs) { return E != (Enum)Rhs; }\
+	inline constexpr u32  operator& (Enum  Lhs, u32 Rhs) { return (u32)((__underlying_type(Enum))Lhs & (__underlying_type(Enum))Rhs); }\
+	inline constexpr u32  operator| (Enum  Lhs, u32 Rhs) { return (u32)((__underlying_type(Enum))Lhs | (__underlying_type(Enum))Rhs); }
+
+#define FUSION_BIT(x) (1 << (x))
