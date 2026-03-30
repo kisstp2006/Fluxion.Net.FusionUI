@@ -9,12 +9,27 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+include(FetchContent)
 include(CMake/FusionPlatform.cmake)
+include(CMake/Targets.cmake)
 
 if(PROJECT_IS_TOP_LEVEL)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-    option(FUSION_BUILD_TESTS    "Build Fusion tests"              ON)
+
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
+
+    option(FUSION_BUILD_TESTS    "Build Fusion tests"               ON)
     option(FUSION_ENABLE_TRACY   "Enable Tracy profiler integration" OFF)
 endif()
+
+include(CMake/ThirdParty.cmake)
+
+if (FUSION_BUILD_TESTS)
+    include(CMake/Tests.cmake)
+endif()
+
+add_subdirectory(FusionCore)
 
 
