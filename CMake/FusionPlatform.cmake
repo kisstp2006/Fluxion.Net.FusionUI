@@ -32,26 +32,6 @@ else()
 endif()
 
 # ---------------------------------------------------------------------------
-# fusion_configure_third_party_target(<target>)
-#
-# Apply minimal build settings to a third-party target fetched via FetchContent.
-# Only call this on targets Fusion fetched itself — never on pre-existing targets.
-# ---------------------------------------------------------------------------
-function(fusion_configure_third_party_target target)
-    if(NOT TARGET ${target})
-        return()
-    endif()
-
-    if(FUSION_COMPILER_MSVC)
-        target_compile_options(${target} PRIVATE /MP)
-    endif()
-
-    if(PROJECT_IS_TOP_LEVEL)
-        set_target_properties(${target} PROPERTIES FOLDER "ThirdParty")
-    endif()
-endfunction()
-
-# ---------------------------------------------------------------------------
 # fusion_configure_target(<target>)
 #
 # Apply Fusion's compile settings to one of Fusion's own targets.

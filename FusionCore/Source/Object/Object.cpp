@@ -2,8 +2,34 @@
 
 namespace Fusion
 {
-    FObject::FObject() = default;
+	FObject::FObject(Ptr<FObject> outer, FName name) : m_Outer(outer), m_Name(MoveTemp(name))
+    {
+	    
+    }
 
-    FObject::~FObject() = default;
+	void FObject::AttachSubobject(Ptr<FObject> subobject)
+	{
+		if (!subobject)
+		{
+			return;
+		}
+
+		m_Subobjects.Add(subobject);
+	}
+
+	void FObject::DetachSubobject(Ptr<FObject> subobject)
+	{
+		if (!subobject)
+		{
+			return;
+		}
+
+
+	}
+
+    FObject::~FObject()
+	{
+		
+	}
 
 } // namespace Fusion

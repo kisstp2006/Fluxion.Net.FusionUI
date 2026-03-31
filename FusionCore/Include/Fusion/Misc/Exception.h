@@ -55,4 +55,38 @@ namespace Fusion
         cpptrace::stacktrace stackTrace;
     };
 
+    class FUSIONCORE_API FNullPointerException : public FException
+    {
+    public:
+
+        FNullPointerException() : FException("Null Pointer Exception")
+        {
+	        
+        }
+
+        FNullPointerException(const FString& message) : FException(FString::Format("NullPointerException: {}", message))
+        {
+	        
+        }
+
+    private:
+
+
+    };
+
+    namespace Internal
+    {
+        template<typename TException> requires TFIsBaseClassOf<FException, TException>::Value
+        [[noreturn]] void AssertFailedThrow(const char* message, const char* file, int line)
+        {
+            FString fullMessage = FString(file) + ":" + std::to_string(line) + " - " + message;
+#if FUSION_EXCEPTIONS
+            throw TException(fullMessage);
+#else
+            FUSION_LOG_CRITICAL("Assert", fullMessage.CStr());
+            assert(false && fullMessage.CStr());
+#endif
+        }
+    }
+
 } // namespace Fusion

@@ -22,15 +22,14 @@ FetchContent_Declare(
 
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
+# Force GTest to build as a static library regardless of BUILD_SHARED_LIBS
+set(_prev_build_shared_libs ${BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS OFF)
 FetchContent_MakeAvailable(googletest)
+set(BUILD_SHARED_LIBS ${_prev_build_shared_libs})
 
 add_library(GoogleTest INTERFACE IMPORTED)
 target_link_libraries(GoogleTest INTERFACE gtest_main)
-
-fusion_configure_third_party_target(gmock)
-fusion_configure_third_party_target(gmock_main)
-fusion_configure_third_party_target(gtest)
-fusion_configure_third_party_target(gtest_main)
 
 fusion_configure_third_party_target(gmock)
 fusion_configure_third_party_target(gmock_main)

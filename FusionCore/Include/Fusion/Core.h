@@ -9,9 +9,8 @@
 #include "Fusion/Misc/CoreDefines.h"
 #include "Fusion/Misc/CoreMacros.h"
 #include "Fusion/Misc/CoreTypes.h"
-#include "Fusion/Misc/Assert.h"
-
 #include "Fusion/Templates/TypeTraits.h"
+#include "Fusion/Misc/Assert.h"
 
 #include "Fusion/Algorithm/Hash.h"
 
@@ -32,7 +31,7 @@
 
 #include "Fusion/Misc/Exception.h"
 
-#include "Fusion/Object/Object.h"
 #include "Fusion/Object/Ptr.h"
 #include "Fusion/Object/WeakPtr.h"
+#include "Fusion/Object/Object.h"
 

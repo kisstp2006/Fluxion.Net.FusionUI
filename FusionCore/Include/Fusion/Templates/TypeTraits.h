@@ -21,6 +21,9 @@ namespace Fusion
     template<typename T>
     struct TFIsSameType<T, T> : TFTrueType {};
 
+    template<class TBase, class TDerived>
+    using TFIsBaseClassOf = TFBoolConst<__is_base_of(TBase, TDerived)>;
+
     template<typename T>
     struct TFIsTemplate : TFFalseType {};
 
@@ -38,5 +41,11 @@ namespace Fusion
     {
         static SizeT GetHash(const T* instance) { return instance->GetHash(); }
     };
+
+    template<typename T>
+    constexpr std::remove_reference_t<T>&& MoveTemp(T&& value)
+    {
+        return static_cast<std::remove_reference_t<T>&&>(value);
+    }
     
 } // namespace Fusion

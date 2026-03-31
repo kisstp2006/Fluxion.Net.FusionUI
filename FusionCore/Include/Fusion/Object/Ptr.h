@@ -108,13 +108,35 @@ namespace Fusion
             return *this;
         }
 
-        T*   Get()        const { return m_Control ? static_cast<T*>(m_Control->m_Object) : nullptr; }
-        T*   operator->() const { return Get(); }
-        T&   operator*()  const { return *Get(); }
+        T* Get() const
+        {
+	        return m_Control ? static_cast<T*>(m_Control->m_Object) : nullptr;
+        }
+
+        T* operator->() const
+        {
+            FUSION_ASSERT_THROW(IsValid(), FNullPointerException, "Trying to dereference a Null Ptr<T>");
+	        return Get();
+        }
+
+        T& operator*() const
+        {
+            FUSION_ASSERT_THROW(IsValid(), FNullPointerException, "Trying to dereference a Null Ptr<T>");
+	        return *Get();
+        }
 
         bool IsValid()    const { return Get() != nullptr; }
         bool IsNull()     const { return Get() == nullptr; }
-        explicit operator bool() const { return IsValid(); }
+
+        explicit operator bool() const
+        {
+	        return IsValid();
+        }
+
+        inline bool operator!() const
+        {
+            return !IsValid();
+        }
 
         bool operator==(const Ptr& other)  const { return m_Control == other.m_Control; }
         bool operator!=(const Ptr& other)  const { return !(*this == other); }

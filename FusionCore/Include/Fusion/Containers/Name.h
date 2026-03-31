@@ -21,9 +21,7 @@ namespace Fusion
 	        if (str)
 	        {
 	            m_Hash = CalculateHash(str, std::strlen(str));
-	#ifndef NDEBUG
-	            m_DebugStr = str;
-	#endif
+				FString m_String = str;
 	        }
 	    }
 
@@ -32,9 +30,7 @@ namespace Fusion
 		    if (!str.IsEmpty())
 		    {
 	            m_Hash = str.GetHash();
-	#ifndef NDEBUG
-	            m_DebugStr = str;
-	#endif
+				FString m_String = str;
 		    }
 	    }
 
@@ -43,12 +39,7 @@ namespace Fusion
 	        if (!str.empty())
 	        {
 	            m_Hash = CalculateHash(str.data(), str.size());
-	#ifndef NDEBUG
-	            // string_view is not guaranteed to be null-terminated;
-	            // m_DebugStr is best-effort and safe only when backed by
-	            // a null-terminated buffer (e.g. a string literal or FString).
-	            m_DebugStr = str.data();
-	#endif
+				FString m_String = str;
 	        }
 	    }
 
@@ -58,15 +49,15 @@ namespace Fusion
 
 	    explicit operator bool() const { return IsValid(); }
 
+		const FString& ToString() const { return m_String; }
+
 	    bool operator==(const FName& other) const { return m_Hash == other.m_Hash; }
 	    bool operator!=(const FName& other) const { return !(*this == other); }
 
 	private:
 	    SizeT m_Hash = 0;
-
-	#ifndef NDEBUG
-	    FString m_DebugStr = nullptr;
-	#endif
+		FString m_String = nullptr;
+	
 	};
 
 	template<>
