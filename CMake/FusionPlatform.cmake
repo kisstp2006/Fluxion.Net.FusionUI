@@ -66,3 +66,27 @@ function(fusion_configure_target target)
         target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
     endif()
 endfunction()
+
+function(fusion_filter_platform_files FILES_LIST)
+    if(NOT ${FUSION_PLATFORM_NAME} STREQUAL "Windows")
+        list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/Windows/.*")
+    endif()
+    
+    if(NOT ${FUSION_PLATFORM_NAME} STREQUAL "Mac")
+        list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/Mac/.*")
+    endif()
+
+    if(NOT ${FUSION_PLATFORM_NAME} STREQUAL "Linux")
+        list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/Linux/.*")
+    endif()
+
+    if(NOT ${FUSION_PLATFORM_NAME} STREQUAL "Android")
+        list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/Android/.*")
+    endif()
+
+    if(NOT ${FUSION_PLATFORM_NAME} STREQUAL "iOS")
+        list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/iOS/.*")
+    endif()
+    
+    set(${FILES_LIST} ${${FILES_LIST}} PARENT_SCOPE)
+endfunction()

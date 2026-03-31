@@ -8,7 +8,7 @@ add_fusion_target(FusionVulkanRHI STATIC
     INCLUDE_DIRECTORIES
         PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include
     PCHHEADER
-        PRIVATE Include/Fusion/VulkanRHI.h
+        PRIVATE Source/VulkanRHIPrivate.h
     BUILD_DEPENDENCIES
         PUBLIC
             Fusion::Core

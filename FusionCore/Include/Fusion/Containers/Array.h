@@ -54,6 +54,15 @@ namespace Fusion
             MoveFrom(std::move(other));
         }
 
+        explicit FArray(SizeT count)
+        {
+			InitInline();
+            Reserve(count);
+            for (size_t i = 0; i < count; ++i)
+                new (m_Data + i) T();
+			m_Size = count;
+        }
+
         ~FArray()
         {
             DestroyElements(0, m_Size);
@@ -111,7 +120,7 @@ namespace Fusion
 
         size_t Size()     const { return m_Size; }
         size_t Capacity() const { return m_Capacity; }
-        bool   IsEmpty()  const { return m_Size == 0; }
+        bool   Empty()  const { return m_Size == 0; }
 
         void Reserve(size_t newCapacity)
         {

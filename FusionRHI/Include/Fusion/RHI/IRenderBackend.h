@@ -5,6 +5,10 @@
 
 namespace Fusion
 {
+	struct FRenderCapabilities
+	{
+		
+	};
     
     class FUSIONRHI_API IFRenderBackend
     {
@@ -12,9 +16,11 @@ namespace Fusion
 
 		virtual ~IFRenderBackend() = default;
 
-		// - Lifecycle -
+		// - Capabilities -
 
-		virtual void InitializeShaders() = 0;
+		virtual FRenderCapabilities GetRenderCapabilities() = 0;
+
+		// - Lifecycle -
 
 		virtual bool IsInitialized(FInstanceHandle instance) = 0;
 

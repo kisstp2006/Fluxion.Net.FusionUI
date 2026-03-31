@@ -286,7 +286,7 @@ TEST(FArrayTest, DefaultConstructorEmpty)
 {
     FArray<int> arr;
     EXPECT_EQ(arr.Size(), 0);
-    EXPECT_TRUE(arr.IsEmpty());
+    EXPECT_TRUE(arr.Empty());
     EXPECT_EQ(arr.Capacity(), 8); // default InlineCapacity
 }
 
@@ -366,7 +366,7 @@ TEST(FArrayTest, Clear)
     FArray<int> arr = { 1, 2, 3 };
     arr.Clear();
     EXPECT_EQ(arr.Size(), 0);
-    EXPECT_TRUE(arr.IsEmpty());
+    EXPECT_TRUE(arr.Empty());
 }
 
 TEST(FArrayTest, ReserveDoesNotShrink)

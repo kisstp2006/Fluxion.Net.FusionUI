@@ -5,16 +5,23 @@
 
 namespace Fusion
 {
+    struct FUSIONVULKANRHI_API FRenderInstance : IntrusiveBase
+    {
+        // Per ApplicationInstance data goes here
+
+    };
     
     class FUSIONVULKANRHI_API FVulkanRenderBackend : public IFRenderBackend
     {
     public:
 
-        void InitializeShaders() override;
+        static constexpr u32 ImageCount = 2;
+
+        FRenderCapabilities GetRenderCapabilities() override;
 
         bool IsInitialized(FInstanceHandle instance) override
         {
-            return true;
+            return instances.KeyExists(instance);
         }
 
         bool InitializeInstance(FInstanceHandle instance) override;
@@ -23,8 +30,52 @@ namespace Fusion
 
 	private:
 
-		VkInstance m_VulkanInstance = VK_NULL_HANDLE;
+		// - Vulkan Lifecycle -
 
+		void InitializeVulkan();
+
+		void ShutdownVulkan();
+
+    private:
+
+        HashMap<FInstanceHandle, IntrusivePtr<FRenderInstance>> instances;
+
+        // - Vulkan Data -
+
+		VkInstance m_VulkanInstance = VK_NULL_HANDLE;
+        VkDebugUtilsMessengerEXT m_VkMessenger = VK_NULL_HANDLE;
+
+		// - Physical Device -
+
+		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
+		VkPhysicalDeviceProperties m_PhysicalDeviceProperties{};
+		VkPhysicalDeviceMemoryProperties m_PhysicalDeviceMemoryProperties{};
+
+        FArray<VkQueueFamilyProperties> m_QueueFamilyProperties;
+
+        // - Properties -
+
+		bool m_IsUnifiedMemory = false;
+        bool m_IsResizableBAR = false;
+
+        // - Surface -
+
+        VkSurfaceCapabilitiesKHR m_SurfaceCapabilities{};   // TestSurface properties: image size, extent, etc
+        FArray<VkSurfaceFormatKHR> m_SurfaceFormats;  // TestSurface image supported formats
+        FArray<VkPresentModeKHR> m_PresentationModes; // How images should be presented to the screen
+
+        // - Device -
+
+		VkDevice m_Device = VK_NULL_HANDLE;
+
+        // - Queues -
+        
+        int m_QueueFamilyIndex = -1;
+        VkQueue m_GraphicsQueue = VK_NULL_HANDLE;
+
+        // - Command Pool -
+
+        VkCommandPool m_CommandPool = VK_NULL_HANDLE;
 
     };
 
