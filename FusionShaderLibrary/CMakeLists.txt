@@ -17,19 +17,21 @@ add_fusion_target(FusionShaderLibrary STATIC
 # ---------------------------------------------------------------------------
 
 fusion_compile_shader(TARGET FusionShaderLibrary
-    HLSL    Shaders/Fusion.slang
-    GROUP   Fusion
-    ENTRY   VSMain
-    STAGE   vertex
-    TARGETS SPIRV
+    HLSL         Shaders/Fusion.slang
+    GROUP        Fusion
+    ENTRY        VSMain
+    STAGE        vertex
+    TARGETS      SPIRV
+    INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Shaders
 )
 
 fusion_compile_shader(TARGET FusionShaderLibrary
-    HLSL    Shaders/Fusion.slang
-    GROUP   Fusion
-    ENTRY   PSMain
-    STAGE   fragment
-    TARGETS SPIRV
+    HLSL         Shaders/Fusion.slang
+    GROUP        Fusion
+    ENTRY        PSMain
+    STAGE        fragment
+    TARGETS      SPIRV
+    INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Shaders
 )
 
 fusion_finalize_shader_registry(FusionShaderLibrary)

@@ -2,21 +2,18 @@
 
 #include "Fusion/ShaderLibrary/ShaderTypes.h"
 
-// ---------------------------------------------------------------------------
-// Fusion::Shaders -- access to precompiled, embedded shader data.
-//
-// All() and FindShader() are implemented in the auto-generated
-// ShaderRegistry.cpp (produced by fusion_finalize_shader_registry in CMake).
-// ---------------------------------------------------------------------------
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 
 namespace Fusion::Shaders {
 
-// All shaders compiled into the library, in registration order.
-// Supports range-for:
-//   for (const FShader& shader : Fusion::Shaders::All()) { ... }
-FShaderView All();
+	// All shaders compiled into the library, in registration order.
+	// Supports range-for:
+	//   for (const FShader& shader : Fusion::Shaders::All()) { ... }
+	FShaderView All();
 
-// Find a shader by name. Returns nullptr if not found.
-const FShader* FindShader(const char* name);
+	// Find a shader by name. Returns nullptr if not found.
+	const FShader* FindShader(const char* name);
 
 } // namespace Fusion::Shaders

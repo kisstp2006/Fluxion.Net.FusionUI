@@ -1,5 +1,10 @@
 include_guard(GLOBAL)
 
+# Capture the Scripts/ directory relative to this file at include time.
+# Using CMAKE_CURRENT_LIST_DIR here (not PROJECT_SOURCE_DIR) ensures the path
+# stays correct when FusionUI is consumed via add_subdirectory().
+set(FUSION_SHADER_SCRIPTS_DIR "${CMAKE_CURRENT_LIST_DIR}/Scripts" CACHE INTERNAL "")
+
 # ---------------------------------------------------------------------------
 # Find slangc -- bundled with Vulkan SDK 1.3.268+
 # ---------------------------------------------------------------------------
@@ -33,7 +38,7 @@ endif()
 # the result as a C++ byte array compiled into the target.
 # ---------------------------------------------------------------------------
 function(fusion_compile_shader)
-    cmake_parse_arguments(ARG "" "TARGET;HLSL;GROUP;ENTRY;STAGE" "TARGETS" ${ARGN})
+    cmake_parse_arguments(ARG "" "TARGET;HLSL;GROUP;ENTRY;STAGE" "TARGETS;INCLUDE_DIRS" ${ARGN})
 
     if(NOT ARG_TARGET OR NOT ARG_HLSL OR NOT ARG_GROUP OR NOT ARG_ENTRY OR NOT ARG_STAGE)
         message(FATAL_ERROR "[Fusion] fusion_compile_shader: TARGET, HLSL, GROUP, ENTRY, and STAGE are all required.")
@@ -48,7 +53,21 @@ function(fusion_compile_shader)
     set(var_name     "${ARG_GROUP}_${ARG_STAGE}")
     set(hlsl_abs     "${CMAKE_CURRENT_SOURCE_DIR}/${ARG_HLSL}")
     set(gen_dir      "${CMAKE_CURRENT_BINARY_DIR}/Generated/Shaders")
-    set(embed_script "${PROJECT_SOURCE_DIR}/CMake/Scripts/EmbedShader.cmake")
+    set(embed_script "${FUSION_SHADER_SCRIPTS_DIR}/EmbedShader.cmake")
+
+    # Build -I flags for slangc (needed for Slang's import keyword)
+    set(slangc_include_args "")
+    foreach(inc_dir ${ARG_INCLUDE_DIRS})
+        list(APPEND slangc_include_args -I "${inc_dir}")
+    endforeach()
+
+    # ---- Add source file to the target (visible in VS, not compiled) -------
+    get_target_property(_existing_hlsl ${ARG_TARGET} FUSION_HLSL_SOURCES)
+    if(NOT hlsl_abs IN_LIST _existing_hlsl)
+        set_source_files_properties("${hlsl_abs}" PROPERTIES HEADER_FILE_ONLY TRUE)
+        target_sources(${ARG_TARGET} PRIVATE "${hlsl_abs}")
+        set_property(TARGET ${ARG_TARGET} APPEND PROPERTY FUSION_HLSL_SOURCES "${hlsl_abs}")
+    endif()
 
     # ---- SPIR-V ------------------------------------------------------------
     if("SPIRV" IN_LIST ARG_TARGETS)
@@ -61,6 +80,7 @@ function(fusion_compile_shader)
                     -target spirv
                     -entry  "${ARG_ENTRY}"
                     -stage  "${ARG_STAGE}"
+                    ${slangc_include_args}
                     -o      "${spv_file}"
             DEPENDS "${hlsl_abs}"
             COMMENT "[Fusion] slangc: ${var_name} -> SPIR-V"
@@ -94,6 +114,7 @@ function(fusion_compile_shader)
                     -target msl
                     -entry  "${ARG_ENTRY}"
                     -stage  "${ARG_STAGE}"
+                    ${slangc_include_args}
                     -o      "${msl_file}"
             DEPENDS "${hlsl_abs}"
             COMMENT "[Fusion] slangc: ${var_name} -> MSL"
