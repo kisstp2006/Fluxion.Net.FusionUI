@@ -1,5 +1,8 @@
 #pragma once
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 #include <type_traits>
 
 namespace Fusion
@@ -47,5 +50,64 @@ namespace Fusion
     {
         return static_cast<std::remove_reference_t<T>&&>(value);
     }
+
+    template<typename T, size_t InlineCapacity>
+    class FArray;
+
+    template<typename T>
+	struct TFIsArray : TFFalseType {};
+
+    template<typename T, size_t InlineCapacity>
+    struct TFIsArray<FArray<T, InlineCapacity>> : TFTrueType {};
+
+    template<typename T>
+    class Ptr;
+
+    template<typename T>
+    class WeakPtr;
+
+    template<typename T>
+    struct TFIsPtr : TFFalseType
+    {
+		typedef void Type;
+    };
+
+    template<typename T>
+    struct TFIsPtr<Ptr<T>> : TFTrueType
+    {
+        typedef T Type;
+    };
+
+    template<typename T>
+    struct TFIsWeakPtr : TFFalseType
+    {
+        typedef void Type;
+    };
+
+    template<typename T>
+    struct TFIsWeakPtr<WeakPtr<T>> : TFTrueType
+    {
+        typedef T Type;
+    };
+
+    template<typename T>
+    struct TFIsIntegralType : TFFalseType {};
+
+    template<>
+    struct TFIsIntegralType<u8> : TFTrueType {};
+    template<>
+    struct TFIsIntegralType<u16> : TFTrueType {};
+    template<>
+    struct TFIsIntegralType<u32> : TFTrueType {};
+    template<>
+    struct TFIsIntegralType<u64> : TFTrueType {};
+    template<>
+    struct TFIsIntegralType<i8> : TFTrueType {};
+    template<>
+    struct TFIsIntegralType<i16> : TFTrueType {};
+    template<>
+    struct TFIsIntegralType<i32> : TFTrueType {};
+    template<>
+    struct TFIsIntegralType<i64> : TFTrueType {};
     
 } // namespace Fusion

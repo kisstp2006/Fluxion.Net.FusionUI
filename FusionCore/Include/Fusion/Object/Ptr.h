@@ -15,7 +15,7 @@ namespace Fusion
         Ptr() = default;
         Ptr(std::nullptr_t) {}
 
-        explicit Ptr(T* object)
+        Ptr(T* object)
         {
             if (object)
             {

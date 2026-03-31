@@ -2,7 +2,13 @@
 
 namespace Fusion
 {
-	using FWindowHandle = u64;
+	//! @brief A handle to an instance of PlatformBackend. Also used for the RenderBackend.
+	using FInstanceHandle = Handle<u32>;
+
+	//! @brief A handle to a window created by the PlatformBackend.
+	using FWindowHandle = Handle<u32>;
+
+    using FDisplayId = Handle<u32>;
     
     enum class FKeyCode : i32
     {
@@ -187,5 +193,26 @@ namespace Fusion
         Button5 = FUSION_BIT((int)FMouseButton::Button5)
     };
     FUSION_ENUM_CLASS_FLAGS(FMouseButtonMask);
+
+    enum class FSystemCursor
+    {
+        Default = 0,
+        Arrow = 0,
+        IBeam,
+        Wait,
+        CrossHair,
+        WaitArrow,
+        SizeTopLeft,
+        SizeBottomRight = SizeTopLeft,
+        SizeTopRight,
+        SizeBottomLeft = SizeTopRight,
+        SizeHorizontal,
+        SizeVertical,
+        SizeAll,
+        No,
+        Hand,
+        COUNT
+    };
+    FUSION_ENUM_CLASS(FSystemCursor);
     
 } // namespace Fusion

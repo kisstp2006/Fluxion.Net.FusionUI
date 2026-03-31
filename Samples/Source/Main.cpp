@@ -4,11 +4,12 @@
 #include <Fusion/VulkanRHI.h>
 #include <Fusion/Widgets.h>
 
+using namespace Fusion;
 
 int main(int argc, char* argv[])
 {
+	FApplication app(argc, argv);
 	
-
-	return 0;
+	return app.Run();
 }
 

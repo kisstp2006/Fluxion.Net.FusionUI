@@ -187,3 +187,4 @@ namespace Fusion
     inline constexpr FVec2i operator*(int32_t scalar, FVec2i v) { return v * scalar; }
 
 } // namespace Fusion
+

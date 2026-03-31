@@ -66,3 +66,19 @@
 	inline constexpr u32  operator| (Enum  Lhs, u32 Rhs) { return (u32)((__underlying_type(Enum))Lhs | (__underlying_type(Enum))Rhs); }
 
 #define FUSION_BIT(x) (1 << (x))
+
+namespace Fusion
+{
+
+	template<typename Enum>
+	constexpr bool FEnumHasAllFlags(Enum Flags, Enum Contains)
+	{
+		return (((__underlying_type(Enum))Flags) & (__underlying_type(Enum))Contains) == ((__underlying_type(Enum))Contains);
+	}
+
+	template<typename Enum>
+	constexpr bool FEnumHasFlag(Enum Flags, Enum Contains)
+	{
+		return ((((__underlying_type(Enum))Flags) & (__underlying_type(Enum))Contains) != 0) || ((__underlying_type(Enum))Contains == 0);
+	}
+}

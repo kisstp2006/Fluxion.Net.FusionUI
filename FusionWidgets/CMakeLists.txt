@@ -14,5 +14,7 @@ add_fusion_target(FusionWidgets STATIC
             Fusion::Core
             Fusion::Platform
             Fusion::RHI
+            $<$<BOOL:${FUSION_USE_SDL3}>:Fusion::SDL3Platform>
+            $<$<BOOL:${FUSION_USE_VULKAN}>:Fusion::VulkanRHI>
 )
 

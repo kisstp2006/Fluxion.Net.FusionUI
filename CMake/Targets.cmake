@@ -195,6 +195,18 @@ function(add_fusion_target NAME TARGET_TYPE)
         list(APPEND add_fusion_target_COMPILE_DEFINITIONS_PUBLIC "FUSION_EXCEPTIONS=1")
     endif()
     
+    if(FUSION_USE_SDL3)
+        list(APPEND add_fusion_target_COMPILE_DEFINITIONS_PUBLIC "FUSION_USE_SDL3=1")
+    endif()
+    
+    if(FUSION_USE_VULKAN)
+        list(APPEND add_fusion_target_COMPILE_DEFINITIONS_PUBLIC "FUSION_USE_VULKAN=1")
+    endif()
+
+    if(FUSION_TRAIT_VULKAN_SUPPORTED)
+        list(APPEND add_fusion_target_COMPILE_DEFINITIONS_PUBLIC "FUSION_TRAIT_VULKAN_SUPPORTED=1")
+    endif()
+    
 
     string(TOUPPER ${NAME} NAME_UPPER)
     if(FUSION_PLATFORM_WINDOWS AND TARGET_TYPE_${TARGET_TYPE}_IS_SHAREDLIB)

@@ -1,5 +1,8 @@
 #pragma once
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -10,13 +13,14 @@
 
 #include "Fusion/Misc/Assert.h"
 
+
 namespace Fusion
 {
-    template<typename T, size_t InlineCapacity = 8>
+    template<typename T = u8, size_t InlineCapacity = 8>
     class FArray
     {
     public:
-        static constexpr size_t npos = static_cast<size_t>(-1);
+        static constexpr i64 npos = -1;
 
         // ----------------------------------------------------------------
         // Construction / Destruction
@@ -223,7 +227,7 @@ namespace Fusion
             return false;
         }
 
-        size_t IndexOf(const T& value) const
+        i64 IndexOf(const T& value) const
         {
             for (size_t i = 0; i < m_Size; ++i)
                 if (m_Data[i] == value)

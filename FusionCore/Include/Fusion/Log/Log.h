@@ -4,6 +4,7 @@
 
 namespace Fusion
 {
+    class FString;
 
     enum class FLogLevel
     {
@@ -24,15 +25,18 @@ namespace Fusion
     FUSIONCORE_API void SetLogSink(FLogSink sink);
 
     // Internal dispatch — use the macros below instead of calling this directly.
-    FUSIONCORE_API void Log(FLogLevel level, const char* category, const char* message);
+    FUSIONCORE_API void Log(FLogLevel level, const char* category, const FString& message);
+
+    template<typename... Args>
+    void LogFormat(FLogLevel level, const char* category, const char* message, Args&&... args);
 
 } // namespace Fusion
 
 // clang-format off
-#define FUSION_LOG(level, category, message)          ::Fusion::Log(level, category, message)
-#define FUSION_LOG_TRACE(category, message)           ::Fusion::Log(::Fusion::FLogLevel::Trace,    category, message)
-#define FUSION_LOG_INFO(category, message)            ::Fusion::Log(::Fusion::FLogLevel::Info,     category, message)
-#define FUSION_LOG_WARNING(category, message)         ::Fusion::Log(::Fusion::FLogLevel::Warning,  category, message)
-#define FUSION_LOG_ERROR(category, message)           ::Fusion::Log(::Fusion::FLogLevel::Error,    category, message)
-#define FUSION_LOG_CRITICAL(category, message)        ::Fusion::Log(::Fusion::FLogLevel::Critical, category, message)
+#define FUSION_LOG(level, category, message, ...)          ::Fusion::LogFormat(level, category, message, ##__VA_ARGS__)
+#define FUSION_LOG_TRACE(category, message, ...)           ::Fusion::LogFormat(::Fusion::FLogLevel::Trace,    category, message, ##__VA_ARGS__)
+#define FUSION_LOG_INFO(category, message, ...)            ::Fusion::LogFormat(::Fusion::FLogLevel::Info,     category, message, ##__VA_ARGS__)
+#define FUSION_LOG_WARNING(category, message, ...)         ::Fusion::LogFormat(::Fusion::FLogLevel::Warning,  category, message, ##__VA_ARGS__)
+#define FUSION_LOG_ERROR(category, message, ...)           ::Fusion::LogFormat(::Fusion::FLogLevel::Error,    category, message, ##__VA_ARGS__)
+#define FUSION_LOG_CRITICAL(category, message, ...)        ::Fusion::LogFormat(::Fusion::FLogLevel::Critical, category, message, ##__VA_ARGS__)
 // clang-format on

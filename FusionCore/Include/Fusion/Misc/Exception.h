@@ -1,5 +1,8 @@
 #pragma once
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 #include "Containers/String.h"
 
 #include <exception>
@@ -59,7 +62,7 @@ namespace Fusion
     {
     public:
 
-        FNullPointerException() : FException("Null Pointer Exception")
+        FNullPointerException() : FException("NullPointerException")
         {
 	        
         }
@@ -67,6 +70,25 @@ namespace Fusion
         FNullPointerException(const FString& message) : FException(FString::Format("NullPointerException: {}", message))
         {
 	        
+        }
+
+    private:
+
+
+    };
+
+    class FUSIONCORE_API FOutOfBoundsException : public FException
+    {
+    public:
+
+        FOutOfBoundsException() : FException("OutOfBoundsException")
+        {
+
+        }
+
+        FOutOfBoundsException(const FString& message) : FException(FString::Format("OutOfBoundsException: {}", message))
+        {
+
         }
 
     private:

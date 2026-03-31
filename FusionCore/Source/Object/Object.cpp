@@ -1,8 +1,11 @@
 #include "Fusion/Object/Object.h"
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
-	FObject::FObject(Ptr<FObject> outer, FName name) : m_Outer(outer), m_Name(MoveTemp(name))
+	FObject::FObject(FName name, Ptr<FObject> outer) : m_Outer(outer), m_Name(MoveTemp(name)), m_Uuid(FUuid::Random())
     {
 	    
     }
@@ -15,6 +18,10 @@ namespace Fusion
 		}
 
 		m_Subobjects.Add(subobject);
+		subobject->m_Outer = Ptr<FObject>(this);
+
+		OnSubobjectAttached(subobject);
+		subobject->OnAttachToOuter();
 	}
 
 	void FObject::DetachSubobject(Ptr<FObject> subobject)
@@ -24,7 +31,16 @@ namespace Fusion
 			return;
 		}
 
+		i64 index = m_Subobjects.IndexOf(subobject);
 
+		if (index != FArray<>::npos)
+		{
+			subobject->OnDetachFromOuter();
+			OnSubobjectDetached(subobject);
+
+			subobject->m_Outer = nullptr;
+			m_Subobjects.RemoveAt(index);
+		}
 	}
 
     FObject::~FObject()

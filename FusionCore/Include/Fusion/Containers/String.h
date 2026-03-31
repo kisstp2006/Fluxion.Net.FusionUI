@@ -104,6 +104,12 @@ namespace Fusion
         static size_t CountCodepoints(const char* str, size_t byteLength);
     };
 
+    template <typename ... Args>
+    void LogFormat(FLogLevel level, const char* category, const char* message, Args&&... args)
+    {
+		Fusion::Log(level, category, FString::FormatV(message, std::make_format_args(args...)));
+    }
+
 } // namespace Fusion
 
 // Allow FString to be used directly as a std::format argument.
@@ -116,3 +122,4 @@ struct std::formatter<Fusion::FString> : std::formatter<std::string_view>
         return std::formatter<std::string_view>::format(str.View(), ctx);
     }
 };
+

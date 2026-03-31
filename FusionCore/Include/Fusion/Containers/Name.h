@@ -43,6 +43,12 @@ namespace Fusion
 	        }
 	    }
 
+		FName(const FName& other) = default;
+		FName& operator=(const FName& other) = default;
+
+		FName(FName&& other) = default;
+		FName& operator=(FName&& other) = default;
+
 	    SizeT GetHash()  const { return m_Hash; }
 	    bool  IsValid()  const { return m_Hash != 0; }
 	    bool  IsNull()   const { return m_Hash == 0; }

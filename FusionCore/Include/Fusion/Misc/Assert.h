@@ -2,6 +2,9 @@
 
 #include "Fusion/Misc/CoreDefines.h"
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
     class FException;

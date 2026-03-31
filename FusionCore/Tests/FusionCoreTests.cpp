@@ -222,12 +222,13 @@ TEST(PtrTest, ThreadSafety)
 {
     class FTestObject : public FObject
     {
+        FUSION_CLASS(FTestObject, FObject)
     public:
         std::atomic<int> m_Value = 0;
     };
 
     // Shared strong ref — all threads copy from this
-    Ptr<FTestObject> shared = NewObject<FTestObject>();
+    Ptr<FTestObject> shared = new FTestObject();
 
     constexpr int threadCount    = 8;
     constexpr int opsPerThread   = 10000;

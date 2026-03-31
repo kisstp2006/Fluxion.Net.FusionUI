@@ -25,15 +25,15 @@ namespace Fusion
         s_Sink = sink;
     }
 
-    void Log(FLogLevel level, const char* category, const char* message)
+    void Log(FLogLevel level, const char* category, const FString& message)
     {
         if (s_Sink)
         {
-            s_Sink(level, category, message);
+            s_Sink(level, category, message.CStr());
         }
         else
         {
-            std::fprintf(stderr, "[Fusion][%s][%s] %s\n", LevelToString(level), category, message);
+            std::fprintf(stderr, "[Fusion][%s][%s] %s\n", LevelToString(level), category, message.CStr());
         }
     }
 

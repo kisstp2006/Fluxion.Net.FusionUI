@@ -13,7 +13,7 @@ add_fusion_target(FusionVulkanRHI STATIC
         PUBLIC
             Fusion::Core
             Fusion::Platform
-        PRIVATE
+            Fusion::RHI
             Vulkan::Vulkan
 )
 

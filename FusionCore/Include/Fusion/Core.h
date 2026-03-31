@@ -2,7 +2,7 @@
 
 #if FUSION_ENABLE_TRACY
 #include <tracy/Tracy.hpp>
-#else
+#elifndef ZoneScoped
 #define ZoneScoped
 #endif
 
@@ -17,6 +17,7 @@
 #include "Fusion/Log/Log.h"
 
 #include "Fusion/Math/Math.h"
+#include "Fusion/Math/Math.h"
 #include "Fusion/Math/Vec2.h"
 #include "Fusion/Math/Vec4.h"
 #include "Fusion/Math/Mat4.h"
@@ -25,11 +26,17 @@
 #include "Fusion/Math/AffineTransform.h"
 
 #include "Fusion/Containers/String.h"
+#include "Fusion/Containers/Uuid.h"
 #include "Fusion/Containers/Name.h"
 #include "Fusion/Containers/Array.h"
 #include "Fusion/Containers/HashMap.h"
 
+#include "Fusion/Misc/Handle.h"
 #include "Fusion/Misc/Exception.h"
+
+#include "Fusion/Misc/IntrusivePtr.h"
+
+#include "Fusion/Misc/RTTI.h"
 
 #include "Fusion/Object/Ptr.h"
 #include "Fusion/Object/WeakPtr.h"
