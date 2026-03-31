@@ -61,6 +61,18 @@ function(fusion_compile_shader)
         list(APPEND slangc_include_args -I "${inc_dir}")
     endforeach()
 
+    # ---- Collect implicit dependencies (imported modules) ------------------
+    # Glob all .slang files in every include dir so that editing any module
+    # triggers a recompile, not just the top-level file.
+    # Note: adding a brand-new .slang file requires re-running CMake to be
+    # picked up here, but changes to existing files are tracked correctly.
+    set(slang_deps "${hlsl_abs}")
+    foreach(inc_dir ${ARG_INCLUDE_DIRS})
+        file(GLOB_RECURSE _inc_files "${inc_dir}/*.slang")
+        list(APPEND slang_deps ${_inc_files})
+    endforeach()
+    list(REMOVE_DUPLICATES slang_deps)
+
     # ---- Add source file to the target (visible in VS, not compiled) -------
     get_target_property(_existing_hlsl ${ARG_TARGET} FUSION_HLSL_SOURCES)
     if(NOT hlsl_abs IN_LIST _existing_hlsl)
@@ -82,7 +94,7 @@ function(fusion_compile_shader)
                     -stage  "${ARG_STAGE}"
                     ${slangc_include_args}
                     -o      "${spv_file}"
-            DEPENDS "${hlsl_abs}"
+            DEPENDS ${slang_deps}
             COMMENT "[Fusion] slangc: ${var_name} -> SPIR-V"
             VERBATIM
         )
@@ -116,7 +128,7 @@ function(fusion_compile_shader)
                     -stage  "${ARG_STAGE}"
                     ${slangc_include_args}
                     -o      "${msl_file}"
-            DEPENDS "${hlsl_abs}"
+            DEPENDS ${slang_deps}
             COMMENT "[Fusion] slangc: ${var_name} -> MSL"
             VERBATIM
         )

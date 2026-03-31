@@ -7,6 +7,14 @@ namespace Fusion
 {
 	using FResourceHandle = Handle<u32>;
 
+	enum class FGraphicsBackendType
+	{
+		Unknown = 0,
+		Vulkan,
+		Metal
+	};
+	FUSION_ENUM_CLASS(FGraphicsBackendType);
+
 	struct FRenderCapabilities
 	{
 		
@@ -19,6 +27,8 @@ namespace Fusion
 		virtual ~IFRenderBackend() = default;
 
 		// - Capabilities -
+
+		virtual FGraphicsBackendType GetGraphicsBackendType() { return FGraphicsBackendType::Unknown; }
 
 		virtual FRenderCapabilities GetRenderCapabilities() = 0;
 

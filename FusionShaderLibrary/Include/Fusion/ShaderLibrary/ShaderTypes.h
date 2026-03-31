@@ -54,7 +54,7 @@ namespace Fusion
 
 	// Lightweight non-owning view over the static shader table.
 	// Supports range-for and index access.
-	struct FShaderView
+	struct FShaderLibrary
 	{
 	    const FShader* Data  = nullptr;
 	    SizeT          Count = 0;

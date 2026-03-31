@@ -17,6 +17,11 @@ namespace Fusion
 
         static constexpr u32 ImageCount = 2;
 
+        FGraphicsBackendType GetGraphicsBackendType() override
+        {
+            return FGraphicsBackendType::Vulkan;
+        }
+
         FRenderCapabilities GetRenderCapabilities() override;
 
         bool IsInitialized(FInstanceHandle instance) override

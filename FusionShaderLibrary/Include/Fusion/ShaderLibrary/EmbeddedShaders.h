@@ -11,7 +11,7 @@ namespace Fusion::Shaders {
 	// All shaders compiled into the library, in registration order.
 	// Supports range-for:
 	//   for (const FShader& shader : Fusion::Shaders::All()) { ... }
-	FShaderView All();
+	FShaderLibrary All();
 
 	// Find a shader by name. Returns nullptr if not found.
 	const FShader* FindShader(const char* name);
