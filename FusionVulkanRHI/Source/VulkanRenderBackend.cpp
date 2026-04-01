@@ -313,6 +313,16 @@ namespace Fusion
 
 		result = vkCreateCommandPool(m_Device, &commandPoolCI, VULKAN_CPU_ALLOCATOR, &m_CommandPool);
 		FUSION_ASSERT(result == VK_SUCCESS, "Failed to create VkCommandPool");
+
+		// - Shader Library -
+
+		for (auto shader : Fusion::Shaders::All(FShaderFormat::SPIRV))
+		{
+			if (const FShaderModule* computeShader = shader.FindModule(FShaderStage::Compute))
+			{
+				
+			}
+		}
 	}
 
 	void FVulkanRenderBackend::ShutdownVulkan()

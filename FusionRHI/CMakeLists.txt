@@ -13,6 +13,7 @@ add_fusion_target(FusionRHI STATIC
         PUBLIC
             Fusion::Core
             Fusion::Platform
+            Fusion::ShaderLibrary
 )
 
 if(FUSION_BUILD_TESTS)
