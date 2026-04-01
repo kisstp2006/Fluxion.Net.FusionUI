@@ -345,7 +345,7 @@ TEST(FArrayTest, RemoveAtOrdered)
 TEST(FArrayTest, RemoveAtSwapUnordered)
 {
     FArray<int> arr = { 10, 20, 30, 40 };
-    arr.RemoveAtSwap(1); // swaps 20 with 40
+    arr.RemoveAtSwapLast(1); // swaps 20 with 40
     EXPECT_EQ(arr.Size(), 3);
     EXPECT_EQ(arr[0], 10);
     EXPECT_EQ(arr[1], 40);
@@ -355,7 +355,7 @@ TEST(FArrayTest, RemoveAtSwapUnordered)
 TEST(FArrayTest, RemoveAtSwapLastElement)
 {
     FArray<int> arr = { 10, 20, 30 };
-    arr.RemoveAtSwap(2); // removing last — no swap needed
+    arr.RemoveAtSwapLast(2); // removing last — no swap needed
     EXPECT_EQ(arr.Size(), 2);
     EXPECT_EQ(arr[0], 10);
     EXPECT_EQ(arr[1], 20);

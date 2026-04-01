@@ -131,9 +131,9 @@ namespace Fusion
 
         inline bool operator==(const FAffineTransform& rhs) const
         {
-            return Math::ApproxEquals(m00, rhs.m00) && Math::ApproxEquals(m01, rhs.m01) &&
-                Math::ApproxEquals(m10, rhs.m10) && Math::ApproxEquals(m11, rhs.m11) &&
-                Math::ApproxEquals(tx, rhs.tx) && Math::ApproxEquals(ty, rhs.ty);
+            return FMath::ApproxEquals(m00, rhs.m00) && FMath::ApproxEquals(m01, rhs.m01) &&
+                FMath::ApproxEquals(m10, rhs.m10) && FMath::ApproxEquals(m11, rhs.m11) &&
+                FMath::ApproxEquals(tx, rhs.tx) && FMath::ApproxEquals(ty, rhs.ty);
 		}
 
         inline bool operator!=(const FAffineTransform& rhs) const

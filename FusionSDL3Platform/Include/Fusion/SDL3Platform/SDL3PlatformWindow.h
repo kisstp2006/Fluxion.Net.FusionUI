@@ -15,7 +15,7 @@ namespace Fusion
 
 		FWindowHandle GetWindowHandle() const { return windowHandle; }
 
-		FVec2i GetDrawableWindowSize();
+		FVec2i GetSizeInPixels();
 
 		FPlatformWindowFlags GetInitialFlags() const { return initialFlags; }
 

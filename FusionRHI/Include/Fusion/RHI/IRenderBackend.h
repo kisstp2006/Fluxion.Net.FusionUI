@@ -28,7 +28,7 @@ namespace Fusion
 		
 	};
     
-    class FUSIONRHI_API IFRenderBackend
+    class FUSIONRHI_API IFRenderBackend : public IFPlatformEventSink
     {
     public:
 
@@ -54,6 +54,9 @@ namespace Fusion
 		virtual bool InitializeInstance(FInstanceHandle instance) = 0;
 
 		virtual void ShutdownInstance(FInstanceHandle instance) = 0;
+
+		// Render loop
+		virtual void RenderTick() = 0;
 
 		// - Rendering -
 

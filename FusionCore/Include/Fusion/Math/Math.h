@@ -9,11 +9,11 @@
 namespace Fusion
 {
     
-    class FUSIONCORE_API Math
+    class FUSIONCORE_API FMath
     {
     public:
-        Math() = delete;
-        ~Math() = delete;
+        FMath() = delete;
+        ~FMath() = delete;
 
         static constexpr f32 PI = (f32)M_PI;
 

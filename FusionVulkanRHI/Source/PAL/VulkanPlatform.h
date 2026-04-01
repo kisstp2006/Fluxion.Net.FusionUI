@@ -8,7 +8,7 @@
 #   endif
 #endif
 
-namespace Fusion
+namespace Fusion::Vulkan
 {
     struct FVulkanTempSurfaceBase
     {
@@ -30,6 +30,7 @@ namespace Fusion
 
 #if FUSION_PLATFORM_WINDOWS
 #include "PAL/Windows/VulkanWindowsPlatform.h"
+#undef max
 #elif FUSION_PLATFORM_MAC
 
 #elif FUSION_PLATFORM_LINUX

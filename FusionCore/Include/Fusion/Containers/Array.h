@@ -118,9 +118,12 @@ namespace Fusion
         // Capacity
         // ----------------------------------------------------------------
 
+        //! @brief Both Size() and Count() return the number of elements, not the byte size.
         size_t Size()     const { return m_Size; }
+        //! @brief Both Size() and Count() return the number of elements, not the byte size.
+        size_t Count()    const { return m_Size; }
         size_t Capacity() const { return m_Capacity; }
-        bool   Empty()  const { return m_Size == 0; }
+        bool   Empty()    const { return m_Size == 0; }
 
         void Reserve(size_t newCapacity)
         {
@@ -206,7 +209,7 @@ namespace Fusion
         }
 
         // Unordered remove — swaps with last element, O(1)
-        void RemoveAtSwap(size_t index)
+        void RemoveAtSwapLast(size_t index)
         {
             FUSION_ASSERT(index < m_Size, "FArray: RemoveAtSwap() index out of bounds");
             m_Data[index].~T();

@@ -62,7 +62,7 @@ namespace Fusion
 		}
 	}
 
-	FVec2i FSDL3PlatformWindow::GetDrawableWindowSize()
+	FVec2i FSDL3PlatformWindow::GetSizeInPixels()
 	{
 		int w = 0, h = 0;
 		SDL_GetWindowSizeInPixels(sdlWindow, &w, &h);

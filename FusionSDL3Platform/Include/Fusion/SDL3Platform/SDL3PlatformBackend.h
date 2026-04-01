@@ -50,6 +50,8 @@ namespace Fusion
 
 		// - Events -
 
+        void SetContinuousResizeTick(const FDelegate<void()>& tick) override;
+
         void PumpEvents() override;
 
         void SetEventSink(FInstanceHandle instance, IFPlatformEventSink* eventSink) override;
@@ -59,9 +61,13 @@ namespace Fusion
             m_RenderBackendEventSink = genericEventSink;
         }
 
+        // - Windowing -
+
         FWindowHandle CreateWindow(FInstanceHandle instance, const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info) override;
 
 		void DestroyWindow(FWindowHandle window) override;
+
+        FVec2i GetWindowSizeInPixels(FWindowHandle window) override;
 
 	protected:
 
@@ -69,7 +75,7 @@ namespace Fusion
 
         void ProcessInputEvents(SDL_Event& event);
 
-        void ProcessWindowResizeEvent(FSDL3PlatformWindow* window);
+        void ProcessWindowResizeEvent(FWindowHandle windowHandle);
 
         HashMap<FInstanceHandle, FSDL3InstanceData> m_Instances;
 
@@ -85,33 +91,36 @@ namespace Fusion
 
         IFPlatformEventSink* m_RenderBackendEventSink = nullptr;
 
-        // - Input -
+        FDelegate<void()> m_ContinuousResizeTick{};
 
-        std::chrono::time_point<std::chrono::high_resolution_clock> startTime = std::chrono::high_resolution_clock::now();
-        u64 curTime = 0;
+        friend bool SDLEventWatch(void* userdata, SDL_Event* event);
 
-        FWindowHandle inputWindowHandle = FWindowHandle::NullValue;
-        FVec2 globalMousePosition{};
-        FVec2 mousePosition{};
-        FVec2 prevGlobalMousePosition{};
+        // - Input State -
+
+        std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTime = std::chrono::high_resolution_clock::now();
+        u64 m_CurTime = 0;
+
+        FWindowHandle m_InputWindowHandle = FWindowHandle::NullValue;
+        FVec2 m_GlobalMousePosition{};
+        FVec2 m_MousePosition{};
+        FVec2 m_PrevGlobalMousePosition{};
         //Vec2i mouseDelta{};
-        FVec2 wheelDelta{};
+        FVec2 m_WheelDelta{};
 
-        FArray<u64> focusGainedWindows{};
-        FArray<u64> focusLostWindows{};
+        FArray<u64> m_FocusGainedWindows{};
+        FArray<u64> m_FocusLostWindows{};
 
-        HashMap<FKeyCode, bool> keyStates{};
+        HashMap<FKeyCode, bool> m_KeyStates{};
         //HashMap<FKeyCode, Internal::KeyStateDelayed> keyStatesDelayed{};
-        HashMap<FMouseButton, int> mouseButtonStates{};
+        HashMap<FMouseButton, int> m_MouseButtonStates{};
 
         // Per-Tick changes
-        HashMap<FKeyCode, bool> stateChangesThisTick{};
-        HashMap<FMouseButton, int> mouseButtonStateChanges{};
+        HashMap<FKeyCode, bool> m_StateChangesThisTick{};
+        HashMap<FMouseButton, int> m_MouseButtonStateChanges{};
 
-        FKeyModifier modifierStates{};
+        FKeyModifier m_ModifierStates{};
 
-
-        FSDL3InputState inputState{};
+        FSDL3InputState m_InputState{};
     };
     
 } // namespace Fusion

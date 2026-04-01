@@ -3,8 +3,32 @@
 // Copyright (c) 2026 Neil Mewada
 // SPDX-License-Identifier: MIT
 
-namespace Fusion
+namespace Fusion::Vulkan
 {
+    class FVulkanRenderBackend;
+
+    // - Image -
+
+    struct FUSIONVULKANRHI_API FTexture : IntrusiveBase
+    {
+        FTexture(FVulkanRenderBackend* renderBackend, VkDevice device) : m_RenderBackend(renderBackend), m_Device(device)
+        {
+	        
+        }
+
+        ~FTexture();
+
+        FVulkanRenderBackend* m_RenderBackend = nullptr;
+        VkDevice m_Device = VK_NULL_HANDLE;
+
+        bool m_IsExternalImage = false;
+
+        VkImage m_Image = VK_NULL_HANDLE;
+        VkImageView m_ImageView = VK_NULL_HANDLE;
+
+        VkFormat m_Format = VK_FORMAT_R8G8B8A8_UNORM;
+    };
+
     // - Shader -
 
     struct FUSIONVULKANRHI_API FGraphicsPipeline : IntrusiveBase
@@ -16,7 +40,7 @@ namespace Fusion
         ~FGraphicsPipeline();
 
         
-        VkDevice m_Device = nullptr;
+        VkDevice m_Device = VK_NULL_HANDLE;
 
         VkShaderModule m_VertexModule = VK_NULL_HANDLE;
         VkShaderModule m_FragmentModule = VK_NULL_HANDLE;
@@ -30,16 +54,26 @@ namespace Fusion
     {
     public:
 
-        FSwapChain(VkInstance instance, VkDevice device);
+        FSwapChain(FVulkanRenderBackend* renderBackend, VkDevice device);
 
         ~FSwapChain();
 
-        VkInstance m_Instance = nullptr;
-        VkDevice m_Device = nullptr;
+        FVulkanRenderBackend* m_RenderBackend = nullptr;
+        VkInstance m_Instance = VK_NULL_HANDLE;
+        VkDevice m_Device = VK_NULL_HANDLE;
 
+        FWindowHandle m_Window = FWindowHandle::NullValue;
         VkSurfaceKHR m_Surface = VK_NULL_HANDLE;
         VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
 
+        FArray<IntrusivePtr<FTexture>> m_Images{};
+        FArray<VkFramebuffer> m_FrameBuffers{};
+
+        u32 width = 0, height = 0;
+
+        FArray<VkSemaphore> m_ImageAcquiredSemaphores{};
+
+        uint32_t m_CurrentImageIndex = -1;
     };
 
     // - Render Instance -
@@ -49,8 +83,17 @@ namespace Fusion
         // Per ApplicationInstance data goes here
 
     };
+
+    // - Render Backend -
+
+    struct FDeferredDestruction
+    {
+        int m_FrameCounter = 2;
+
+        FDelegate<void()> m_Destruction{};
+    };
     
-    class FUSIONVULKANRHI_API FVulkanRenderBackend : public IFRenderBackend, public IFPlatformEventSink
+    class FUSIONVULKANRHI_API FVulkanRenderBackend : public IFRenderBackend
     {
     public:
 
@@ -82,7 +125,20 @@ namespace Fusion
 
         void ShutdownInstance(FInstanceHandle instance) override;
 
+        void RenderTick() override;
+
+        template<typename TFunc>
+        void DeferDestruction(TFunc&& functor)
+        {
+            m_DeferredDestruction.Add({
+                .m_FrameCounter = ImageCount,
+                .m_Destruction = functor
+            });
+        }
+
 	private:
+
+        void TickDestructionQueue();
 
 		// - Vulkan Lifecycle -
 
@@ -92,7 +148,11 @@ namespace Fusion
 
         // - Window & SwapChain -
 
+        void UpdateAllSwapChains();
+
         void CreateOrUpdateSwapChain(FWindowHandle window);
+
+        void DestroySwapChain(FWindowHandle window);
 
         void OnWindowCreated(FWindowHandle window) override;
 
@@ -141,7 +201,9 @@ namespace Fusion
         // - Queues -
         
         int m_QueueFamilyIndex = -1;
+        uint32_t m_QueueCount = 0;
         VkQueue m_GraphicsQueue = VK_NULL_HANDLE;
+        VkQueue m_PresentQueue = VK_NULL_HANDLE;
 
         // - Command Pools & Buffers -
 
@@ -159,6 +221,14 @@ namespace Fusion
 
         IntrusivePtr<FGraphicsPipeline> m_MainGraphicsPipeline;
 
+        // - Frame Loop -
+
+        u32 m_FrameSlot = 0;
+        FArray<VkCommandBuffer, ImageCount> m_CommandBuffers;
+        FArray<VkSemaphore, ImageCount> m_RenderFinishedSemaphores;
+        FArray<VkFence, ImageCount> m_RenderFinishedFences;
+
+        FArray<FDeferredDestruction> m_DeferredDestruction;
     };
 
 } // namespace Fusion

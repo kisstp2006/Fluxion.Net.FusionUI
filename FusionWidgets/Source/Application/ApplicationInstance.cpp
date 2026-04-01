@@ -30,7 +30,7 @@ namespace Fusion
 		if (!m_RenderBackend)
 		{
 			m_RenderBackendAllocated = true;
-			m_RenderBackend = new FVulkanRenderBackend(m_PlatformBackend);
+			m_RenderBackend = new Vulkan::FVulkanRenderBackend(m_PlatformBackend);
 		}
 #endif
 

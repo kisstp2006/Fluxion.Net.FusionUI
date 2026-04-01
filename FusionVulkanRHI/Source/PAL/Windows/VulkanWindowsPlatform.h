@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include "vulkan/vulkan_win32.h"
 
-namespace Fusion
+namespace Fusion::Vulkan
 {
 	struct FWindowsVulkanTempSurface : FVulkanTempSurfaceBase
     {

@@ -47,6 +47,8 @@ namespace Fusion
 
 		virtual bool IsUserRequestingExit() = 0;
 
+        virtual void SetContinuousResizeTick(const FDelegate<void()>& tick) {}
+
         // - Native Handles -
 
         virtual void* GetNativeWindowHandle(FWindowHandle handle) = 0;
@@ -64,6 +66,8 @@ namespace Fusion
 		virtual FWindowHandle CreateWindow(FInstanceHandle instance, const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info) = 0;
 
 		virtual void DestroyWindow(FWindowHandle window) = 0;
+
+        virtual FVec2i GetWindowSizeInPixels(FWindowHandle window) = 0;
 
 	};
     

@@ -7,6 +7,18 @@ namespace Fusion
 		return m_Instances.KeyExists(instance);
 	}
 
+	bool SDLEventWatch(void* userdata, SDL_Event* event)
+	{
+		FSDL3PlatformBackend* backend = (FSDL3PlatformBackend*)userdata;
+		if (event->type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) 
+		{
+			FWindowHandle windowId = event->window.windowID;
+			backend->ProcessWindowResizeEvent(windowId);
+			backend->m_ContinuousResizeTick.ExecuteIfBound();
+		}
+		return true;
+	}
+
 	FInstanceHandle FSDL3PlatformBackend::InitializeInstance()
 	{
 		if (m_InitFailed)
@@ -32,6 +44,8 @@ namespace Fusion
 				m_InitFailed = true;
 				return false;
 			}
+
+			SDL_AddEventWatch(SDLEventWatch, this);
 
 			m_IsInitialized = true;
 			m_UserRequestedExit = false;
@@ -67,6 +81,9 @@ namespace Fusion
 		if (m_Instances.IsEmpty())
 		{
 			m_IsInitialized = false;
+
+			SDL_RemoveEventWatch(SDLEventWatch, this);
+
 			SDL_Quit();
 		}
 	}
@@ -74,32 +91,32 @@ namespace Fusion
 	void FSDL3PlatformBackend::Tick()
 	{
 		auto now = std::chrono::high_resolution_clock::now();
-		curTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
+		m_CurTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_StartTime).count();
 
-		SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
-		SDL_GetGlobalMouseState(&globalMousePosition.x, &globalMousePosition.y);
+		SDL_GetMouseState(&m_MousePosition.x, &m_MousePosition.y);
+		SDL_GetGlobalMouseState(&m_GlobalMousePosition.x, &m_GlobalMousePosition.y);
 
-		inputState.windowHandle = inputWindowHandle;
-		inputState.stateChangesThisTick = stateChangesThisTick;
-		inputState.keyStates = keyStates;
-		inputState.modifierStates = modifierStates;
+		m_InputState.windowHandle = m_InputWindowHandle;
+		m_InputState.stateChangesThisTick = m_StateChangesThisTick;
+		m_InputState.keyStates = m_KeyStates;
+		m_InputState.modifierStates = m_ModifierStates;
 		//inputState.keyStatesDelayed = keyStatesDelayed;
-		inputState.mouseButtonStates = mouseButtonStates;
-		inputState.mouseButtonStateChanges = mouseButtonStateChanges;
-		inputState.mousePosition = mousePosition;
-		inputState.globalMousePosition = globalMousePosition;
-		inputState.mouseDelta = globalMousePosition - prevGlobalMousePosition;
-		inputState.wheelDelta = wheelDelta;
-		inputState.curTime = curTime;
+		m_InputState.mouseButtonStates = m_MouseButtonStates;
+		m_InputState.mouseButtonStateChanges = m_MouseButtonStateChanges;
+		m_InputState.mousePosition = m_MousePosition;
+		m_InputState.globalMousePosition = m_GlobalMousePosition;
+		m_InputState.mouseDelta = m_GlobalMousePosition - m_PrevGlobalMousePosition;
+		m_InputState.wheelDelta = m_WheelDelta;
+		m_InputState.curTime = m_CurTime;
 
 		// Reset temp values
-		prevGlobalMousePosition = globalMousePosition;
-		wheelDelta = FVec2();
+		m_PrevGlobalMousePosition = m_GlobalMousePosition;
+		m_WheelDelta = FVec2();
 
-		stateChangesThisTick.Clear();
-		mouseButtonStateChanges.Clear();
-		focusGainedWindows.Clear();
-		focusLostWindows.Clear();
+		m_StateChangesThisTick.Clear();
+		m_MouseButtonStateChanges.Clear();
+		m_FocusGainedWindows.Clear();
+		m_FocusLostWindows.Clear();
 	}
 
 	void* FSDL3PlatformBackend::GetNativeWindowHandle(FWindowHandle handle)
@@ -120,6 +137,11 @@ namespace Fusion
 #else
 		#error Platform Not Supported
 #endif
+	}
+
+	void FSDL3PlatformBackend::SetContinuousResizeTick(const FDelegate<void()>& tick)
+	{
+		m_ContinuousResizeTick = tick;
 	}
 
 	void FSDL3PlatformBackend::PumpEvents()
@@ -217,14 +239,27 @@ namespace Fusion
 		m_WindowsByHandle.Remove(window);
 	}
 
+	FVec2i FSDL3PlatformBackend::GetWindowSizeInPixels(FWindowHandle window)
+	{
+		if (!m_WindowsByHandle.KeyExists(window))
+		{
+			return {};
+		}
+
+		FSDL3PlatformWindow* sdlWindow = m_WindowsByHandle[window];
+		if (!sdlWindow)
+		{
+			return {};
+		}
+
+		return sdlWindow->GetSizeInPixels();
+	}
+
 	void FSDL3PlatformBackend::ProcessWindowEvents(SDL_Event& event)
 	{
 		if (event.window.type == SDL_EVENT_WINDOW_RESIZED)
 		{
-			if (m_WindowsByHandle.KeyExists(event.window.windowID))
-			{
-				ProcessWindowResizeEvent(m_WindowsByHandle[event.window.windowID]);
-			}
+			ProcessWindowResizeEvent(event.window.windowID);
 		}
 		else if (event.window.type == SDL_EVENT_WINDOW_MOVED)
 		{
@@ -384,58 +419,58 @@ namespace Fusion
 
 	void FSDL3PlatformBackend::ProcessInputEvents(SDL_Event& event)
 	{
-		SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
-		u32 mouseBtnMask = SDL_GetGlobalMouseState(&globalMousePosition.x, &globalMousePosition.y);
+		SDL_GetMouseState(&m_MousePosition.x, &m_MousePosition.y);
+		u32 mouseBtnMask = SDL_GetGlobalMouseState(&m_GlobalMousePosition.x, &m_GlobalMousePosition.y);
 
 		// TODO: Fix keyStatesDelayed: It is way too fast if FPS is high
 
 		switch (event.type)
 		{
 		case SDL_EVENT_KEY_DOWN:
-			inputWindowHandle = event.key.windowID;
-			if (keyStates[(FKeyCode)event.key.key])
+			m_InputWindowHandle = event.key.windowID;
+			if (m_KeyStates[(FKeyCode)event.key.key])
 			{
 				//keyStatesDelayed[(FKeyCode)event.key.key] = { .state = true, .lastEnabledTime = curTime };
 			}
 			else
 			{
-				stateChangesThisTick[(FKeyCode)event.key.key] = true;
+				m_StateChangesThisTick[(FKeyCode)event.key.key] = true;
 			}
-			keyStates[(FKeyCode)event.key.key] = true;
-			modifierStates = (FKeyModifier)event.key.mod;
+			m_KeyStates[(FKeyCode)event.key.key] = true;
+			m_ModifierStates = (FKeyModifier)event.key.mod;
 			break;
 		case SDL_EVENT_KEY_UP:
-			inputWindowHandle = event.key.windowID;
-			if (keyStates[(FKeyCode)event.key.key])
+			m_InputWindowHandle = event.key.windowID;
+			if (m_KeyStates[(FKeyCode)event.key.key])
 			{
-				stateChangesThisTick[(FKeyCode)event.key.key] = false;
+				m_StateChangesThisTick[(FKeyCode)event.key.key] = false;
 			}
-			keyStates[(FKeyCode)event.key.key] = false;
+			m_KeyStates[(FKeyCode)event.key.key] = false;
 			//keyStatesDelayed[(FKeyCode)event.key.key] = { .state = false, .lastEnabledTime = 0 };
-			modifierStates = (FKeyModifier)event.key.mod;
+			m_ModifierStates = (FKeyModifier)event.key.mod;
 			break;
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
-			inputWindowHandle = event.button.windowID;
-			if (mouseButtonStates[(FMouseButton)event.button.button] != event.button.clicks)
+			m_InputWindowHandle = event.button.windowID;
+			if (m_MouseButtonStates[(FMouseButton)event.button.button] != event.button.clicks)
 			{
-				mouseButtonStateChanges[(FMouseButton)event.button.button] = event.button.clicks;
+				m_MouseButtonStateChanges[(FMouseButton)event.button.button] = event.button.clicks;
 			}
-			mouseButtonStates[(FMouseButton)event.button.button] = event.button.clicks;
+			m_MouseButtonStates[(FMouseButton)event.button.button] = event.button.clicks;
 			break;
 		case SDL_EVENT_MOUSE_BUTTON_UP:
-			inputWindowHandle = event.button.windowID;
-			if (mouseButtonStates[(FMouseButton)event.button.button] != 0)
+			m_InputWindowHandle = event.button.windowID;
+			if (m_MouseButtonStates[(FMouseButton)event.button.button] != 0)
 			{
-				mouseButtonStateChanges[(FMouseButton)event.button.button] = 0;
+				m_MouseButtonStateChanges[(FMouseButton)event.button.button] = 0;
 			}
-			mouseButtonStates[(FMouseButton)event.button.button] = 0;
+			m_MouseButtonStates[(FMouseButton)event.button.button] = 0;
 			break;
 		case SDL_EVENT_MOUSE_MOTION:
-			inputWindowHandle = event.motion.windowID;
+			m_InputWindowHandle = event.motion.windowID;
 			break;
 		case SDL_EVENT_MOUSE_WHEEL:
 		{
-			inputWindowHandle = event.wheel.windowID;
+			m_InputWindowHandle = event.wheel.windowID;
 #if PLATFORM_MAC
 			f32 flipX = event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -1 : 1;
 			f32 flipY = event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? 1 : -1;
@@ -443,25 +478,31 @@ namespace Fusion
 			f32 flipX = -1.0f, flipY = 1.0f;
 #endif
 
-			wheelDelta = FVec2(event.wheel.x * flipX, event.wheel.y * flipY);
+			m_WheelDelta = FVec2(event.wheel.x * flipX, event.wheel.y * flipY);
 		}
 		break;
 		}
 
-		if (mouseButtonStates[FMouseButton::Left] != 0 && (mouseBtnMask & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) == 0)
+		if (m_MouseButtonStates[FMouseButton::Left] != 0 && (mouseBtnMask & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) == 0)
 		{
-			mouseButtonStateChanges[FMouseButton::Left] = 0;
-			mouseButtonStates[FMouseButton::Left] = 0;
+			m_MouseButtonStateChanges[FMouseButton::Left] = 0;
+			m_MouseButtonStates[FMouseButton::Left] = 0;
 		}
 	}
 
-	void FSDL3PlatformBackend::ProcessWindowResizeEvent(FSDL3PlatformWindow* window)
+	void FSDL3PlatformBackend::ProcessWindowResizeEvent(FWindowHandle windowHandle)
 	{
+		if (windowHandle.IsNull())
+			return;
+		if (!m_WindowsByHandle.KeyExists(windowHandle))
+			return;
+
+		FSDL3PlatformWindow* window = m_WindowsByHandle[windowHandle];
 		if (!window)
 			return;
 
 		int w = 0, h = 0;
-		FVec2i size = window->GetDrawableWindowSize();
+		FVec2i size = window->GetSizeInPixels();
 		w = size.x;
 		h = size.y;
 

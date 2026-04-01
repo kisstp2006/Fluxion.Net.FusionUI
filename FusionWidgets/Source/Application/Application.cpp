@@ -25,7 +25,7 @@ namespace Fusion
 		if (m_RenderBackend == nullptr)
 		{
 #if FUSION_USE_VULKAN
-			m_RenderBackend = new FVulkanRenderBackend(m_PlatformBackend);
+			m_RenderBackend = new Vulkan::FVulkanRenderBackend(m_PlatformBackend);
 #else
 			FUSION_LOG_ERROR("Backend", "No render backend specified and no default available.");
 			return -1;
@@ -53,11 +53,18 @@ namespace Fusion
 			.windowFlags = FPlatformWindowFlags::DestroyOnClose
 		});
 
+		m_PlatformBackend->SetContinuousResizeTick([this]
+		{
+			m_RenderBackend->RenderTick();
+		});
+
 		while (!m_PlatformBackend->IsUserRequestingExit())
 		{
 			m_PlatformBackend->PumpEvents();
 
 			m_PlatformBackend->Tick();
+
+			m_RenderBackend->RenderTick();
 		}
 
 		m_MainApplication->Shutdown();

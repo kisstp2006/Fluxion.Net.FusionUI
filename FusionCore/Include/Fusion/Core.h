@@ -42,3 +42,6 @@
 #include "Fusion/Object/WeakPtr.h"
 #include "Fusion/Object/Object.h"
 
+#include "Fusion/Delegates/Delegate.h"
+#include "Fusion/Delegates/Event.h"
+
