@@ -224,6 +224,6 @@ namespace Fusion
         T* ptr = nullptr;
     };
 
-    using IntrusiveBase = IntrusiveBaseRefCnt<std::atomic<int>>;
+    using FIntrusiveBase = IntrusiveBaseRefCnt<std::atomic<int>>;
     
 } // namespace Fusion

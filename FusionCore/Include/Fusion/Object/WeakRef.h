@@ -1,18 +1,18 @@
 #pragma once
 
-#include "Fusion/Object/Ptr.h"
+#include "Fusion/Object/Ref.h"
 #include <concepts>
 
 namespace Fusion
 {
     template<typename T>
-    class WeakPtr
+    class WeakRef
     {
     public:
-        WeakPtr() = default;
-        WeakPtr(std::nullptr_t) {}
+        WeakRef() = default;
+        WeakRef(std::nullptr_t) {}
 
-        WeakPtr(const Ptr<T>& ptr)
+        WeakRef(const Ref<T>& ptr)
         {
             m_Control = ptr.m_Control;
             if (m_Control)
@@ -21,41 +21,41 @@ namespace Fusion
 
         // Upcasting: WeakPtr<Derived> -> WeakPtr<Base>
         template<typename U> requires std::derived_from<U, T>
-        WeakPtr(const Ptr<U>& ptr)
+        WeakRef(const Ref<U>& ptr)
         {
             m_Control = ptr.m_Control;
             if (m_Control)
                 m_Control->AddWeakRef();
         }
 
-        WeakPtr(const WeakPtr& other)
+        WeakRef(const WeakRef& other)
         {
             m_Control = other.m_Control;
             if (m_Control)
                 m_Control->AddWeakRef();
         }
 
-        WeakPtr(WeakPtr&& other) noexcept
+        WeakRef(WeakRef&& other) noexcept
         {
             m_Control       = other.m_Control;
             other.m_Control = nullptr;
         }
 
         template<typename U> requires std::derived_from<U, T>
-        WeakPtr(const WeakPtr<U>& other)
+        WeakRef(const WeakRef<U>& other)
         {
             m_Control = other.m_Control;
             if (m_Control)
                 m_Control->AddWeakRef();
         }
 
-        ~WeakPtr()
+        ~WeakRef()
         {
             if (m_Control)
                 m_Control->ReleaseWeakRef();
         }
 
-        WeakPtr& operator=(const WeakPtr& other)
+        WeakRef& operator=(const WeakRef& other)
         {
             if (this != &other)
             {
@@ -69,7 +69,7 @@ namespace Fusion
             return *this;
         }
 
-        WeakPtr& operator=(WeakPtr&& other) noexcept
+        WeakRef& operator=(WeakRef&& other) noexcept
         {
             if (this != &other)
             {
@@ -82,7 +82,7 @@ namespace Fusion
             return *this;
         }
 
-        WeakPtr& operator=(std::nullptr_t)
+        WeakRef& operator=(std::nullptr_t)
         {
             if (m_Control)
                 m_Control->ReleaseWeakRef();
@@ -91,10 +91,10 @@ namespace Fusion
         }
 
         // Attempts to promote to a strong Ptr<T>. Returns null if object was destroyed.
-        Ptr<T> Lock() const
+        Ref<T> Lock() const
         {
             if (m_Control && m_Control->TryAddStrongRef())
-                return Ptr<T>(m_Control, typename Ptr<T>::AlreadyRetained{});
+                return Ref<T>(m_Control, typename Ref<T>::AlreadyRetained{});
 
             return nullptr;
         }
@@ -103,15 +103,15 @@ namespace Fusion
         bool IsNull()  const { return !IsValid(); }
         explicit operator bool() const { return IsValid(); }
 
-        bool operator==(const WeakPtr& other) const { return m_Control == other.m_Control; }
-        bool operator!=(const WeakPtr& other) const { return !(*this == other); }
+        bool operator==(const WeakRef& other) const { return m_Control == other.m_Control; }
+        bool operator!=(const WeakRef& other) const { return !(*this == other); }
         bool operator==(std::nullptr_t)       const { return IsNull(); }
         bool operator!=(std::nullptr_t)       const { return IsValid(); }
 
     private:
         Internal::RefCountBlock* m_Control = nullptr;
 
-        template<typename U> friend class WeakPtr;
+        template<typename U> friend class WeakRef;
     };
 
 } // namespace Fusion

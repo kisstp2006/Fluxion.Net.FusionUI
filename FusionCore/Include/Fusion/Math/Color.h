@@ -112,12 +112,12 @@ namespace Fusion
         constexpr FColor& operator*=(float value) { *this = *this * value; return *this; }
         constexpr FColor& operator/=(float value) { *this = *this / value; return *this; }
 
-        constexpr bool operator==(const FColor& rhs) const
+        bool operator==(const FColor& rhs) const
         {
-            return r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a;
+            return FMath::ApproxEquals(r, rhs.r) && FMath::ApproxEquals(g, rhs.g) && FMath::ApproxEquals(b, rhs.b) && FMath::ApproxEquals(a, rhs.a);
         }
 
-        constexpr bool operator!=(const FColor& rhs) const { return !(*this == rhs); }
+        bool operator!=(const FColor& rhs) const { return !(*this == rhs); }
 
         // ----------------------------------------------------------------
         // Interpolation

@@ -1,5 +1,8 @@
 #pragma once
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
     using FUIVertexArray        = FStableDynamicArray<FUIVertex,        1024>;
@@ -9,7 +12,7 @@ namespace Fusion
     using FUIGradientStopArray  = FStableDynamicArray<FUIGradientStop,  64>;
     using FUIDrawCmdArray       = FStableDynamicArray<FUIDrawCmd,       64>;
 
-	class FUSIONRHI_API FUIDrawList final : public IntrusiveBase
+	class FUSIONRHI_API FUIDrawList final
 	{
 	public:
 

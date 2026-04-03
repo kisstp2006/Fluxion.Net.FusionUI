@@ -81,6 +81,9 @@ namespace Fusion
             return mag > 0.0f ? (*this / mag) : FVec2{};
         }
 
+        float GetMin() const { return std::min(x, y); }
+        float GetMax() const { return std::max(x, y); }
+
         static constexpr float Dot(FVec2 a, FVec2 b)         { return a.x * b.x + a.y * b.y; }
         static constexpr float SqrDistance(FVec2 a, FVec2 b) { return (b - a).GetSqrMagnitude(); }
         static           float Distance(FVec2 a, FVec2 b)    { return (b - a).GetMagnitude(); }

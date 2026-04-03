@@ -1,7 +1,15 @@
 #pragma once
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
+    struct FWidgetBuilder
+    {
+        FWidgetBuilder() {}
+    };
+
     enum class EWidgetFlags
     {
 	    None = 0,
@@ -22,7 +30,7 @@ namespace Fusion
         FUSION_CLASS(FWidget, FObject)
     public:
 
-        FWidget(FName name = "Widget", Ptr<FObject> outer = nullptr);
+        FWidget(Ref<FObject> outer = nullptr);
 
         // - Flags -
 
@@ -34,11 +42,15 @@ namespace Fusion
 
         bool IsHidden() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::Hidden); }
 
+        bool IsFaulted() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::Faulted); }
+
         bool IsExcluded() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::Excluded); }
 
         bool IsPaintDirty() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::PaintDirty); }
 
         bool IsLayoutDirty() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::LayoutDirty); }
+
+        virtual void OnPropertyModified(const FName& propertyName);
 
     protected:
 
@@ -46,15 +58,13 @@ namespace Fusion
 
         virtual void Construct() {}
 
-        virtual void OnPropertyModified(const FName& propertyName);
-
     public:
 
         // - Getters -
 
-        Ptr<FWidget> GetParentWidget() const { return m_ParentWidget.Lock(); }
+        Ref<FWidget> GetParentWidget() const { return m_ParentWidget.Lock(); }
 
-        Ptr<FSurface> GetParentSurface() const { return m_ParentSurface.Lock(); }
+        Ref<FSurface> GetParentSurface() const { return m_ParentSurface.Lock(); }
 
         const FAffineTransform& GetCachedLayerSpaceTransform() const { return m_CachedLayerSpaceTransform; }
 
@@ -62,9 +72,9 @@ namespace Fusion
 
         FAffineTransform GetChildTransform();
 
-        virtual u32 GetChildCount() const { return 0; }
+        virtual u32 GetChildCount() { return 0; }
 
-        virtual Ptr<FWidget> GetChildAt(u32 index) { return nullptr; }
+        virtual Ref<FWidget> GetChildAt(u32 index) { return nullptr; }
 
         // - Layout -
 
@@ -76,6 +86,22 @@ namespace Fusion
 
         FVec2 GetDesiredSize() const { return m_DesiredSize; }
 
+        FVec2 GetMinimumContentSize();
+
+        FVec2 ApplyLayoutConstraints(FVec2 desiredSize);
+
+        virtual FVec2 MeasureContent(FVec2 availableSize);
+
+        virtual void ArrangeContent(FVec2 finalSize);
+
+        // Hierarchy
+
+        virtual void SetParentSurfaceRecursive(Ref<FSurface> surface);
+
+        virtual void DetachChild(Ref<FWidget> child) {}
+
+        void DetachFromParent();
+
         // - Layer -
 
         bool IsBoundary() const { return IsCompositingBoundary() || IsPaintBoundary(); }
@@ -86,8 +112,23 @@ namespace Fusion
 
         void UpdateBoundaryFlags();
 
-    private:
+        // - Paint -
 
+        virtual void Paint(FPainter& painter);
+
+        virtual void PaintOverlay(FPainter& painter);
+
+        // - Internal -
+
+        // For internal use only!
+        void SetParentWidget(Ref<FWidget> newParentWidget) { m_ParentWidget = newParentWidget; }
+
+        // For internal use only!
+        void SetParentSurface(Ref<FSurface> surface) { m_ParentSurface = surface; }
+
+    protected:
+
+        // For internal use only!
         void SetWidgetFlag(EWidgetFlags flag, bool set);
 
     public: 
@@ -111,18 +152,57 @@ namespace Fusion
 
         FUSION_LAYOUT_PROPERTY(f32, Opacity);
 
-    private:
+        FUSION_PROPERTY(FShape, ClipShape);
+        FUSION_PROPERTY(bool, ClipContent);
 
-        // - Internal - 
+        FUSION_LAYOUT_PROPERTY(EHAlign, HAlign);
+        FUSION_LAYOUT_PROPERTY(EVAlign, VAlign);
 
-        WeakPtr<FWidget> m_ParentWidget;
+        FUSION_PROPERTY_SET(f32, Width)
+        {
+            return self
+                .MinWidth(value)
+                .MaxWidth(value);
+        }
 
-        WeakPtr<FSurface> m_ParentSurface;
+        FUSION_PROPERTY_SET(f32, Height)
+        {
+            return self
+                .MinHeight(value)
+                .MaxHeight(value);
+        }
 
-        // - Cache -
+        FUSION_PROPERTY_GET(bool, Excluded)
+        {
+            return IsExcluded();
+        }
 
-        FAffineTransform m_CachedLayerSpaceTransform;
-        FRect m_CachedLayerSpaceAABB;
+        FUSION_PROPERTY_GET(bool, Visible)
+        {
+            return !IsHidden();
+        }
+
+        template<typename TWidget> requires TFIsDerivedClass<FWidget, TWidget>::Value
+        TWidget& Assign(TWidget*& out)
+        {
+            out = (TWidget*)this;
+            return *out;
+        }
+
+        template<typename TWidget> requires TFIsDerivedClass<FWidget, TWidget>::Value
+        TWidget& Assign(Ref<TWidget>& out)
+        {
+            out = (TWidget*)this;
+            return *out;
+        }
+
+        FUSION_PROPERTY_SET(FString, Name)
+        {
+            self.SetName(value);
+            return self;
+        }
+
+    protected:
 
         // - Layout - 
 
@@ -132,9 +212,25 @@ namespace Fusion
 
         FVec2 m_DesiredSize;
 
+    private:
+
+        // - Internal - 
+
+        WeakRef<FWidget> m_ParentWidget;
+
+        WeakRef<FSurface> m_ParentSurface;
+
+        // - Cache -
+
+        FAffineTransform m_CachedLayerSpaceTransform;
+        FRect m_CachedLayerSpaceAABB;
+
         EWidgetFlags m_WidgetFlags = EWidgetFlags::None;
 
         FUSION_WIDGET;
     };
+
+    template<class T>
+    concept FWidgetClassType = TFIsDerivedClass<FWidget, T>::Value;
 
 } // namespace Fusion

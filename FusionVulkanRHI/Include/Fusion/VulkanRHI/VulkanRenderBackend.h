@@ -7,23 +7,6 @@ namespace Fusion::Vulkan
 {
     class FVulkanRenderBackend;
 
-    // - Descriptor Set -
-
-    struct FUSIONVULKANRHI_API FDescriptorSet
-    {
-        FDescriptorSet(FVulkanRenderBackend* renderBackend, VkDevice device, VkDescriptorPool pool)
-	        : m_RenderBackend(renderBackend), m_Device(device), m_OwningPool(pool)
-		{}
-
-        ~FDescriptorSet();
-
-        FVulkanRenderBackend* m_RenderBackend = nullptr;
-        VkDevice m_Device = VK_NULL_HANDLE;
-
-        VkDescriptorPool m_OwningPool = VK_NULL_HANDLE;
-        VkDescriptorSet m_Set = VK_NULL_HANDLE;
-    };
-
     // - Descriptor Pool -
 
     struct FUSIONVULKANRHI_API FDescriptorPool
@@ -38,17 +21,20 @@ namespace Fusion::Vulkan
 
         void Grow();
 
-        FDescriptorSet* Allocate(VkDescriptorSetLayout setLayout);
+        void Reset();
+
+        VkDescriptorSet Allocate(VkDescriptorSetLayout setLayout);
 
         FVulkanRenderBackend* m_RenderBackend = nullptr;
         VkDevice m_Device = VK_NULL_HANDLE;
         
+        int m_CurPoolIndex = 0;
         FArray<VkDescriptorPool> m_Pools{};
     };
 
     // - Image -
 
-    struct FUSIONVULKANRHI_API FTexture : IntrusiveBase
+    struct FUSIONVULKANRHI_API FTexture : FIntrusiveBase
     {
         FTexture(FVulkanRenderBackend* renderBackend, VkDevice device) : m_RenderBackend(renderBackend), m_Device(device)
         {
@@ -70,7 +56,7 @@ namespace Fusion::Vulkan
 
     // - Shader -
 
-    struct FUSIONVULKANRHI_API FGraphicsPipeline : IntrusiveBase
+    struct FUSIONVULKANRHI_API FGraphicsPipeline : FIntrusiveBase
     {
     public:
 
@@ -90,7 +76,7 @@ namespace Fusion::Vulkan
         VkPipeline m_Pipeline = VK_NULL_HANDLE;
     };
 
-    struct FUSIONVULKANRHI_API FSwapChain : IntrusiveBase
+    struct FUSIONVULKANRHI_API FSwapChain : FIntrusiveBase
     {
     public:
 
@@ -109,16 +95,25 @@ namespace Fusion::Vulkan
         FArray<IntrusivePtr<FTexture>> m_Images{};
         FArray<VkFramebuffer> m_FrameBuffers{};
 
-        u32 width = 0, height = 0;
+        u32 m_Width = 0, m_Height = 0;
 
         FArray<VkSemaphore> m_ImageAcquiredSemaphores{};
 
         uint32_t m_CurrentImageIndex = -1;
     };
 
+    struct FRenderTarget : FIntrusiveBase
+    {
+        ERenderTargetType m_Type = ERenderTargetType::Window;
+
+        FWindowHandle m_Window{};
+
+        IntrusivePtr<FRenderSnapshot> m_Snapshot = nullptr;
+    };
+
     // - Render Instance -
 
-    struct FUSIONVULKANRHI_API FRenderInstance : IntrusiveBase
+    struct FUSIONVULKANRHI_API FRenderInstance : FIntrusiveBase
     {
         // Per ApplicationInstance data goes here
 
@@ -149,14 +144,9 @@ namespace Fusion::Vulkan
             return m_VulkanInstance;
         }
 
-        bool IsDescriptorPoolAlive() const
+        EGraphicsBackendType GetGraphicsBackendType() override
         {
-            return m_Pool != nullptr;
-        }
-
-        FGraphicsBackendType GetGraphicsBackendType() override
-        {
-            return FGraphicsBackendType::Vulkan;
+            return EGraphicsBackendType::Vulkan;
         }
 
         FRenderCapabilities GetRenderCapabilities() override;
@@ -172,6 +162,8 @@ namespace Fusion::Vulkan
 
         void RenderTick() override;
 
+        void SubmitSnapshot(FRenderTargetHandle renderTarget, IntrusivePtr<FRenderSnapshot> snapshot) override;
+
         template<typename TFunc>
         void DeferDestruction(TFunc&& functor)
         {
@@ -180,6 +172,12 @@ namespace Fusion::Vulkan
                 .m_Destruction = functor
             });
         }
+
+        // - Render Target -
+
+        FRenderTargetHandle AcquireWindowRenderTarget(FWindowHandle window) override;
+
+        void ReleaseRenderTarget(FRenderTargetHandle renderTarget) override;
 
 	private:
 
@@ -258,6 +256,11 @@ namespace Fusion::Vulkan
 
         FHashMap<FWindowHandle, IntrusivePtr<FSwapChain>> m_SwapChainsByWindowHandle;
 
+        // - Render Targets -
+
+        FRenderTargetHandle::IndexType m_RenderTargetIndexAllocator = 0;
+        FHashMap<FRenderTargetHandle, IntrusivePtr<FRenderTarget>> m_RenderTargetsByHandle;
+
         // - Render Pass -
 
         VkRenderPass m_RenderPass = VK_NULL_HANDLE;
@@ -266,13 +269,12 @@ namespace Fusion::Vulkan
 
         IntrusivePtr<FGraphicsPipeline> m_MainGraphicsPipeline;
 
-        // - Descriptors -
-
-        FDescriptorPool* m_Pool = nullptr;
-
-        // - Frame Loop -
+        // - Per Frame Resources -
 
         u32 m_FrameSlot = 0;
+        
+        FArray<FDescriptorPool*, ImageCount> m_PoolsPerFrame;
+
         FArray<VkCommandBuffer, ImageCount> m_CommandBuffers;
         FArray<VkSemaphore, ImageCount> m_RenderFinishedSemaphores;
         FArray<VkFence, ImageCount> m_RenderFinishedFences;

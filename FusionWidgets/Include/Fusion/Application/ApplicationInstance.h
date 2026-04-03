@@ -7,6 +7,7 @@ namespace Fusion
 {
 	class FWidget;
 	class FSurface;
+	class FNativeSurface;
 
     struct FApplicationInstanceDesc
     {
@@ -24,11 +25,33 @@ namespace Fusion
 	        
         }
 
+		// - Public API -
+
+		f32 GetDpiScaleForWindow(FWindowHandle windowHandle);
+
+		// - Lifecycle -
+
 		bool Initialize(const FApplicationInstanceDesc& desc);
 
 		void Shutdown();
 
+		void Tick();
+
+		// - Surface -
+
+		Ref<FNativeSurface> CreateNativeSurfaceForWindow(FWindowHandle window);
+
 		FInstanceHandle GetInstanceHandle() const { return m_InstanceHandle; }
+
+		FRenderCapabilities GetRenderCapabilities() const { return m_RenderCapabilities; }
+
+		// - Render Target -
+
+		FRenderTargetHandle AcquireWindowRenderTarget(FWindowHandle window);
+
+		void ReleaseRenderTarget(FRenderTargetHandle renderTarget);
+
+		void SubmitSnapshot(FRenderTargetHandle renderTarget, IntrusivePtr<FRenderSnapshot> snapshot);
 
 	protected:
 
@@ -36,7 +59,9 @@ namespace Fusion
 
 		FInstanceHandle m_InstanceHandle = FInstanceHandle::NullValue;
 
-		FArray<Ptr<FSurface>> m_Surfaces;
+		FArray<Ref<FSurface>> m_Surfaces;
+
+		FHashMap<FWindowHandle, Ref<FNativeSurface>> m_NativeSurfacesByWindow;
 
     private:
 
@@ -45,6 +70,8 @@ namespace Fusion
 
 		bool m_RenderBackendAllocated = false;
 		IFRenderBackend* m_RenderBackend = nullptr;
+
+		FRenderCapabilities m_RenderCapabilities{};
     };
     
 } // namespace Fusion

@@ -4,13 +4,17 @@
 #define FNew(WidgetClass, ...) \
     (* NewObject<WidgetClass>(__VA_ARGS__))
 
-#define FUSION_WIDGET
+#define FAssignNew(WidgetClass, VariableName) FNew(WidgetClass).Assign(VariableName)
+
+#define FUSION_WIDGET\
+	friend class FLayer;
 
 
 #define __FUSION_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
     protected:\
 		PropertyType m_##PropertyName = {};\
     public:\
+		PropertyType PropertyName() const { return m_##PropertyName; }\
 		template<typename TSelf>\
 		TSelf& PropertyName(this TSelf& self, PropertyType const& value) {\
 			ZoneScoped;\
@@ -31,4 +35,9 @@
 #define FUSION_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty())
 #define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkLayoutDirty())
 
+#define FUSION_PROPERTY_GET(PropertyType, PropertyName) \
+	PropertyType PropertyName()
 
+#define FUSION_PROPERTY_SET(PropertyType, PropertyName) \
+	template<typename TSelf>\
+	TSelf& PropertyName(this TSelf& self, PropertyType value)

@@ -34,13 +34,14 @@
 
 #include "Fusion/Misc/Handle.h"
 #include "Fusion/Misc/Exception.h"
+#include "Fusion/Misc/MemoryUtils.h"
 
 #include "Fusion/Misc/IntrusivePtr.h"
 
 #include "Fusion/Misc/RTTI.h"
 
-#include "Fusion/Object/Ptr.h"
-#include "Fusion/Object/WeakPtr.h"
+#include "Fusion/Object/Ref.h"
+#include "Fusion/Object/WeakRef.h"
 #include "Fusion/Object/Object.h"
 
 #include "Fusion/Delegates/Delegate.h"

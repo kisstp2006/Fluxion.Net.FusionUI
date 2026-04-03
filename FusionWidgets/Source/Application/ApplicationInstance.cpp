@@ -5,6 +5,10 @@
 
 namespace Fusion
 {
+	f32 FApplicationInstance::GetDpiScaleForWindow(FWindowHandle windowHandle)
+	{
+		return m_PlatformBackend->GetDpiScaleForWindow(windowHandle);
+	}
 
 	bool FApplicationInstance::Initialize(const FApplicationInstanceDesc& desc)
 	{
@@ -52,6 +56,9 @@ namespace Fusion
 
 		m_RenderBackend->InitializeInstance(m_InstanceHandle);
 
+		m_RenderCapabilities = m_RenderBackend->GetRenderCapabilities();
+		FUSION_ASSERT(m_RenderCapabilities.MinStructuredBufferOffsetAlignment > 0, "Invalid value for MinStructuredBufferOffsetAlignment.");
+
 		return true;
 	}
 
@@ -82,9 +89,56 @@ namespace Fusion
 		m_PlatformBackendAllocated = m_RenderBackendAllocated = false;
 	}
 
-	void FApplicationInstance::OnWindowDestroyed([[maybe_unused]] FWindowHandle window)
+	void FApplicationInstance::Tick()
 	{
-		
+		for (Ref<FSurface> surface : m_Surfaces)
+		{
+			surface->TickSurface();
+		}
+	}
+
+	Ref<FNativeSurface> FApplicationInstance::CreateNativeSurfaceForWindow(FWindowHandle window)
+	{
+		Ref<FNativeSurface> nativeSurface = new FNativeSurface(window, this);
+		nativeSurface->m_Application = Ref(this);
+
+		m_NativeSurfacesByWindow[window] = nativeSurface;
+
+		m_Surfaces.Add(nativeSurface);
+
+		nativeSurface->Initialize();
+
+		return nativeSurface;
+	}
+
+	FRenderTargetHandle FApplicationInstance::AcquireWindowRenderTarget(FWindowHandle window)
+	{
+		return m_RenderBackend->AcquireWindowRenderTarget(window);
+	}
+
+	void FApplicationInstance::ReleaseRenderTarget(FRenderTargetHandle renderTarget)
+	{
+		m_RenderBackend->ReleaseRenderTarget(renderTarget);
+	}
+
+	void FApplicationInstance::SubmitSnapshot(FRenderTargetHandle renderTarget, IntrusivePtr<FRenderSnapshot> snapshot)
+	{
+		m_RenderBackend->SubmitSnapshot(renderTarget, snapshot);
+	}
+
+	void FApplicationInstance::OnWindowDestroyed(FWindowHandle window)
+	{
+		if (!m_NativeSurfacesByWindow.KeyExists(window))
+			return;
+
+		Ref<FNativeSurface> nativeSurface = m_NativeSurfacesByWindow[window];
+		if (!nativeSurface)
+			return;
+
+		nativeSurface->Shutdown();
+
+		m_NativeSurfacesByWindow.Remove(window);
+		m_Surfaces.Remove(nativeSurface);
 	}
 
 } // namespace Fusion

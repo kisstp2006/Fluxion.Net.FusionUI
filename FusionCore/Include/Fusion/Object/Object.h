@@ -7,8 +7,8 @@
 
 #include <atomic>
 
-#include "Ptr.h"
-#include "WeakPtr.h"
+#include "Ref.h"
+#include "WeakRef.h"
 
 #define FUSION_CLASS_BODY(SelfClass) typedef SelfClass Self;\
     virtual FTypeID GetClassTypeID() const { return ::Fusion::GetTypeID<Self>(); }\
@@ -31,21 +31,23 @@ namespace Fusion
     {
 		FUSION_CLASS_BODY(FObject)
     protected:
-        FObject(FName name = "Object", Ptr<FObject> outer = nullptr);
+        FObject(FName name = "Object", Ref<FObject> outer = nullptr);
 
     public:
 
         FObject(const FObject&)            = delete;
         FObject& operator=(const FObject&) = delete;
 
-		void AttachSubobject(Ptr<FObject> subobject);
-		void DetachSubobject(Ptr<FObject> subobject);
+		void AttachSubobject(Ref<FObject> subobject);
+		void DetachSubobject(Ref<FObject> subobject);
 
-		Ptr<FObject> GetOuter() const { return m_Outer.Lock(); }
+		Ref<FObject> GetOuter() const { return m_Outer.Lock(); }
 
 		u32 GetSubobjectCount() const { return static_cast<u32>(m_Subobjects.Size()); }
 
-        Ptr<FObject> GetSubobject(u32 index) const
+        EObjectFlags GetFlags() const { return m_Flags; }
+
+        Ref<FObject> GetSubobject(u32 index) const
         {
             FUSION_ASSERT_THROW(index < static_cast<int>(m_Subobjects.Size()), FOutOfBoundsException, "Index out of bounds");
             return m_Subobjects[static_cast<size_t>(index)];
@@ -63,9 +65,9 @@ namespace Fusion
 
         virtual void OnConstruct() {}
 
-		virtual void OnSubobjectAttached(Ptr<FObject> subobject) {}
+		virtual void OnSubobjectAttached(Ref<FObject> subobject) {}
 
-		virtual void OnSubobjectDetached(Ptr<FObject> subobject) {}
+		virtual void OnSubobjectDetached(Ref<FObject> subobject) {}
 
 		virtual void OnDetachFromOuter() {}
 
@@ -75,28 +77,28 @@ namespace Fusion
 
     private:
 
-		FArray<Ptr<FObject>> m_Subobjects;
+		FArray<Ref<FObject>> m_Subobjects;
 
         FName m_Name;
-		WeakPtr<FObject> m_Outer;
+		WeakRef<FObject> m_Outer;
 		FUuid m_Uuid;
         std::atomic<Internal::RefCountBlock*> m_Control = nullptr;
         EObjectFlags m_Flags = EObjectFlags::None;
 
-        template<typename T> friend class Ptr;
-        template<typename T> friend class WeakPtr;
+        template<typename T> friend class Ref;
+        template<typename T> friend class WeakRef;
         friend struct Internal::RefCountBlock;
 
         template<FObjectType TObject, typename... TArgs>
-        friend TObject* NewObject(TArgs&&... args);
+        friend Ref<TObject> NewObject(TArgs&&... args);
     };
 
     template<FObjectType TObject, typename... TArgs>
-    TObject* NewObject(TArgs&&... args)
+    Ref<TObject> NewObject(TArgs&&... args)
     {
-        TObject* object = new TObject(std::forward<TArgs>(args)...);
-        static_cast<FObject*>(object)->m_Flags &= ~EObjectFlags::PendingConstruction;
-        static_cast<FObject*>(object)->OnConstruct();
+        Ref<TObject> object = new TObject(std::forward<TArgs>(args)...);
+        static_cast<FObject*>(object.Get())->m_Flags &= ~EObjectFlags::PendingConstruction;
+        static_cast<FObject*>(object.Get())->OnConstruct();
         return object;
     }
 

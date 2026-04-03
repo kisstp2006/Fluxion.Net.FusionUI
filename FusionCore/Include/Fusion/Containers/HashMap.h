@@ -154,6 +154,11 @@ namespace Fusion
             Impl.erase(key);
         }
 
+        void Remove(ankerl::unordered_dense::map<KeyType, ValueType, HashFunc<KeyType>>::iterator iterator)
+        {
+            Impl.erase(iterator);
+        }
+
         void Clear()
         {
             Impl.clear();

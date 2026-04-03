@@ -195,12 +195,21 @@ namespace Fusion
             --m_Size;
         }
 
+        bool Remove(const T& value)
+        {
+            i64 index = IndexOf(value);
+            if (index == npos)
+                return false;
+            RemoveAt(index);
+            return true;
+        }
+
         // Ordered remove — preserves element order, O(n)
         void RemoveAt(size_t index)
         {
             FUSION_ASSERT(index < m_Size, "FArray: RemoveAt() index out of bounds");
             m_Data[index].~T();
-            for (size_t i = index; i < m_Size - 1; ++i)
+            for (size_t i = index; i + 1 < m_Size; ++i)
             {
                 new (m_Data + i) T(std::move(m_Data[i + 1]));
                 m_Data[i + 1].~T();
@@ -225,6 +234,32 @@ namespace Fusion
         {
             DestroyElements(0, m_Size);
             m_Size = 0;
+        }
+
+        // Removes all elements matching the predicate, preserving order. Returns the number of elements removed.
+        template<typename Predicate>
+        size_t RemoveAll(Predicate&& predicate)
+        {
+            size_t write = 0;
+            for (size_t read = 0; read < m_Size; ++read)
+            {
+                if (predicate(m_Data[read]))
+                {
+                    m_Data[read].~T();
+                }
+                else
+                {
+                    if (write != read)
+                    {
+                        new (m_Data + write) T(std::move(m_Data[read]));
+                        m_Data[read].~T();
+                    }
+                    ++write;
+                }
+            }
+            size_t removed = m_Size - write;
+            m_Size = write;
+            return removed;
         }
 
         // ----------------------------------------------------------------

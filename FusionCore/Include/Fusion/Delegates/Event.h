@@ -76,7 +76,7 @@ namespace Fusion
 
         // Non-const member function (Ptr<T>)
         template<typename TObject, typename TMethod>
-        FEventHandle Add(Ptr<TObject> object, TMethod method)
+        FEventHandle Add(Ref<TObject> object, TMethod method)
         {
             FEventHandle handle{ m_NextID++ };
             auto& binding = m_Bindings.Emplace(handle.ID, FDelegate<TReturn(TArgs...)>{});
@@ -86,7 +86,7 @@ namespace Fusion
 
         // Const member function (Ptr<const T>)
         template<typename TObject, typename TMethod>
-        FEventHandle Add(Ptr<const TObject> object, TMethod method)
+        FEventHandle Add(Ref<const TObject> object, TMethod method)
         {
             FEventHandle handle{ m_NextID++ };
             auto& binding = m_Bindings.Emplace(handle.ID, FDelegate<TReturn(TArgs...)>{});

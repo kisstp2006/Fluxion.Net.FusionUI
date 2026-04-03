@@ -5,12 +5,12 @@
 
 namespace Fusion
 {
-	FObject::FObject(FName name, Ptr<FObject> outer) : m_Outer(outer), m_Name(MoveTemp(name)), m_Uuid(FUuid::Random())
+	FObject::FObject(FName name, Ref<FObject> outer) : m_Outer(outer), m_Name(MoveTemp(name)), m_Uuid(FUuid::Random())
     {
 		m_Flags |= EObjectFlags::PendingConstruction;
     }
 
-	void FObject::AttachSubobject(Ptr<FObject> subobject)
+	void FObject::AttachSubobject(Ref<FObject> subobject)
 	{
 		if (!subobject)
 		{
@@ -18,13 +18,13 @@ namespace Fusion
 		}
 
 		m_Subobjects.Add(subobject);
-		subobject->m_Outer = Ptr<FObject>(this);
+		subobject->m_Outer = Ref<FObject>(this);
 
 		OnSubobjectAttached(subobject);
 		subobject->OnAttachToOuter();
 	}
 
-	void FObject::DetachSubobject(Ptr<FObject> subobject)
+	void FObject::DetachSubobject(Ref<FObject> subobject)
 	{
 		if (!subobject)
 		{

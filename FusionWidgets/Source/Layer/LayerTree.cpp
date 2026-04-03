@@ -1,5 +1,8 @@
 #include "Fusion/Widgets.h"
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
 
@@ -41,11 +44,11 @@ namespace Fusion
 		if (!m_RootLayer)
 			return;
 
-		m_RootLayer->cachedTransformInParentLayerSpace = FAffineTransform::Identity();
+		m_RootLayer->m_CachedTransformInParentLayerSpace = FAffineTransform::Identity();
 		m_RootLayer->DoPaintIfNeeded();
 	}
 
-	Ptr<FLayer> FLayerTree::FindLayerForWidget(FUuid widgetUuid)
+	Ref<FLayer> FLayerTree::FindLayerForWidget(FUuid widgetUuid)
 	{
 		auto it = m_WidgetUuidToLayerMap.Find(widgetUuid);
 		if (it != m_WidgetUuidToLayerMap.End())
@@ -55,20 +58,20 @@ namespace Fusion
 		return nullptr;
 	}
 
-	void FLayerTree::SyncWidget(Ptr<FWidget> widget, Ptr<FLayer> parentLayer, FHashSet<FUuid>& visited)
+	void FLayerTree::SyncWidget(Ref<FWidget> widget, Ref<FLayer> parentLayer, FHashSet<FUuid>& visited)
 	{
 		if (!widget)
 			return;
 
 		ZoneScoped;
 
-		Ptr<FLayer> currentLayer = parentLayer;
+		Ref<FLayer> currentLayer = parentLayer;
 
 		if (widget->IsPaintBoundary())
 		{
 			const FUuid uuid = widget->GetUuid();
 
-			Ptr<FLayer> layer;
+			Ref<FLayer> layer;
 
 			auto it = m_WidgetUuidToLayerMap.Find(uuid);
 
@@ -81,15 +84,15 @@ namespace Fusion
 				layer = new FLayer("Layer", this);
 
 				layer->m_OwningWidget = widget;
-				layer->m_OwnerTree = Ptr(this);
+				layer->m_OwnerTree = Ref(this);
 				m_WidgetUuidToLayerMap.Add(uuid, layer);
 			}
 
-			layer->parent = parentLayer;
-			layer->children.Clear();
+			layer->m_Parent = parentLayer;
+			layer->m_Children.Clear();
 
 			if (parentLayer != nullptr)
-				parentLayer->children.Add(layer);
+				parentLayer->m_Children.Add(layer);
 			else
 				m_RootLayer = layer;
 
@@ -99,7 +102,7 @@ namespace Fusion
 
 		for (u32 i = 0; i < widget->GetChildCount(); i++)
 		{
-			if (Ptr<FWidget> child = widget->GetChildAt(i))
+			if (Ref<FWidget> child = widget->GetChildAt(i))
 			{
 				SyncWidget(child.Get(), currentLayer, visited);
 			}

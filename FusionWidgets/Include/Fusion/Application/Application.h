@@ -5,6 +5,7 @@
 
 namespace Fusion
 {
+    class FWidget;
 
     class FUSIONWIDGETS_API FApplication
     {
@@ -16,13 +17,24 @@ namespace Fusion
 
 		void SetRenderBackend(IFRenderBackend* renderBackend) { m_RenderBackend = renderBackend; }
 
-        Ptr<FApplicationInstance> GetMainApplication() const { return m_MainApplication; }
+        Ref<FApplicationInstance> GetMainApplication() const { return m_MainApplication; }
+
+        template<class TWidget, class... TArgs>
+        TWidget& CreateWindow(TArgs&&... args) requires TFIsDerivedClass<FWidget, TWidget>::Value
+		{
+            Ref<TWidget> ptr = NewObject<TWidget>(std::forward<TArgs>(args)...);
+            m_MainWindow = ptr;
+            return *ptr;
+		}
 
         int Run();
 
     private:
 
-		Ptr<FApplicationInstance> m_MainApplication;
+        Ref<FWidget> m_MainWindow;
+        FVec2i m_InitialWindowSize = FVec2i(1200, 720);
+
+		Ref<FApplicationInstance> m_MainApplication;
 
 		IFRenderBackend* m_RenderBackend = nullptr;
 		IFPlatformBackend* m_PlatformBackend = nullptr;

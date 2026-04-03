@@ -41,7 +41,7 @@ float4 PSMain(VSOutput input) : SV_Target
 
     // - Shading -
 
-    if (item.shaderType == FUIShaderType::Texture)
+    /*if (item.shaderType == FUIShaderType::Texture)
     {
         float2 sampleUVMin = float2(item.data[0], item.data[1]);
         float2 sampleUVMax = float2(item.data[2], item.data[3]);
@@ -70,7 +70,7 @@ float4 PSMain(VSOutput input) : SV_Target
 
         color *= sampleColor;
     }
-    else if (item.shaderType == FUIShaderType::LinearGradient)
+    else */if (item.shaderType == FUIShaderType::LinearGradient)
     {
         float angle = item.data[0];
         uv = fmod(uv, 1.0f);

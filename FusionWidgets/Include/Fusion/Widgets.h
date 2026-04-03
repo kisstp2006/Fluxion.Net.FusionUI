@@ -23,7 +23,11 @@
 #include "Layer/Layer.h"
 #include "Layer/LayerTree.h"
 
+// Layout
+#include "Layout/LayoutTypes.h"
+
 // Style
+#include "Style/Shape.h"
 #include "Style/Gradient.h"
 #include "Style/Pen.h"
 #include "Style/Brush.h"
@@ -37,3 +41,7 @@
 
 // Widgets
 #include "Widget/Widget.h"
+#include "Widget/CompoundWidget.h"
+#include "Widget/DecoratedWidget.h"
+#include "Widget/ContainerWidget.h"
+#include "Widget/Layout/StackBox.h"

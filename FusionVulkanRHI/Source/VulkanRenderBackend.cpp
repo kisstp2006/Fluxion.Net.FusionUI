@@ -5,7 +5,7 @@
 
 #include "PAL/VulkanPlatform.h"
 
-#define VULKAN_ASSERT(vkResult, message) FUSION_ASSERT(vkResult == VK_SUCCESS, message)
+#define VULKAN_CHECK(vkResult, message) FUSION_ASSERT(vkResult == VK_SUCCESS, message)
 
 namespace Fusion::Vulkan
 {
@@ -67,21 +67,6 @@ namespace Fusion::Vulkan
 	// Descriptor Set
 	// -----------------------------------------------------------------
 
-	FDescriptorSet::~FDescriptorSet()
-	{
-		if (!m_RenderBackend->IsDescriptorPoolAlive())
-			return;
-
-		VkDevice device = m_Device;
-		VkDescriptorPool pool = m_OwningPool;
-		VkDescriptorSet set = m_Set;
-
-		m_RenderBackend->DeferDestruction([device, pool, set]
-		{
-			vkFreeDescriptorSets(device, pool, 1, &set);
-		});
-	}
-
 	// -----------------------------------------------------------------
 	// Descriptor Pool
 	// -----------------------------------------------------------------
@@ -117,30 +102,62 @@ namespace Fusion::Vulkan
 		poolCI.maxSets = 128;
 		poolCI.poolSizeCount = (uint32_t)poolSizes.Size();
 		poolCI.pPoolSizes = poolSizes.Data();
-		poolCI.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+		poolCI.flags = 0;
 
 		VkDescriptorPool pool = VK_NULL_HANDLE;
 
 		auto result = vkCreateDescriptorPool(m_Device, &poolCI, VULKAN_CPU_ALLOCATOR, &pool);
-		VULKAN_ASSERT(result, "Failed to create VkDescriptorPool");
+		VULKAN_CHECK(result, "Failed to create VkDescriptorPool");
 
 		m_Pools.Add(pool);
 	}
 
-	FDescriptorSet* FDescriptorPool::Allocate(VkDescriptorSetLayout setLayout)
+	void FDescriptorPool::Reset()
+	{
+		for (VkDescriptorPool pool : m_Pools)
+		{
+			vkResetDescriptorPool(m_Device, pool, 0);
+		}
+
+		m_CurPoolIndex = 0;
+	}
+
+	VkDescriptorSet FDescriptorPool::Allocate(VkDescriptorSetLayout setLayout)
 	{
 		VkDescriptorSetAllocateInfo allocateInfo{};
 		allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		allocateInfo.descriptorPool = m_Pools.Last();
+		allocateInfo.descriptorPool = m_Pools[m_CurPoolIndex];
 		allocateInfo.descriptorSetCount = 1;
 		allocateInfo.pSetLayouts = &setLayout;
 
 		VkDescriptorSet set = VK_NULL_HANDLE;
 
 		auto result = vkAllocateDescriptorSets(m_Device, &allocateInfo, &set);
-		VULKAN_ASSERT(result, "Failed to allocate VkDescriptorSet");
 
-		return new FDescriptorSet(m_RenderBackend, m_Device, allocateInfo.descriptorPool);
+		while (result == VK_ERROR_OUT_OF_POOL_MEMORY)
+		{
+			bool wasIncremented = false;
+
+			if (m_CurPoolIndex < (int)m_Pools.Size() - 1)
+			{
+				m_CurPoolIndex++;
+			}
+			else
+			{
+				Grow();
+				m_CurPoolIndex++;
+				wasIncremented = true;
+			}
+
+			allocateInfo.descriptorPool = m_Pools[m_CurPoolIndex];
+			result = vkAllocateDescriptorSets(m_Device, &allocateInfo, &set);
+
+			FUSION_ASSERT(!wasIncremented || result == VK_SUCCESS, "Failed to allocate VkDescriptorSet");
+		}
+
+		VULKAN_CHECK(result, "Failed to allocate VkDescriptorSet");
+
+		return set;
 	}
 
 	// -----------------------------------------------------------------
@@ -256,9 +273,8 @@ namespace Fusion::Vulkan
 
 	FRenderCapabilities FVulkanRenderBackend::GetRenderCapabilities()
 	{
-		// TODO
 		return {
-
+			.MinStructuredBufferOffsetAlignment = m_PhysicalDeviceProperties.limits.minStorageBufferOffsetAlignment
 		};
 	}
 
@@ -298,6 +314,65 @@ namespace Fusion::Vulkan
 		}
 	}
 
+	void FVulkanRenderBackend::SubmitSnapshot(FRenderTargetHandle renderTarget, IntrusivePtr<FRenderSnapshot> snapshot)
+	{
+		auto it = m_RenderTargetsByHandle.Find(renderTarget);
+		if (it == m_RenderTargetsByHandle.End())
+			return;
+
+		it->second->m_Snapshot = snapshot;
+	}
+
+	FRenderTargetHandle FVulkanRenderBackend::AcquireWindowRenderTarget(FWindowHandle window)
+	{
+		if (window.IsNull())
+			return {};
+		if (!m_SwapChainsByWindowHandle.KeyExists(window))
+			return {};
+		if (m_SwapChainsByWindowHandle[window] == nullptr)
+			return {};
+
+		m_RenderTargetIndexAllocator += 1;
+		auto handle = FRenderTargetHandle(m_RenderTargetIndexAllocator);
+
+		IntrusivePtr<FRenderTarget> renderTarget = new FRenderTarget;
+		renderTarget->m_Type = ERenderTargetType::Window;
+		renderTarget->m_Window = window;
+
+		m_RenderTargetsByHandle[handle] = renderTarget;
+
+		return handle;
+	}
+
+	void FVulkanRenderBackend::ReleaseRenderTarget(FRenderTargetHandle renderTarget)
+	{
+		auto it = m_RenderTargetsByHandle.Find(renderTarget);
+
+		if (it == m_RenderTargetsByHandle.End())
+			return;
+
+		m_RenderTargetsByHandle.Remove(it);
+	}
+
+	void FVulkanRenderBackend::TickDestructionQueue()
+	{
+		for (int i = (int)m_DeferredDestruction.Size() - 1; i >= 0; --i)
+		{
+			if (m_DeferredDestruction[i].m_FrameCounter <= 0)
+			{
+				m_DeferredDestruction[i].m_Destruction.ExecuteIfBound();
+				m_DeferredDestruction.RemoveAtSwapLast(i);
+				continue;
+			}
+
+			m_DeferredDestruction[i].m_FrameCounter--;
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------------------
+	// - Render Tick
+	
+
 	void FVulkanRenderBackend::RenderTick()
 	{
 		if (m_SwapChainsByWindowHandle.IsEmpty())
@@ -315,7 +390,9 @@ namespace Fusion::Vulkan
 		FArray<uint32_t> presentImageIndices{};
 
 		result = vkWaitForFences(m_Device, 1, &m_RenderFinishedFences[m_FrameSlot], VK_TRUE, kFenceTimeOut);
-		VULKAN_ASSERT(result, "Failed to wait on Render Finished Fence.");
+		VULKAN_CHECK(result, "Failed to wait on Render Finished Fence.");
+
+		m_PoolsPerFrame[m_FrameSlot]->Reset();
 
 		vkResetFences(m_Device, 1, &m_RenderFinishedFences[m_FrameSlot]);
 
@@ -324,7 +401,7 @@ namespace Fusion::Vulkan
 			if (!swapChain)
 				continue;
 
-			result = vkAcquireNextImageKHR(m_Device, swapChain->m_SwapChain, kSwapChainTimeOut, 
+			result = vkAcquireNextImageKHR(m_Device, swapChain->m_SwapChain, kSwapChainTimeOut,
 				swapChain->m_ImageAcquiredSemaphores[m_FrameSlot], VK_NULL_HANDLE, &swapChain->m_CurrentImageIndex);
 
 			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
@@ -335,7 +412,7 @@ namespace Fusion::Vulkan
 					swapChain->m_ImageAcquiredSemaphores[m_FrameSlot], VK_NULL_HANDLE, &swapChain->m_CurrentImageIndex);
 			}
 
-			VULKAN_ASSERT(result, "Failed to acquire image from SwapChain.");
+			VULKAN_CHECK(result, "Failed to acquire image from SwapChain.");
 
 			waitSemaphores.Add(swapChain->m_ImageAcquiredSemaphores[m_FrameSlot]);
 			waitSemaphoreStages.Add(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
@@ -352,13 +429,13 @@ namespace Fusion::Vulkan
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
 		int numRenderPasses = 0;
-		
+
 		vkBeginCommandBuffer(cmdBuffer, &beginInfo);
 		{
 			for (auto [windowHandle, swapChain] : m_SwapChainsByWindowHandle)
 			{
 				VkClearValue colorClear;
-				colorClear.color = { { 0.0f, 0.0f, 0.3f, 1.0f } }; // Opaque black
+				colorClear.color = { { 0.0f, 0.0f, 0.0f, 0.0f } }; // Opaque black
 
 				VkRenderPassBeginInfo renderPassInfo{};
 				renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -366,14 +443,14 @@ namespace Fusion::Vulkan
 				renderPassInfo.pClearValues = &colorClear;
 				renderPassInfo.framebuffer = swapChain->m_FrameBuffers[swapChain->m_CurrentImageIndex];
 				renderPassInfo.renderArea = {
-					.offset = { .x = 0, .y = 0 },
-					.extent = { .width = swapChain->width, .height = swapChain->height }
+					.offset = {.x = 0, .y = 0 },
+					.extent = {.width = swapChain->m_Width, .height = swapChain->m_Height }
 				};
 				renderPassInfo.renderPass = m_RenderPass;
-				
+
 				vkCmdBeginRenderPass(cmdBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 				{
-					
+
 				}
 				vkCmdEndRenderPass(cmdBuffer);
 
@@ -393,7 +470,7 @@ namespace Fusion::Vulkan
 		submitInfo.pWaitSemaphores = waitSemaphores.Data();
 
 		result = vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_RenderFinishedFences[m_FrameSlot]);
-		VULKAN_ASSERT(result, "Failed to submit Command Buffer.");
+		VULKAN_CHECK(result, "Failed to submit Command Buffer.");
 
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -413,21 +490,6 @@ namespace Fusion::Vulkan
 			"Failed to Present SwapChains.");
 
 		m_FrameSlot = (m_FrameSlot + 1) % ImageCount;
-	}
-
-	void FVulkanRenderBackend::TickDestructionQueue()
-	{
-		for (int i = (int)m_DeferredDestruction.Size() - 1; i >= 0; --i)
-		{
-			if (m_DeferredDestruction[i].m_FrameCounter <= 0)
-			{
-				m_DeferredDestruction[i].m_Destruction.ExecuteIfBound();
-				m_DeferredDestruction.RemoveAtSwapLast(i);
-				continue;
-			}
-
-			m_DeferredDestruction[i].m_FrameCounter--;
-		}
 	}
 
 	// ------------------------------------------------------------------------------------------------------------
@@ -477,12 +539,12 @@ namespace Fusion::Vulkan
 		}
 
 		auto result = vkCreateInstance(&instanceCI, VULKAN_CPU_ALLOCATOR, &m_VulkanInstance);
-		VULKAN_ASSERT(result, "Failed to create Vulkan instance.");
+		VULKAN_CHECK(result, "Failed to create Vulkan instance.");
 
 		if (FVulkanPlatform::IsValidationEnabled())
 		{
 			result = CreateDebugUtilsMessengerEXT(m_VulkanInstance, &debugCI, VULKAN_CPU_ALLOCATOR, &m_VkMessenger);
-			VULKAN_ASSERT(result, "Failed to create Vulkan debug messenger.");
+			VULKAN_CHECK(result, "Failed to create Vulkan debug messenger.");
 		}
 
 
@@ -635,7 +697,7 @@ namespace Fusion::Vulkan
 		deviceFeaturesToUse.samplerAnisotropy = VK_FALSE;
 		
 		result = vkCreateDevice(m_PhysicalDevice, &deviceCI, VULKAN_CPU_ALLOCATOR, &m_Device);
-		VULKAN_ASSERT(result, "Failed to create VkDevice.");
+		VULKAN_CHECK(result, "Failed to create VkDevice.");
 
 		vkGetDeviceQueue(m_Device, m_QueueFamilyIndex, 0, &m_GraphicsQueue);
 
@@ -657,7 +719,7 @@ namespace Fusion::Vulkan
 		commandPoolCI.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
 		result = vkCreateCommandPool(m_Device, &commandPoolCI, VULKAN_CPU_ALLOCATOR, &m_CommandPool);
-		VULKAN_ASSERT(result, "Failed to create VkCommandPool");
+		VULKAN_CHECK(result, "Failed to create VkCommandPool");
 
 
 		// - Command Buffer -
@@ -671,7 +733,7 @@ namespace Fusion::Vulkan
 		commandBufferInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		
 		result = vkAllocateCommandBuffers(m_Device, &commandBufferInfo, m_CommandBuffers.Data());
-		VULKAN_ASSERT(result, "Failed to allocate VkCommandBuffer");
+		VULKAN_CHECK(result, "Failed to allocate VkCommandBuffer");
 
 
 		// - Semaphores -
@@ -686,7 +748,7 @@ namespace Fusion::Vulkan
 			VkSemaphore semaphore = VK_NULL_HANDLE;
 
 			result = vkCreateSemaphore(m_Device, &semaphoreCI, VULKAN_CPU_ALLOCATOR, &semaphore);
-			VULKAN_ASSERT(result, "Failed to create Render Finished semaphore.");
+			VULKAN_CHECK(result, "Failed to create Render Finished semaphore.");
 
 			m_RenderFinishedSemaphores[i] = semaphore;
 		}
@@ -705,7 +767,7 @@ namespace Fusion::Vulkan
 			VkFence fence = VK_NULL_HANDLE;
 
 			result = vkCreateFence(m_Device, &fenceCI, VULKAN_CPU_ALLOCATOR, &fence);
-			VULKAN_ASSERT(result, "Failed to create Render Finished fence.");
+			VULKAN_CHECK(result, "Failed to create Render Finished fence.");
 
 			m_RenderFinishedFences[i] = fence;
 		}
@@ -742,7 +804,7 @@ namespace Fusion::Vulkan
 			renderPassCI.pSubpasses = &subpass;
 
 			result = vkCreateRenderPass(m_Device, &renderPassCI, VULKAN_CPU_ALLOCATOR, &m_RenderPass);
-			VULKAN_ASSERT(result, "Failed to create VkRenderPass.");
+			VULKAN_CHECK(result, "Failed to create VkRenderPass.");
 		}
 
 
@@ -763,7 +825,7 @@ namespace Fusion::Vulkan
 			vertexModuleCI.pCode = (const uint32_t*)vertexShader->m_SPIRVData;
 			
 			result = vkCreateShaderModule(m_Device, &vertexModuleCI, VULKAN_CPU_ALLOCATOR, &m_MainGraphicsPipeline->m_VertexModule);
-			VULKAN_ASSERT(result, "Failed to load Vertex Shader.");
+			VULKAN_CHECK(result, "Failed to load Vertex Shader.");
 
 			VkShaderModuleCreateInfo fragmentModuleCI{};
 			fragmentModuleCI.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -771,7 +833,7 @@ namespace Fusion::Vulkan
 			fragmentModuleCI.pCode = (const uint32_t*)fragmentShader->m_SPIRVData;
 
 			result = vkCreateShaderModule(m_Device, &fragmentModuleCI, VULKAN_CPU_ALLOCATOR, &m_MainGraphicsPipeline->m_FragmentModule);
-			VULKAN_ASSERT(result, "Failed to load Fragment Shader.");
+			VULKAN_CHECK(result, "Failed to load Fragment Shader.");
 
 			VkGraphicsPipelineCreateInfo graphicsPipelineCI{};
 			graphicsPipelineCI.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -801,7 +863,7 @@ namespace Fusion::Vulkan
 			VkVertexInputBindingDescription vertexInputBinding{};
 			vertexInputBinding.binding = 0;
 			vertexInputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-			vertexInputBinding.stride = sizeof(EUIVertex);
+			vertexInputBinding.stride = sizeof(FUIVertex);
 
 			vertexInputState.vertexBindingDescriptionCount = 1;
 			vertexInputState.pVertexBindingDescriptions = &vertexInputBinding;
@@ -810,22 +872,22 @@ namespace Fusion::Vulkan
 			vertexAttributes[0].format = VK_FORMAT_R32G32_SFLOAT;
 			vertexAttributes[0].binding = 0;
 			vertexAttributes[0].location = 0;
-			vertexAttributes[0].offset = offsetof(EUIVertex, pos);
+			vertexAttributes[0].offset = offsetof(FUIVertex, pos);
 
 			vertexAttributes[1].format = VK_FORMAT_R32G32_SFLOAT;
 			vertexAttributes[1].binding = 0;
 			vertexAttributes[1].location = 1;
-			vertexAttributes[1].offset = offsetof(EUIVertex, uv);
+			vertexAttributes[1].offset = offsetof(FUIVertex, uv);
 
 			vertexAttributes[2].format = VK_FORMAT_R8G8B8A8_UNORM;
 			vertexAttributes[2].binding = 0;
 			vertexAttributes[2].location = 2;
-			vertexAttributes[2].offset = offsetof(EUIVertex, color);
+			vertexAttributes[2].offset = offsetof(FUIVertex, color);
 
 			vertexAttributes[3].format = VK_FORMAT_R32_UINT;
 			vertexAttributes[3].binding = 0;
 			vertexAttributes[3].location = 3;
-			vertexAttributes[3].offset = offsetof(EUIVertex, drawItemIndex);
+			vertexAttributes[3].offset = offsetof(FUIVertex, drawItemIndex);
 
 			vertexInputState.vertexAttributeDescriptionCount = 4;
 			vertexInputState.pVertexAttributeDescriptions = vertexAttributes.data();
@@ -869,7 +931,7 @@ namespace Fusion::Vulkan
 
 				VkDescriptorSetLayout setLayout = nullptr;
 				result = vkCreateDescriptorSetLayout(m_Device, &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
-				VULKAN_ASSERT(result, "Failed to create Set Layout.");
+				VULKAN_CHECK(result, "Failed to create Set Layout.");
 				
 				m_MainGraphicsPipeline->m_SetLayouts.Add(setLayout);
 			}
@@ -893,7 +955,7 @@ namespace Fusion::Vulkan
 				
 				VkDescriptorSetLayout setLayout = nullptr;
 				result = vkCreateDescriptorSetLayout(m_Device, &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
-				VULKAN_ASSERT(result, "Failed to create Set Layout.");
+				VULKAN_CHECK(result, "Failed to create Set Layout.");
 
 				m_MainGraphicsPipeline->m_SetLayouts.Add(setLayout);
 			}
@@ -917,7 +979,7 @@ namespace Fusion::Vulkan
 
 				VkDescriptorSetLayout setLayout = nullptr;
 				result = vkCreateDescriptorSetLayout(m_Device, &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
-				VULKAN_ASSERT(result, "Failed to create Set Layout.");
+				VULKAN_CHECK(result, "Failed to create Set Layout.");
 
 				m_MainGraphicsPipeline->m_SetLayouts.Add(setLayout);
 			}
@@ -958,7 +1020,7 @@ namespace Fusion::Vulkan
 
 				VkDescriptorSetLayout setLayout = nullptr;
 				result = vkCreateDescriptorSetLayout(m_Device, &setLayoutCI, VULKAN_CPU_ALLOCATOR, &setLayout);
-				VULKAN_ASSERT(result, "Failed to create Set Layout.");
+				VULKAN_CHECK(result, "Failed to create Set Layout.");
 
 				m_MainGraphicsPipeline->m_SetLayouts.Add(setLayout);
 			}
@@ -967,7 +1029,7 @@ namespace Fusion::Vulkan
 			pipelineLayoutCI.pSetLayouts = m_MainGraphicsPipeline->m_SetLayouts.Data();
 
 			result = vkCreatePipelineLayout(m_Device, &pipelineLayoutCI, VULKAN_CPU_ALLOCATOR, &m_MainGraphicsPipeline->m_PipelineLayout);
-			VULKAN_ASSERT(result, "Failed to create Main Pipeline Layout.");
+			VULKAN_CHECK(result, "Failed to create Main Pipeline Layout.");
 
 			graphicsPipelineCI.layout = m_MainGraphicsPipeline->m_PipelineLayout;
 
@@ -1016,12 +1078,15 @@ namespace Fusion::Vulkan
 			graphicsPipelineCI.pDepthStencilState = &depthStencilState;
 
 			result = vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &graphicsPipelineCI, VULKAN_CPU_ALLOCATOR, &m_MainGraphicsPipeline->m_Pipeline);
-			VULKAN_ASSERT(result, "Failed to create Main Graphics Pipeline.");
+			VULKAN_CHECK(result, "Failed to create Main Graphics Pipeline.");
 		}
 
 		// - Descriptors -
 
-		m_Pool = new FDescriptorPool(this, m_Device);
+		for (int i = 0; i < ImageCount; i++)
+		{
+			m_PoolsPerFrame.Add(new FDescriptorPool(this, m_Device));
+		}
 	}
 
 	void FVulkanRenderBackend::ShutdownVulkan()
@@ -1034,7 +1099,11 @@ namespace Fusion::Vulkan
 		}
 		m_DeferredDestruction.Clear();
 
-		delete m_Pool; m_Pool = nullptr;
+		for (int i = 0; i < ImageCount; i++)
+		{
+			delete m_PoolsPerFrame[i];
+		}
+		m_PoolsPerFrame.Clear();
 
 		m_SwapChainsByWindowHandle.Clear();
 
@@ -1121,8 +1190,10 @@ namespace Fusion::Vulkan
 				};
 
 				result = vkCreateSemaphore(m_Device, &semaphoreCI, VULKAN_CPU_ALLOCATOR, &swapChain->m_ImageAcquiredSemaphores[i]);
-				VULKAN_ASSERT(result, "Failed to create Image Acquired semaphore.");
+				VULKAN_CHECK(result, "Failed to create Image Acquired semaphore.");
 			}
+
+			m_SwapChainsByWindowHandle[window] = swapChain;
 		}
 
 		swapChain->m_Images.Clear();
@@ -1134,7 +1205,7 @@ namespace Fusion::Vulkan
 		VkSurfaceCapabilitiesKHR surfaceCapabilities{};
 
 		result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_PhysicalDevice, swapChain->m_Surface, &surfaceCapabilities);
-		VULKAN_ASSERT(result, "Failed to fetch surface capabilities");
+		VULKAN_CHECK(result, "Failed to fetch surface capabilities");
 
 		VkSwapchainCreateInfoKHR swapChainCI{};
 		swapChainCI.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -1165,8 +1236,8 @@ namespace Fusion::Vulkan
 
 		swapChainCI.imageExtent = extent;
 
-		swapChain->width = extent.width;
-		swapChain->height = extent.height;
+		swapChain->m_Width = extent.width;
+		swapChain->m_Height = extent.height;
 
 		uint32_t presentModesCount = 0;
 		vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, swapChain->m_Surface, &presentModesCount, nullptr);
@@ -1196,7 +1267,7 @@ namespace Fusion::Vulkan
 		swapChainCI.surface = swapChain->m_Surface;
 
 		result = vkCreateSwapchainKHR(m_Device, &swapChainCI, VULKAN_CPU_ALLOCATOR, &swapChain->m_SwapChain);
-		VULKAN_ASSERT(result, "Failed to create Vulkan SwapChain.");
+		VULKAN_CHECK(result, "Failed to create Vulkan SwapChain.");
 
 		uint32_t swapChainImageCount = 0;
 		vkGetSwapchainImagesKHR(m_Device, swapChain->m_SwapChain, &swapChainImageCount, nullptr);
@@ -1231,7 +1302,7 @@ namespace Fusion::Vulkan
 			imageViewCI.image = texture->m_Image;
 			
 			result = vkCreateImageView(m_Device, &imageViewCI, VULKAN_CPU_ALLOCATOR, &texture->m_ImageView);
-			VULKAN_ASSERT(result, "Failed to create Vulkan ImageView for SwapChain.");
+			VULKAN_CHECK(result, "Failed to create Vulkan ImageView for SwapChain.");
 
 			swapChain->m_Images.Add(texture);
 		}
@@ -1262,13 +1333,13 @@ namespace Fusion::Vulkan
 			frameBufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			frameBufferCI.attachmentCount = 1;
 			frameBufferCI.pAttachments = &swapChain->m_Images[i]->m_ImageView;
-			frameBufferCI.width = swapChain->width;
-			frameBufferCI.height = swapChain->height;
+			frameBufferCI.width = swapChain->m_Width;
+			frameBufferCI.height = swapChain->m_Height;
 			frameBufferCI.renderPass = m_RenderPass;
 			frameBufferCI.layers = 1;
 
 			result = vkCreateFramebuffer(m_Device, &frameBufferCI, VULKAN_CPU_ALLOCATOR, &swapChain->m_FrameBuffers[i]);
-			VULKAN_ASSERT(result, "Failed to create FrameBuffer.");
+			VULKAN_CHECK(result, "Failed to create FrameBuffer.");
 		}
 
 		VkFramebufferCreateInfo frameBufferCI{};
@@ -1283,8 +1354,6 @@ namespace Fusion::Vulkan
 				vkDestroySwapchainKHR(m_Device, oldSwapChain, VULKAN_CPU_ALLOCATOR);
 			});
 		}
-
-		m_SwapChainsByWindowHandle[window] = swapChain;
 	}
 
 	void FVulkanRenderBackend::DestroySwapChain(FWindowHandle window)

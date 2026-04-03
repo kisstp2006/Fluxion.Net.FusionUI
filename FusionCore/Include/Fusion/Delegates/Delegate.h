@@ -74,7 +74,7 @@ namespace Fusion
 
         // Bind a non-const member function via Ptr<T>
         template<typename TObject, typename TMethod>
-        void Bind(Ptr<TObject> object, TMethod method)
+        void Bind(Ref<TObject> object, TMethod method)
         {
             m_Function = [object, method](TArgs... args) -> TReturn
             {
@@ -84,7 +84,7 @@ namespace Fusion
 
         // Bind a const member function via Ptr<T>
         template<typename TObject, typename TMethod>
-        void Bind(Ptr<const TObject> object, TMethod method)
+        void Bind(Ref<const TObject> object, TMethod method)
         {
             m_Function = [object, method](TArgs... args) -> TReturn
             {

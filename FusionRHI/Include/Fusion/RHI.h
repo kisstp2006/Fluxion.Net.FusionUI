@@ -5,5 +5,6 @@
 
 #include "RHI/UIDrawData.h"
 #include "RHI/UIDrawList.h"
+#include "RHI/RenderSnapshot.h"
 #include "RHI/IRenderBackend.h"
 

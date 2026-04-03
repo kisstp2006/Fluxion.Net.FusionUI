@@ -1,6 +1,9 @@
 #pragma once
 #include <chrono>
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
 
@@ -67,6 +70,8 @@ namespace Fusion
 		void DestroyWindow(FWindowHandle window) override;
 
         FVec2i GetWindowSizeInPixels(FWindowHandle window) override;
+
+		f32 GetDpiScaleForWindow(FWindowHandle window) override;
 
 	protected:
 

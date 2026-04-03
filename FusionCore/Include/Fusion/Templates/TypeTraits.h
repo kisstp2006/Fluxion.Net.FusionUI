@@ -62,10 +62,10 @@ namespace Fusion
     struct TFIsArray<FArray<T, InlineCapacity>> : TFTrueType {};
 
     template<typename T>
-    class Ptr;
+    class Ref;
 
     template<typename T>
-    class WeakPtr;
+    class WeakRef;
 
     template<typename T>
     struct TFIsPtr : TFFalseType
@@ -74,7 +74,7 @@ namespace Fusion
     };
 
     template<typename T>
-    struct TFIsPtr<Ptr<T>> : TFTrueType
+    struct TFIsPtr<Ref<T>> : TFTrueType
     {
         typedef T Type;
     };
@@ -86,7 +86,7 @@ namespace Fusion
     };
 
     template<typename T>
-    struct TFIsWeakPtr<WeakPtr<T>> : TFTrueType
+    struct TFIsWeakPtr<WeakRef<T>> : TFTrueType
     {
         typedef T Type;
     };

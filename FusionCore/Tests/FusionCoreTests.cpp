@@ -228,7 +228,7 @@ TEST(PtrTest, ThreadSafety)
     };
 
     // Shared strong ref — all threads copy from this
-    Ptr<FTestObject> shared = new FTestObject();
+    Ref<FTestObject> shared = new FTestObject();
 
     constexpr int threadCount    = 8;
     constexpr int opsPerThread   = 10000;
@@ -243,7 +243,7 @@ TEST(PtrTest, ThreadSafety)
         {
             for (int j = 0; j < opsPerThread; ++j)
             {
-                Ptr<FTestObject> local = shared;
+                Ref<FTestObject> local = shared;
                 if (local)
                     local->m_Value.fetch_add(1, std::memory_order_relaxed);
             }
@@ -251,14 +251,14 @@ TEST(PtrTest, ThreadSafety)
     }
 
     // Weak ref threads: repeatedly lock and release WeakPtr<T>
-    WeakPtr<FTestObject> weak = shared;
+    WeakRef<FTestObject> weak = shared;
     for (int i = 0; i < threadCount; ++i)
     {
         threads.emplace_back([&]()
         {
             for (int j = 0; j < opsPerThread; ++j)
             {
-                Ptr<FTestObject> locked = weak.Lock();
+                Ref<FTestObject> locked = weak.Lock();
                 if (locked)
                     locked->m_Value.fetch_add(1, std::memory_order_relaxed);
             }

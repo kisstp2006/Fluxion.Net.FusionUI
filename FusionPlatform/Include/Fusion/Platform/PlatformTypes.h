@@ -3,12 +3,12 @@
 namespace Fusion
 {
 	//! @brief A handle to an instance of PlatformBackend. Also used for the RenderBackend.
-	using FInstanceHandle = Handle<u32>;
+	using FInstanceHandle = FHandle<u32>;
 
 	//! @brief A handle to a window created by the PlatformBackend.
-	using FWindowHandle = Handle<u32>;
+	using FWindowHandle = FHandle<u32>;
 
-    using FDisplayId = Handle<u32>;
+    using FDisplayId = FHandle<u32>;
     
     enum class FKeyCode : i32
     {

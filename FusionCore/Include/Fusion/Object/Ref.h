@@ -6,16 +6,16 @@
 
 namespace Fusion
 {
-    template<typename T> class WeakPtr;
+    template<typename T> class WeakRef;
 
     template<typename T>
-    class Ptr
+    class Ref
     {
     public:
-        Ptr() = default;
-        Ptr(std::nullptr_t) {}
+        Ref() = default;
+        Ref(std::nullptr_t) {}
 
-        Ptr(T* object)
+        Ref(T* object)
         {
             if (object)
             {
@@ -38,14 +38,14 @@ namespace Fusion
             }
         }
 
-        Ptr(const Ptr& other)
+        Ref(const Ref& other)
         {
             m_Control = other.m_Control;
             if (m_Control)
                 m_Control->AddStrongRef();
         }
 
-        Ptr(Ptr&& other) noexcept
+        Ref(Ref&& other) noexcept
         {
             m_Control       = other.m_Control;
             other.m_Control = nullptr;
@@ -53,7 +53,7 @@ namespace Fusion
 
         // Upcasting: Ptr<Derived> -> Ptr<Base>
         template<typename U> requires std::derived_from<U, T>
-        Ptr(const Ptr<U>& other)
+        Ref(const Ref<U>& other)
         {
             m_Control = other.m_Control;
             if (m_Control)
@@ -61,19 +61,19 @@ namespace Fusion
         }
 
         template<typename U> requires std::derived_from<U, T>
-        Ptr(Ptr<U>&& other) noexcept
+        Ref(Ref<U>&& other) noexcept
         {
             m_Control       = other.m_Control;
             other.m_Control = nullptr;
         }
 
-        ~Ptr()
+        ~Ref()
         {
             if (m_Control)
                 m_Control->ReleaseStrongRef();
         }
 
-        Ptr& operator=(const Ptr& other)
+        Ref& operator=(const Ref& other)
         {
             if (this != &other)
             {
@@ -87,7 +87,7 @@ namespace Fusion
             return *this;
         }
 
-        Ptr& operator=(Ptr&& other) noexcept
+        Ref& operator=(Ref&& other) noexcept
         {
             if (this != &other)
             {
@@ -100,7 +100,7 @@ namespace Fusion
             return *this;
         }
 
-        Ptr& operator=(std::nullptr_t)
+        Ref& operator=(std::nullptr_t)
         {
             if (m_Control)
                 m_Control->ReleaseStrongRef();
@@ -138,8 +138,8 @@ namespace Fusion
             return !IsValid();
         }
 
-        bool operator==(const Ptr& other)  const { return m_Control == other.m_Control; }
-        bool operator!=(const Ptr& other)  const { return !(*this == other); }
+        bool operator==(const Ref& other)  const { return m_Control == other.m_Control; }
+        bool operator!=(const Ref& other)  const { return !(*this == other); }
         bool operator==(std::nullptr_t)    const { return IsNull(); }
         bool operator!=(std::nullptr_t)    const { return IsValid(); }
 
@@ -148,11 +148,11 @@ namespace Fusion
 
         // Internal constructor used by WeakPtr::Lock() — ref already incremented via TryAddStrongRef
         struct AlreadyRetained {};
-        Ptr(Internal::RefCountBlock* control, AlreadyRetained)
+        Ref(Internal::RefCountBlock* control, AlreadyRetained)
             : m_Control(control) {}
 
-        template<typename U> friend class Ptr;
-        template<typename U> friend class WeakPtr;
+        template<typename U> friend class Ref;
+        template<typename U> friend class WeakRef;
         friend class FObject;
     };
 

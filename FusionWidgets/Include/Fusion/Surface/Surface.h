@@ -1,5 +1,8 @@
 #pragma once
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
     class FWidget;
@@ -9,11 +12,11 @@ namespace Fusion
         FUSION_CLASS(FSurface, FObject)
     protected:
 
-        FSurface();
+        FSurface(FObject* outer = nullptr);
 
     public:
 
-        // - Getters & Setters -
+        // - Getters -
 
         FVec2 GetAvailableSize() const { return m_AvailableSize; }
 
@@ -21,21 +24,37 @@ namespace Fusion
 
         f32 GetDpiScale() const { return m_DpiScale; }
 
-        Ptr<FWidget> GetRootWidget() const { return m_RootWidget; }
+        Ref<FWidget> GetRootWidget() const { return m_RootWidget; }
 
-        Ptr<FSurface> GetParentSurface() const { return m_ParentSurface.Lock(); }
+        Ref<FSurface> GetParentSurface() const { return m_ParentSurface.Lock(); }
 
         u32 GetChildSurfaceCount() const { return m_ChildSurfaces.Size(); }
 
-        Ptr<FSurface> GetChildSurface(u32 index) const { return m_ChildSurfaces[index]; }
+        Ref<FSurface> GetChildSurface(u32 index) const { return m_ChildSurfaces[index]; }
 
-        Ptr<FLayerTree> GetLayerTree() const { return m_LayerTree; }
+        Ref<FLayerTree> GetLayerTree() const { return m_LayerTree; }
+
+        Ref<FApplicationInstance> GetApplication() const { return m_Application.Lock(); }
+
+        virtual bool IsNativeSurface() const { return false; }
+
+        // - Lifecycle -
+
+        virtual void Initialize();
+
+        virtual void Shutdown();
+
+        virtual void TickSurface();
 
     public:
 
+        // - Widget -
+
+        void SetOwningWidget(Ref<FWidget> widget);
+
         // - Layout -
 
-        void AddPendingLayoutRoot(Ptr<FWidget> layoutRoot);
+        void AddPendingLayoutRoot(Ref<FWidget> layoutRoot);
 
         void MarkRootLayoutDirty();
 
@@ -43,24 +62,34 @@ namespace Fusion
 
         void MarkLayerTreeDirty();
 
+        void CompositeLayer(IntrusivePtr<FRenderSnapshot> snapshot, Ref<FLayer> layer, int layerIndex);
+
     protected:
 
-        Ptr<FLayerTree> m_LayerTree;
+        Ref<FLayerTree> m_LayerTree;
 
         FHashSet<FUuid> m_PendingLayoutRootIds;
-        FArray<Ptr<FWidget>> m_PendingLayoutRoots;
+        FArray<Ref<FWidget>> m_PendingLayoutRoots;
 
-        FArray<Ptr<FSurface>> m_ChildSurfaces;
+        FArray<Ref<FSurface>> m_ChildSurfaces;
 
-        WeakPtr<FSurface> m_ParentSurface;
+        WeakRef<FSurface> m_ParentSurface;
 
-        Ptr<FWidget> m_RootWidget;
+        WeakRef<FApplicationInstance> m_Application;
+
+        Ref<FWidget> m_RootWidget;
+
+        FRenderCapabilities m_RenderCapabilities{};
+
+        FRenderTargetHandle m_RenderTarget;
 
         FVec2 m_AvailableSize;
 
         FVec2 m_PixelSize;
 
         f32 m_DpiScale = 1.0f;
+
+        friend class FApplicationInstance;
     };
 
 } // namespace Fusion

@@ -16,6 +16,7 @@ namespace Fusion
             struct { float x, y, z, w; };
             struct { FVec2 min, max; };
             struct { float left, top, right, bottom; };
+            struct { float topLeft, topRight, bottomRight, bottomLeft; };
             float xyzw[4];
         };
 
@@ -84,6 +85,9 @@ namespace Fusion
             float mag = GetMagnitude();
             return mag > 0.0f ? (*this / mag) : FVec4{};
         }
+
+        float GetMin() const { return std::min<f32>({ x, y, z, w }); }
+        float GetMax() const { return std::max<f32>({ x, y, z, w }); }
 
         static constexpr float Dot(FVec4 a, FVec4 b)         { return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w; }
         static constexpr float SqrDistance(FVec4 a, FVec4 b) { return (b - a).GetSqrMagnitude(); }

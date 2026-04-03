@@ -1,5 +1,8 @@
 #pragma once
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
 
@@ -11,11 +14,13 @@ namespace Fusion
 
 		~FSDL3PlatformWindow();
 
-		bool IsValid() const { return windowHandle != FWindowHandle::NullValue; }
+		bool IsValid() const { return windowHandle.IsValid(); }
 
 		FWindowHandle GetWindowHandle() const { return windowHandle; }
 
 		FVec2i GetSizeInPixels();
+
+		f32 GetDpiScale();
 
 		FPlatformWindowFlags GetInitialFlags() const { return initialFlags; }
 

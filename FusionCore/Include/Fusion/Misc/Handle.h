@@ -1,22 +1,40 @@
 #pragma once
 
+#define FUSION_DEFINE_HANDLE_TYPE(HandleTypeName, ...)\
+    class HandleTypeName\
+    {\
+    public:\
+		using IndexType = FHandle<__VA_ARGS__>::IndexType;\
+		static constexpr FHandle<__VA_ARGS__> NullValue = FHandle<__VA_ARGS__>::NullValue;\
+        HandleTypeName() = default;\
+        explicit HandleTypeName(FHandle<__VA_ARGS__> value) : m_Value(value) {}\
+        bool IsNull() const { return m_Value.IsNull(); }\
+        bool IsValid() const { return m_Value.IsNull(); }\
+        SizeT GetHash() const { return m_Value.GetHash(); }\
+        auto Get() const { return m_Value.Get(); }\
+        bool operator==(const HandleTypeName& rhs) const { return m_Value == rhs.m_Value; }\
+        bool operator!=(const HandleTypeName& rhs) const { return m_Value != rhs.m_Value; }\
+    private:\
+        FHandle<__VA_ARGS__> m_Value = FHandle<__VA_ARGS__>::NullValue;\
+    };
+
 namespace Fusion
 {
 
     template<typename T = u32> requires TFIsIntegralType<T>::Value
-    class Handle
+    class FHandle
     {
     public:
         using IndexType = T;
 
         static constexpr T NullValue = T(-1);
 
-        Handle() : value(NullValue)
+        constexpr FHandle() : value(NullValue)
         {
 
         }
 
-        Handle(T value) : value(value)
+        constexpr FHandle(T value) : value(value)
         {
 
         }
@@ -54,5 +72,5 @@ namespace Fusion
     private:
         T value = NullValue;
     };
-    
+
 } // namespace Fusion

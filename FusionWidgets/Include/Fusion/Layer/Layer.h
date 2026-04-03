@@ -1,5 +1,8 @@
 #pragma once
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
     class FLayerTree;
@@ -10,31 +13,31 @@ namespace Fusion
         FUSION_CLASS(FLayer, FObject)
     public:
 
-        FLayer(FName name, FObject* outer = nullptr);
+        FLayer(FName name = "Layer", FObject* outer = nullptr);
 
-        Ptr<FWidget> GetOwningWidget() { return m_OwningWidget.Lock(); }
+        Ref<FWidget> GetOwningWidget() { return m_OwningWidget.Lock(); }
 
-        Ptr<FLayer> GetParentLayer() { return parent.Lock(); }
+        Ref<FLayer> GetParentLayer() { return m_Parent.Lock(); }
 
         f32 GetDpiScale();
 
-        bool NeedsCompositing() { return needsCompositing; }
+        bool NeedsCompositing() { return m_NeedsCompositing; }
 
         bool NeedsRepaint();
 
         void DoPaintIfNeeded();
 
-        u32 GetChildCount() { return (u32)children.Size(); }
+        u32 GetChildCount() { return (u32)m_Children.Size(); }
 
-        Ptr<FLayer> GetChild(u32 index) { return children[index]; }
+        Ref<FLayer> GetChild(u32 index) { return m_Children[index]; }
 
-        //FUIDrawList* GetDrawList() { return &drawList; }
+        FUIDrawList* GetDrawList() { return &m_DrawList; }
 
-        u32 GetSplitPointCount() { return splitPoints.Size(); }
+        u32 GetSplitPointCount() { return m_SplitPoints.Size(); }
 
-        u32 GetSplitPoint(u32 index) { return splitPoints[index]; }
+        SizeT GetSplitPoint(u32 index) { return m_SplitPoints[index]; }
 
-        const FAffineTransform& GetTransformInParentSpace() const { return cachedTransformInParentLayerSpace; }
+        const FAffineTransform& GetTransformInParentSpace() const { return m_CachedTransformInParentLayerSpace; }
 
         FAffineTransform GetGlobalTransform();
 
@@ -42,25 +45,25 @@ namespace Fusion
 
         void DoPaint();
 
-        void DoPaint(FWidget* widget, FPainter& painter);
+        void DoPaint(Ref<FWidget> widget, FPainter& painter);
 
-        WeakPtr<FLayerTree> m_OwnerTree;
+        WeakRef<FLayerTree> m_OwnerTree;
 
-        WeakPtr<FLayer> parent;
+        WeakRef<FLayer> m_Parent;
 
-        WeakPtr<FWidget> m_OwningWidget;
+        WeakRef<FWidget> m_OwningWidget;
 
-        FArray<Ptr<FLayer>> children;
+        FArray<Ref<FLayer>> m_Children;
 
-        FAffineTransform cachedTransformInParentLayerSpace;
+        FAffineTransform m_CachedTransformInParentLayerSpace;
 
-        bool needsCompositing = false;
-        //FUIDrawList drawList;
-        FArray<u32> splitPoints;
+        bool m_NeedsCompositing = false;
+        FUIDrawList m_DrawList;
+        FArray<SizeT> m_SplitPoints;
 
         friend class FLayerTree;
         friend class FPainter;
-        friend class FRenderSnapshot;
+        friend class FSurface;
     };
 
 } // namespace CE

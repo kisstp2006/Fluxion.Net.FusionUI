@@ -1,5 +1,8 @@
 #include "Fusion/SDL3Platform.h"
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
 	bool FSDL3PlatformBackend::IsInitialized(FInstanceHandle instance)
@@ -268,6 +271,22 @@ namespace Fusion
 		}
 
 		return sdlWindow->GetSizeInPixels();
+	}
+
+	f32 FSDL3PlatformBackend::GetDpiScaleForWindow(FWindowHandle window)
+	{
+		if (!m_WindowsByHandle.KeyExists(window))
+		{
+			return {};
+		}
+
+		FSDL3PlatformWindow* sdlWindow = m_WindowsByHandle[window];
+		if (!sdlWindow)
+		{
+			return {};
+		}
+
+		return sdlWindow->GetDpiScale();
 	}
 
 	void FSDL3PlatformBackend::ProcessWindowEvents(SDL_Event& event)

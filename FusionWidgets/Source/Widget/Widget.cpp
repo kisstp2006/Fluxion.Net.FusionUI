@@ -1,10 +1,14 @@
 #include "Fusion/Widgets.h"
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
 
-	FWidget::FWidget(FName name, Ptr<FObject> outer) : Super(name, outer)
+	FWidget::FWidget(Ref<FObject> outer) : Super("Widget", outer)
 	{
+		m_ClipShape = FRectangle();
 		m_MaxHeight = FNumericLimits<f32>::Infinity();
 		m_MaxWidth = FNumericLimits<f32>::Infinity();
 		m_Pivot = FVec2(0.5f, 0.5f);
@@ -44,7 +48,23 @@ namespace Fusion
 
 	void FWidget::OnPropertyModified(const FName& propertyName)
 	{
+		thread_local const FName styleProperty = "Style";
+		thread_local const FName opacityProperty = "Opacity";
+		thread_local const FName pivotProperty = "Pivot";
 
+		if (propertyName == styleProperty)
+		{
+			// TODO: Update styling
+		}
+		else if (propertyName == opacityProperty)
+		{
+			UpdateBoundaryFlags();
+		}
+		else if (propertyName == pivotProperty)
+		{
+			m_Pivot.x = FMath::Clamp01(m_Pivot.x);
+			m_Pivot.y = FMath::Clamp01(m_Pivot.y);
+		}
 	}
 
 	FAffineTransform FWidget::GetGlobalTransform() const
@@ -59,9 +79,9 @@ namespace Fusion
 		if (boundary == nullptr)
 			return m_CachedLayerSpaceTransform;
 
-		if (Ptr<FSurface> surface = m_ParentSurface.Lock())
+		if (Ref<FSurface> surface = m_ParentSurface.Lock())
 		{
-			if (Ptr<FLayer> layer = surface->GetLayerTree()->FindLayerForWidget(boundary->GetUuid()))
+			if (Ref<FLayer> layer = surface->GetLayerTree()->FindLayerForWidget(boundary->GetUuid()))
 			{
 				return layer->GetGlobalTransform() * m_CachedLayerSpaceTransform;
 			}
@@ -88,6 +108,65 @@ namespace Fusion
 		MarkPaintDirty();
 	}
 
+	FVec2 FWidget::GetMinimumContentSize()
+	{
+		return FVec2(m_MinWidth + m_Padding.left + m_Padding.right, m_MinHeight + m_Padding.top + m_Padding.bottom);
+	}
+
+	FVec2 FWidget::ApplyLayoutConstraints(FVec2 desiredSize)
+	{
+		ZoneScoped;
+
+		f32 constrainedWidth = FMath::Clamp(desiredSize.x, m_MinWidth + m_Padding.left + m_Padding.right, m_MaxWidth + m_Padding.left + m_Padding.right);
+		f32 constrainedHeight = FMath::Clamp(desiredSize.y, m_MinHeight + m_Padding.top + m_Padding.bottom, m_MaxHeight + m_Padding.top + m_Padding.bottom);
+
+		return FVec2(constrainedWidth, constrainedHeight);
+	}
+
+	FVec2 FWidget::MeasureContent(FVec2 availableSize)
+	{
+		return m_DesiredSize = GetMinimumContentSize();
+	}
+
+	void FWidget::ArrangeContent(FVec2 finalSize)
+	{
+		ZoneScoped;
+
+		m_WidgetFlags &= ~EWidgetFlags::LayoutDirty;
+
+		FVec2 newLayoutSize = ApplyLayoutConstraints(finalSize);
+		if (m_LayoutSize == newLayoutSize)
+			return;
+
+		m_LayoutSize = newLayoutSize;
+
+		MarkPaintDirty();
+	}
+
+	void FWidget::SetParentSurfaceRecursive(Ref<FSurface> surface)
+	{
+		ZoneScoped;
+
+		this->m_ParentSurface = surface;
+
+		const bool wasPaintDirty = IsPaintDirty();
+		const bool wasLayoutDirty = IsLayoutDirty();
+		m_WidgetFlags &= ~(EWidgetFlags::PaintDirty | EWidgetFlags::LayoutDirty);
+
+		if (wasPaintDirty)
+			MarkPaintDirty();
+		if (wasLayoutDirty)
+			MarkLayoutDirty();
+	}
+
+	void FWidget::DetachFromParent()
+	{
+		if (Ref<FWidget> parent = m_ParentWidget.Lock())
+		{
+			parent->DetachChild(this);
+		}
+	}
+
 	bool FWidget::IsPaintBoundary() const
 	{
 		return TestWidgetFlags(EWidgetFlags::CachedPaintBoundary) || TestWidgetFlags(EWidgetFlags::CachedCompositingBoundary);
@@ -111,9 +190,17 @@ namespace Fusion
 
 		if (isCompositing != wasCompositing || isPaint != wasPaint)
 		{
-			if (Ptr<FSurface> surface = m_ParentSurface.Lock())
+			if (Ref<FSurface> surface = m_ParentSurface.Lock())
 				surface->MarkLayerTreeDirty();
 		}
+	}
+
+	void FWidget::Paint(FPainter& painter)
+	{
+	}
+
+	void FWidget::PaintOverlay(FPainter& painter)
+	{
 	}
 
 	void FWidget::SetWidgetFlag(EWidgetFlags flag, bool set)

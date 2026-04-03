@@ -5,19 +5,26 @@
 
 namespace Fusion
 {
-	using FResourceHandle = Handle<u32>;
+	using FResourceHandle = FHandle<u32>;
 
-	enum class FGraphicsBackendType
+	enum class ERenderTargetType
 	{
-		Unknown = 0,
-		Vulkan,
-		Metal
+		Window = 0,
+
 	};
-	FUSION_ENUM_CLASS(FGraphicsBackendType);
+
+	enum class EGraphicsBackendType
+	{
+		None = 0,
+		Vulkan,
+		Metal,
+		Other,
+	};
+	FUSION_ENUM_CLASS(EGraphicsBackendType);
 
 	struct FRenderCapabilities
 	{
-		
+		SizeT MinStructuredBufferOffsetAlignment = 16;
 	};
     
     class FUSIONRHI_API IFRenderBackend : public IFPlatformEventSink
@@ -35,7 +42,7 @@ namespace Fusion
 
 		// - Capabilities -
 
-		virtual FGraphicsBackendType GetGraphicsBackendType() { return FGraphicsBackendType::Unknown; }
+		virtual EGraphicsBackendType GetGraphicsBackendType() { return EGraphicsBackendType::None; }
 
 		virtual FRenderCapabilities GetRenderCapabilities() = 0;
 
@@ -49,11 +56,13 @@ namespace Fusion
 
 		// - Rendering -
 
+		virtual FRenderTargetHandle AcquireWindowRenderTarget(FWindowHandle window) = 0;
+		virtual void ReleaseRenderTarget(FRenderTargetHandle renderTarget) = 0;
+
 		// Render loop, only called when using FApplication.Run()
 		virtual void RenderTick() = 0;
 
-		// TODO: Need to come up with a better API
-		virtual void SubmitFrame(FInstanceHandle instance) {}
+		virtual void SubmitSnapshot(FRenderTargetHandle renderTarget, IntrusivePtr<FRenderSnapshot> snapshot) = 0;
 
     protected:
 

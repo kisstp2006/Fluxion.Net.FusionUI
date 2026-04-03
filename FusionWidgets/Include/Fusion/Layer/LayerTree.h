@@ -1,5 +1,8 @@
 #pragma once
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
 
@@ -19,19 +22,19 @@ namespace Fusion
 
         void DoPaintIfNeeded();
 
-        Ptr<FLayer> FindLayerForWidget(FUuid widgetUuid);
+        Ref<FLayer> FindLayerForWidget(FUuid widgetUuid);
 
-        Ptr<FLayer> GetRootLayer() { return m_RootLayer; }
+        Ref<FLayer> GetRootLayer() { return m_RootLayer; }
 
     protected:
 
-        void SyncWidget(Ptr<FWidget> widget, Ptr<FLayer> parentLayer, FHashSet<FUuid>& visited);
+        void SyncWidget(Ref<FWidget> widget, Ref<FLayer> parentLayer, FHashSet<FUuid>& visited);
 
-        Ptr<FLayer> m_RootLayer;
+        Ref<FLayer> m_RootLayer;
 
         FAffineTransform m_RootLayerTransform;
 
-        FHashMap<FUuid, Ptr<FLayer>> m_WidgetUuidToLayerMap;
+        FHashMap<FUuid, Ref<FLayer>> m_WidgetUuidToLayerMap;
 
         bool m_NeedsSync = true;
     };

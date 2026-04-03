@@ -70,6 +70,8 @@ namespace Fusion
 
         virtual FVec2i GetWindowSizeInPixels(FWindowHandle window) = 0;
 
+        virtual f32 GetDpiScaleForWindow(FWindowHandle window) = 0;
+
 	};
     
 } // namespace Fusion

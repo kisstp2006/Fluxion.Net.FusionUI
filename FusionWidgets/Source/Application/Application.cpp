@@ -5,7 +5,7 @@
 
 namespace Fusion
 {
-	FApplication::FApplication(int argc, char** argv)
+	FApplication::FApplication([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	{
 		m_MainApplication = new FApplicationInstance("FusionApplication");
 	}
@@ -39,19 +39,26 @@ namespace Fusion
 		m_MainApplication->Initialize({
 			m_PlatformBackend,
 			m_RenderBackend
-		});
+			});
 
 		FInstanceHandle instanceHandle = m_MainApplication->GetInstanceHandle();
 
-		m_PlatformBackend->CreateWindow(instanceHandle, "Fusion 1", 1280, 720, {
-			.maximised = false,
-			.fullscreen = false,
-			.resizable = true,
-			.hidden = false,
-			.borderless = false,
-			.openCentered = true,
-			.windowFlags = FPlatformWindowFlags::DestroyOnClose
-		});
+		if (m_MainWindow)
+		{
+			FWindowHandle windowHandle = m_PlatformBackend->CreateWindow(instanceHandle, "Fusion 1", m_InitialWindowSize.width, m_InitialWindowSize.height, {
+				.maximised = false,
+				.fullscreen = false,
+				.resizable = true,
+				.hidden = false,
+				.borderless = false,
+				.openCentered = true,
+				.windowFlags = FPlatformWindowFlags::DestroyOnClose
+			});
+
+			Ref<FNativeSurface> nativeSurface = m_MainApplication->CreateNativeSurfaceForWindow(windowHandle);
+
+			nativeSurface->SetOwningWidget(m_MainWindow);
+		}
 
 		m_PlatformBackend->SetContinuousResizeTick([this]
 		{
@@ -63,6 +70,8 @@ namespace Fusion
 			m_PlatformBackend->PumpEvents();
 
 			m_PlatformBackend->Tick();
+
+			m_MainApplication->Tick();
 
 			m_RenderBackend->RenderTick();
 		}
