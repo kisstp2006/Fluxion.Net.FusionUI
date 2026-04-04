@@ -109,7 +109,7 @@ namespace Fusion
         indexWritePtr = indexArray.GetData() + curIndexCount;
     }
 
-    void FUIDrawList::AddPolyLine(const FVec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased, u32 drawItemIndex, const f32* uvXValues)
+    void FUIDrawList::AddPolyLine(const FVec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased, u32 drawItemIndex, const f32* uvXValues, const FRect* minMaxPos)
     {
         ZoneScoped;
 
@@ -118,9 +118,11 @@ namespace Fusion
         if ((color & ColorAlphaMask) == 0)
             return;
 
-        auto getUV = [&](int i) -> FVec2 {
-            return uvXValues ? FVec2(uvXValues[i], 0.5f) : FVec2(0, 0);
-            };
+        auto getUV = [&](int i, FVec2 pos) -> FVec2 {
+            return uvXValues 
+        		? FVec2(uvXValues[i], 0.5f) 
+        		: minMaxPos ? (pos - minMaxPos->min) / minMaxPos->GetSize() : FVec2(0, 0);
+        };
 
         const int count = closed ? numPoints : numPoints - 1; // The number of line segments we need to draw
         const bool thickLine = (thickness > fringeScale);
@@ -214,7 +216,7 @@ namespace Fusion
                     // If we're not using a texture, we need the center vertex as well
                     for (int i = 0; i < numPoints; i++)
                     {
-                        const FVec2 uv = getUV(i);
+                        const FVec2 uv = getUV(i, points[i]);
                         vertexWritePtr[0].pos = points[i];             vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = color;            vertexWritePtr[0].drawItemIndex = drawItemIndex; // Center of line
                         vertexWritePtr[1].pos = tempPoints[i * 2 + 0]; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = transparentColor; vertexWritePtr[1].drawItemIndex = drawItemIndex; // Left-side outer edge
                         vertexWritePtr[2].pos = tempPoints[i * 2 + 1]; vertexWritePtr[2].uv = uv; vertexWritePtr[2].color = transparentColor; vertexWritePtr[2].drawItemIndex = drawItemIndex; // Right-side outer edge
@@ -285,7 +287,7 @@ namespace Fusion
                 // Add vertices
                 for (int i = 0; i < numPoints; i++)
                 {
-                    const FVec2 uv = getUV(i);
+                    const FVec2 uv = getUV(i, tempPoints[i * 4 + 1]);
                     vertexWritePtr[0].pos = tempPoints[i * 4 + 0]; vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = transparentColor; vertexWritePtr[0].drawItemIndex = drawItemIndex;
                     vertexWritePtr[1].pos = tempPoints[i * 4 + 1]; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = color;            vertexWritePtr[1].drawItemIndex = drawItemIndex;
                     vertexWritePtr[2].pos = tempPoints[i * 4 + 2]; vertexWritePtr[2].uv = uv; vertexWritePtr[2].color = color;            vertexWritePtr[2].drawItemIndex = drawItemIndex;
@@ -316,8 +318,8 @@ namespace Fusion
                 dx *= (thickness * 0.5f);
                 dy *= (thickness * 0.5f);
 
-                const FVec2 uv1 = getUV(i1);
-                const FVec2 uv2 = getUV(i2);
+                const FVec2 uv1 = getUV(i1, p1);
+                const FVec2 uv2 = getUV(i2, p2);
                 vertexWritePtr[0].pos.x = p1.x + dy; vertexWritePtr[0].pos.y = p1.y - dx; vertexWritePtr[0].uv = uv1; vertexWritePtr[0].color = color; vertexWritePtr[0].drawItemIndex = drawItemIndex;
                 vertexWritePtr[1].pos.x = p2.x + dy; vertexWritePtr[1].pos.y = p2.y - dx; vertexWritePtr[1].uv = uv2; vertexWritePtr[1].color = color; vertexWritePtr[1].drawItemIndex = drawItemIndex;
                 vertexWritePtr[2].pos.x = p2.x - dy; vertexWritePtr[2].pos.y = p2.y + dx; vertexWritePtr[2].uv = uv2; vertexWritePtr[2].color = color; vertexWritePtr[2].drawItemIndex = drawItemIndex;

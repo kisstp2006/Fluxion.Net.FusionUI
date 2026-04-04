@@ -29,11 +29,57 @@ namespace Fusion
 
 		m_WidgetFlags |= EWidgetFlags::PaintDirty;
 
+		if (Ref<FSurface> surface = m_ParentSurface.Lock())
+		{
+			Ref<FWidget> parent = this;
 
+			while (parent != nullptr)
+			{
+				if (parent != this && parent->IsPaintDirty())
+				{
+					break;
+				}
+
+				if (parent->IsPaintBoundary())
+				{
+					parent->SetWidgetFlag(EWidgetFlags::PaintDirty, true);
+					break;
+				}
+
+				parent = parent->GetParentWidget();
+			}
+		}
 	}
 
 	void FWidget::MarkLayoutDirty()
 	{
+		ZoneScoped;
+
+		if (IsLayoutDirty())
+			return;
+
+		m_WidgetFlags |= EWidgetFlags::LayoutDirty;
+
+		if (Ref<FSurface> surface = m_ParentSurface.Lock())
+		{
+			Ref<FWidget> parent = this;
+
+			while (parent != nullptr)
+			{
+				if (parent != this && parent->IsLayoutDirty())
+				{
+					break;
+				}
+
+				if (parent->IsLayoutBoundary())
+				{
+					surface->AddPendingLayoutRoot(parent);
+					break;
+				}
+
+				parent = parent->GetParentWidget();
+			}
+		}
 	}
 
 	void FWidget::OnConstruct()
@@ -103,6 +149,21 @@ namespace Fusion
 			FAffineTransform::Translation(-m_Pivot);
 	}
 
+	bool FWidget::IsLayoutBoundary()
+	{
+		ZoneScoped;
+
+		const bool isFixedSize = FMath::ApproxEquals(m_MinWidth, m_MaxWidth) && FMath::ApproxEquals(m_MinHeight, m_MaxHeight);
+		if (isFixedSize)
+			return true;
+
+		const bool isRootWidget = m_ParentWidget.IsNull() && m_ParentSurface.IsValid();
+		if (isRootWidget)
+			return true;
+
+		return false;
+	}
+
 	void FWidget::SetLayoutPosition(FVec2 newPosition)
 	{
 		if (m_LayoutPosition == newPosition)
@@ -138,11 +199,6 @@ namespace Fusion
 		ZoneScoped;
 
 		m_WidgetFlags &= ~EWidgetFlags::LayoutDirty;
-
-		if (GetName() == "hstack")
-		{
-			FString str;
-		}
 
 		FVec2 newLayoutSize = ApplyLayoutConstraints(finalSize);
 		if (m_LayoutSize == newLayoutSize)
@@ -211,6 +267,31 @@ namespace Fusion
 
 	void FWidget::PaintOverlay([[maybe_unused]] FPainter& painter)
 	{
+	}
+
+	bool FWidget::SelfHitTest(FVec2 localMousePos)
+	{
+		ZoneScoped;
+
+		if (Excluded() || IsFaulted() || !Visible())
+			return false;
+
+		return FRect::FromSize(FVec2(), m_LayoutSize).Contains(localMousePos);
+	}
+
+	void FWidget::SetFaulted()
+	{
+		SetWidgetFlag(EWidgetFlags::Faulted, true);
+
+		if (Ref<FWidget> parent = GetParentWidget())
+		{
+			parent->MarkLayoutDirty();
+			parent->MarkPaintDirty();
+
+			parent->DetachChild(this);
+		}
+
+		m_ParentWidget = nullptr;
 	}
 
 	void FWidget::SetWidgetFlag(EWidgetFlags flag, bool set)

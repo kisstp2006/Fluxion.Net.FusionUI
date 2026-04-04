@@ -11,7 +11,7 @@ namespace Fusion
         FUSION_CLASS(FNativeSurface, FSurface)
     public:
 
-        FNativeSurface(FWindowHandle windowHandle, FObject* outer = nullptr);
+        FNativeSurface(FWindowHandle windowHandle);
 
         // - Public API -
 
@@ -20,6 +20,8 @@ namespace Fusion
         void Shutdown() override;
 
         bool IsNativeSurface() const final { return true; }
+
+        FVec2 ScreenToSurfacePoint(FVec2 position) override;
 
         void OnWindowResized();
 

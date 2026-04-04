@@ -197,6 +197,8 @@ namespace Fusion
 
         static constexpr FVec4i Zero() { return { 0, 0, 0, 0 }; }
         static constexpr FVec4i One()  { return { 1, 1, 1, 1 }; }
+
+        FVec4 ToVec4() const { return FVec4((float)x, (float)y, (float)z, (float)w); }
     };
 
     inline constexpr FVec4i operator*(int32_t scalar, FVec4i v) { return v * scalar; }
@@ -204,3 +206,21 @@ namespace Fusion
     using FMargin = FVec4;
 
 } // namespace Fusion
+
+template<>
+struct std::formatter<Fusion::FVec4> : std::formatter<float>
+{
+    auto format(const Fusion::FVec4& v, std::format_context& ctx) const
+    {
+        return std::format_to(ctx.out(), "({}, {}, {}, {})", v.x, v.y, v.z, v.w);
+    }
+};
+
+template<>
+struct std::formatter<Fusion::FVec4i> : std::formatter<int>
+{
+    auto format(const Fusion::FVec4i& v, std::format_context& ctx) const
+    {
+        return std::format_to(ctx.out(), "({}, {}, {}, {})", v.x, v.y, v.z, v.w);
+    }
+};

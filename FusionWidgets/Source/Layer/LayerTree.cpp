@@ -81,7 +81,8 @@ namespace Fusion
 			}
 			else
 			{
-				layer = new FLayer("Layer", this);
+				layer = new FLayer("Layer");
+				AttachSubobject(layer);
 
 				layer->m_OwningWidget = widget;
 				layer->m_OwnerTree = Ref(this);

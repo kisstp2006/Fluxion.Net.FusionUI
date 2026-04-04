@@ -52,6 +52,7 @@ namespace Fusion
 		initialFlags = info.windowFlags;
 		
 		SDL_SetWindowPosition(sdlWindow, x, y);
+		SDL_SetWindowMinimumSize(sdlWindow, 32, 32);
 		
 		windowHandle = SDL_GetWindowID(sdlWindow);
 	}
@@ -77,6 +78,13 @@ namespace Fusion
 		int w = 0, h = 0;
 		SDL_GetWindowSize(sdlWindow, &w, &h);
 		return FVec2i(w, h);
+	}
+
+	FVec2i FSDL3PlatformWindow::GetPosition()
+	{
+		int x = 0, y = 0;
+		SDL_GetWindowPosition(sdlWindow, &x, &y);
+		return FVec2i(x, y);
 	}
 
 	f32 FSDL3PlatformWindow::GetDpiScale()

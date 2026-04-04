@@ -25,11 +25,6 @@ namespace Fusion
 	{
         ZoneScoped;
 
-        if (GetName() == "hstack")
-        {
-            FString string;
-        }
-
         FVec2 contentAvailable = FVec2(
             FMath::Max(0.0f, availableSize.x - m_Padding.left - m_Padding.right),
             FMath::Max(0.0f, availableSize.y - m_Padding.top - m_Padding.bottom)
@@ -52,7 +47,19 @@ namespace Fusion
                 FMath::Max(0.0f, contentAvailable.y - childMargin.top - childMargin.bottom)
             );
 
-            FVec2 childDesired = child->MeasureContent(childAvailable);
+            FVec2 childDesired = FVec2();
+
+            FUSION_TRY
+            {
+                childDesired = child->MeasureContent(childAvailable);
+            }
+            FUSION_CATCH(const FException& exception)
+            {
+                FUSION_LOG_ERROR("Widget", "Exception: {}. Exception thrown by a Widget [{}] in FStackBox::MeasureContent.\n{}", 
+                    exception.what(), child->GetClassName(), exception.GetStackTraceString(true));
+
+                child->SetFaulted();
+            }
 
             if (m_StackDirection == EStackDirection::Horizontal)
             {
@@ -95,11 +102,6 @@ namespace Fusion
 	void FStackBox::ArrangeContent(FVec2 finalSize)
 	{
         ZoneScoped;
-
-        if (GetName() == "RootStack")
-        {
-            FString string;
-        }
 
         Super::ArrangeContent(finalSize);
 
@@ -313,19 +315,29 @@ namespace Fusion
                 }
             }
 
-            // Arrange and advance the cursor using the child's actual layout size
-            // (post-constraint) rather than our pre-computed estimate.
-            if (isHorizontal)
+            FUSION_TRY
             {
-                child->SetLayoutPosition(FVec2(childMainPos, childCrossPos));
-                child->ArrangeContent(FVec2(childMainSize, childCrossSize));
-                cursor += mainMarginStart + child->GetLayoutSize().x + mainMarginEnd;
+                // Arrange and advance the cursor using the child's actual layout size
+                // (post-constraint) rather than our pre-computed estimate.
+                if (isHorizontal)
+                {
+                    child->SetLayoutPosition(FVec2(childMainPos, childCrossPos));
+                    child->ArrangeContent(FVec2(childMainSize, childCrossSize));
+                    cursor += mainMarginStart + child->GetLayoutSize().x + mainMarginEnd;
+                }
+                else
+                {
+                    child->SetLayoutPosition(FVec2(childCrossPos, childMainPos));
+                    child->ArrangeContent(FVec2(childCrossSize, childMainSize));
+                    cursor += mainMarginStart + child->GetLayoutSize().y + mainMarginEnd;
+                }
             }
-            else
+            FUSION_CATCH(const FException& exception)
             {
-                child->SetLayoutPosition(FVec2(childCrossPos, childMainPos));
-                child->ArrangeContent(FVec2(childCrossSize, childMainSize));
-                cursor += mainMarginStart + child->GetLayoutSize().y + mainMarginEnd;
+                FUSION_LOG_ERROR("Widget", "Exception: {}. Exception thrown by a Widget [{}] in FStackBox::ArrangeContent.\n{}",
+                    exception.what(), child->GetClassName(), exception.GetStackTraceString(true));
+
+                child->SetFaulted();
             }
         }
 	}

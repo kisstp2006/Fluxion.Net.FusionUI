@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <format>
 
 #include "Fusion/Misc/Assert.h"
 
@@ -173,3 +174,12 @@ namespace Fusion
     }
 
 } // namespace Fusion
+
+template<>
+struct std::formatter<Fusion::FColor> : std::formatter<float>
+{
+    auto format(const Fusion::FColor& c, std::format_context& ctx) const
+    {
+        return std::format_to(ctx.out(), "({}, {}, {}, {})", c.r, c.g, c.b, c.a);
+    }
+};

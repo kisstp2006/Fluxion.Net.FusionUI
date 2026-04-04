@@ -62,6 +62,29 @@ namespace Fusion
         virtual void RegisterEventSink(IFPlatformEventSink* eventSink) = 0;
         virtual void DeregisterEventSink(IFPlatformEventSink* eventSink) = 0;
 
+        virtual FVec2 GetGlobalMousePosition() = 0;
+        virtual FVec2 GetMouseWheelDelta() = 0;
+
+        virtual bool IsKeyDown(EKeyCode key) = 0;
+
+        virtual bool IsKeyHeld(EKeyCode key) = 0;
+
+        virtual bool IsKeyUp(EKeyCode key) = 0;
+
+        virtual bool IsMouseButtonDown(EMouseButton mouseButton) = 0;
+
+        virtual bool IsMouseButtonUp(EMouseButton mouseButton) = 0;
+
+        virtual int GetMouseButtonClicks(EMouseButton mouseButton) = 0;
+
+        virtual bool IsMouseButtonHeld(EMouseButton mouseButton) = 0;
+
+        //! @brief Tests for presence of ALL of the given modifiers
+        virtual bool TestModifiers(EKeyModifier modifier) = 0;
+
+        //! @brief Returns the full current modifier bitmask
+        virtual EKeyModifier GetModifierStates() = 0;
+
 		// - Window Management -
 
 		virtual FWindowHandle CreateWindow(FInstanceHandle instance, const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info) = 0;
@@ -71,6 +94,8 @@ namespace Fusion
         virtual FVec2i GetWindowSizeInPixels(FWindowHandle window) = 0;
 
         virtual FVec2i GetWindowSize(FWindowHandle window) = 0;
+
+        virtual FVec2i GetWindowPosition(FWindowHandle window) = 0;
 
         virtual f32 GetDpiScaleForWindow(FWindowHandle window) = 0;
 

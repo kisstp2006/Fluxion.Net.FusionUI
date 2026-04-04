@@ -27,7 +27,7 @@ namespace Fusion
     
     class FUSIONWIDGETS_API FWidget : public FObject
     {
-        FUSION_CLASS(FWidget, FObject)
+        FUSION_WIDGET(FWidget, FObject)
     public:
 
         FWidget();
@@ -80,6 +80,8 @@ namespace Fusion
 
         // - Layout -
 
+        virtual bool IsLayoutBoundary();
+
         FVec2 GetLayoutPosition() const { return m_LayoutPosition; }
 
         FVec2 GetLayoutSize() const { return m_LayoutSize; }
@@ -120,6 +122,20 @@ namespace Fusion
 
         virtual void PaintOverlay(FPainter& painter);
 
+        // - Event -
+
+        virtual void OnMouseEnter(FMouseEvent& event) {}
+        virtual void OnMouseLeave(FMouseEvent& event) {}
+        virtual FEventReply OnMouseMove(FMouseEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnMouseButtonDown(FMouseEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnMouseButtonUp(FMouseEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnMouseWheel(FMouseEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnKeyDown(FKeyEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnKeyUp(FKeyEvent& event) { return FEventReply::Unhandled(); }
+        virtual void OnFocusChanged(FFocusEvent& event) {}
+
+        bool SelfHitTest(FVec2 localMousePos);
+
         // - Internal -
 
         // For internal use only!
@@ -127,6 +143,9 @@ namespace Fusion
 
         // For internal use only!
         void SetParentSurface(Ref<FSurface> surface) { m_ParentSurface = surface; }
+
+        // For internal use only!
+        void SetFaulted();
 
     protected:
 
@@ -229,7 +248,8 @@ namespace Fusion
 
         EWidgetFlags m_WidgetFlags = EWidgetFlags::None;
 
-        FUSION_WIDGET;
+        friend class FLayer;
+        friend class FSurface;
     };
 
     template<class T>

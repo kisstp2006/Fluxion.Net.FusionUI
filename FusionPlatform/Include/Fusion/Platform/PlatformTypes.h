@@ -10,7 +10,7 @@ namespace Fusion
 
     using FDisplayId = FHandle<u32>;
     
-    enum class FKeyCode : i32
+    enum class EKeyCode : i32
     {
         Unknown = 0,
         Return = '\r',
@@ -141,10 +141,10 @@ namespace Fusion
         RGui = (231 | (1 << 30)),
 
     };
-    FUSION_ENUM_CLASS(FKeyCode);
+    FUSION_ENUM_CLASS(EKeyCode);
 
     
-    enum class FKeyModifier : u16
+    enum class EKeyModifier : u16
     {
         None = 0x0000,
         LShift = 0x0001,
@@ -168,10 +168,10 @@ namespace Fusion
         RCmd = RGui,
         Cmd = Gui,
     };
-    FUSION_ENUM_CLASS_FLAGS(FKeyModifier);
+    FUSION_ENUM_CLASS_FLAGS(EKeyModifier);
 
     
-    enum class FMouseButton
+    enum class EMouseButton
     {
         None = 0,
         Left = 1,
@@ -180,21 +180,21 @@ namespace Fusion
         Button4 = 4,
         Button5 = 5
     };
-    FUSION_ENUM_CLASS(FMouseButton);
+    FUSION_ENUM_CLASS(EMouseButton);
 
     
-    enum class FMouseButtonMask
+    enum class EMouseButtonMask
     {
         None = 0,
-        Left = FUSION_BIT((int)FMouseButton::Left),
-        Middle = FUSION_BIT((int)FMouseButton::Middle),
-        Right = FUSION_BIT((int)FMouseButton::Right),
-        Button4 = FUSION_BIT((int)FMouseButton::Button4),
-        Button5 = FUSION_BIT((int)FMouseButton::Button5)
+        Left = FUSION_BIT((int)EMouseButton::Left),
+        Middle = FUSION_BIT((int)EMouseButton::Middle),
+        Right = FUSION_BIT((int)EMouseButton::Right),
+        Button4 = FUSION_BIT((int)EMouseButton::Button4),
+        Button5 = FUSION_BIT((int)EMouseButton::Button5)
     };
-    FUSION_ENUM_CLASS_FLAGS(FMouseButtonMask);
+    FUSION_ENUM_CLASS_FLAGS(EMouseButtonMask);
 
-    enum class FSystemCursor
+    enum class ESystemCursor
     {
         Default = 0,
         Arrow = 0,
@@ -213,6 +213,6 @@ namespace Fusion
         Hand,
         COUNT
     };
-    FUSION_ENUM_CLASS(FSystemCursor);
+    FUSION_ENUM_CLASS(ESystemCursor);
     
 } // namespace Fusion

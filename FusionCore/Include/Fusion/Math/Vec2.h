@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cmath>
+#include <format>
 
 #include "Fusion/Misc/Assert.h"
 
@@ -54,6 +55,7 @@ namespace Fusion
         constexpr FVec2 operator+(const FVec2& rhs) const { return { x + rhs.x, y + rhs.y }; }
         constexpr FVec2 operator-(const FVec2& rhs) const { return { x - rhs.x, y - rhs.y }; }
         constexpr FVec2 operator*(const FVec2& rhs) const { return { x * rhs.x, y * rhs.y }; }
+        constexpr FVec2 operator/(const FVec2& rhs) const { return { x / rhs.x, y / rhs.y }; }
         constexpr FVec2 operator*(float scalar)     const { return { x * scalar, y * scalar }; }
         constexpr FVec2 operator/(float scalar)     const { return { x / scalar, y / scalar }; }
         constexpr FVec2 operator+()                 const { return *this; }
@@ -185,9 +187,29 @@ namespace Fusion
 
         static constexpr FVec2i Zero() { return { 0, 0 }; }
         static constexpr FVec2i One()  { return { 1, 1 }; }
+
+        FVec2 ToVec2() const { return FVec2((float)x, (float)y); }
     };
 
     inline constexpr FVec2i operator*(int32_t scalar, FVec2i v) { return v * scalar; }
 
 } // namespace Fusion
+
+template<>
+struct std::formatter<Fusion::FVec2> : std::formatter<float>
+{
+    auto format(const Fusion::FVec2& v, std::format_context& ctx) const
+    {
+        return std::format_to(ctx.out(), "({}, {})", v.x, v.y);
+    }
+};
+
+template<>
+struct std::formatter<Fusion::FVec2i> : std::formatter<int>
+{
+    auto format(const Fusion::FVec2i& v, std::format_context& ctx) const
+    {
+        return std::format_to(ctx.out(), "({}, {})", v.x, v.y);
+    }
+};
 

@@ -38,6 +38,23 @@ namespace Fusion
 
         virtual bool IsNativeSurface() const { return false; }
 
+        FWidget* HitTestWidget(FVec2 pos, FWidget* widget = nullptr);
+
+        // - Coordinate Transforms -
+
+        virtual FVec2 ScreenToSurfacePoint(FVec2 position) = 0;
+
+        // - Events -
+
+        virtual void DispatchSurfaceUnfocusEvent();
+
+        virtual void DispatchSurfaceFocusEvent();
+
+        virtual void DispatchMouseEvents();
+        virtual void DispatchKeyEvents();
+
+        void ProcessReply(Ref<FWidget> sender, const FEventReply& reply);
+
         // - Lifecycle -
 
         virtual void Initialize();
@@ -90,6 +107,13 @@ namespace Fusion
         FVec2 m_PixelSize;
 
         f32 m_DpiScale = 1.0f;
+
+        // - Event -
+
+        FArray<WeakRef<FWidget>> hoveredWidgetStack;
+        std::array<WeakRef<FWidget>, 5> pressedWidgetPerButton;
+        WeakRef<FWidget> curFocusedWidget, nextFocusWidget;
+        WeakRef<FWidget> capturedWidget;
 
         friend class FApplicationInstance;
     };

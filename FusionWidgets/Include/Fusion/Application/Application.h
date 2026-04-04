@@ -32,7 +32,7 @@ namespace Fusion
     private:
 
         Ref<FWidget> m_MainWindow;
-        FVec2i m_InitialWindowSize = FVec2i(1200, 720);
+        FVec2i m_InitialWindowSize = FVec2i(1200, 900);
 
 		Ref<FApplicationInstance> m_MainApplication;
 

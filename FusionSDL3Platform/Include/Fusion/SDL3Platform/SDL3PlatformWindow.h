@@ -21,6 +21,8 @@ namespace Fusion
 		FVec2i GetSizeInPixels();
 		FVec2i GetSize();
 
+		FVec2i GetPosition();
+
 		f32 GetDpiScale();
 
 		FPlatformWindowFlags GetInitialFlags() const { return initialFlags; }

@@ -13,7 +13,7 @@ namespace Fusion
         FUSION_CLASS(FLayer, FObject)
     public:
 
-        FLayer(FName name = "Layer", FObject* outer = nullptr);
+        FLayer(FName name = "Layer");
 
         Ref<FWidget> GetOwningWidget() { return m_OwningWidget.Lock(); }
 

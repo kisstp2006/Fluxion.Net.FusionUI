@@ -48,7 +48,7 @@ namespace Fusion
 
 		bool HasGradient() const { return m_Gradient.IsValid(); }
 
-		bool IsValidPen() const
+		bool IsValid() const
 		{
 			return (HasGradient() || m_Color.a > 0.001f) && m_Thickness > 0.01f;
 		}

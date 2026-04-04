@@ -18,6 +18,8 @@ namespace Fusion
 	using f32 = float;
 	using f64 = double;
 
+	using b8 = bool;
+
 	using SizeT = size_t;
     
 } // namespace Fusion

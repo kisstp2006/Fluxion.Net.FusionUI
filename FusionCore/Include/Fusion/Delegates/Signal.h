@@ -6,59 +6,73 @@
 #include "Fusion/Delegates/Delegate.h"
 #include "Fusion/Containers/Array.h"
 
+#define FUSION_SIGNAL_TYPE(SignalType, ...) using SignalType = ::Fusion::FSignal<void(__VA_ARGS__)>;
+
 namespace Fusion
 {
 
-    struct FEventHandle
+    struct FSignalHandle
     {
         u32 ID = u32(-1);
 
         bool IsValid() const { return ID != u32(-1); }
 
-        bool operator==(const FEventHandle&) const = default;
-        bool operator!=(const FEventHandle&) const = default;
+        bool operator==(const FSignalHandle&) const = default;
+        bool operator!=(const FSignalHandle&) const = default;
 
-        static FEventHandle Invalid() { return {}; }
+        static FSignalHandle Invalid() { return {}; }
     };
 
     // ---------------------------------------------------------------------------
 
     template<typename TSignature>
-    class FEvent;
+    class FSignal;
 
     template<typename TReturn, typename... TArgs>
-    class FEvent<TReturn(TArgs...)>
+    class FSignal<TReturn(TArgs...)>
     {
     public:
-        FEvent()  = default;
-        ~FEvent() = default;
+        FSignal()  = default;
+        ~FSignal() = default;
 
-        // Non-copyable — copying an event's subscriber list is almost never intentional
-        FEvent(const FEvent&)            = delete;
-        FEvent& operator=(const FEvent&) = delete;
+        // Non-copyable — copying a signal's subscriber list is almost never intentional
+        FSignal(const FSignal&)            = delete;
+        FSignal& operator=(const FSignal&) = delete;
 
-        FEvent(FEvent&&)            = default;
-        FEvent& operator=(FEvent&&) = default;
+        FSignal(FSignal&&)            = default;
+        FSignal& operator=(FSignal&&) = default;
 
         // ----------------------------------------------------------------
         // Add
         // ----------------------------------------------------------------
 
-        // Lambda or free function
+        // Lambda or free function — also accepts no-arg lambdas that ignore the signal's parameters
         template<typename TCallable>
-        FEventHandle Add(TCallable&& callable)
+        FSignalHandle Add(TCallable&& callable)
         {
-            FEventHandle handle{ m_NextID++ };
+            FSignalHandle handle{ m_NextID++ };
             auto& binding = m_Bindings.Emplace(handle.ID, FDelegate<TReturn(TArgs...)>{});
-            binding.Delegate.Bind(std::forward<TCallable>(callable));
+
+            if constexpr (std::is_invocable_v<TCallable, TArgs...>)
+            {
+                binding.Delegate.Bind(std::forward<TCallable>(callable));
+            }
+            else
+            {
+                // Callable doesn't accept TArgs — wrap it so parameters are discarded
+                binding.Delegate.Bind([c = std::forward<TCallable>(callable)](TArgs...) mutable -> TReturn {
+                    return c();
+                });
+            }
+
             return handle;
         }
 
         // Non-const member function (raw pointer)
         template<typename TObject, typename TMethod>
-        FEventHandle Add(TObject* object, TMethod method)
+        FSignalHandle Add(TObject* object, TMethod method)
         {
-            FEventHandle handle{ m_NextID++ };
+            FSignalHandle handle{ m_NextID++ };
             auto& binding = m_Bindings.Emplace(handle.ID, FDelegate<TReturn(TArgs...)>{});
             binding.Delegate.Bind(object, method);
             return handle;
@@ -66,9 +80,9 @@ namespace Fusion
 
         // Const member function (raw pointer)
         template<typename TObject, typename TMethod>
-        FEventHandle Add(const TObject* object, TMethod method)
+        FSignalHandle Add(const TObject* object, TMethod method)
         {
-            FEventHandle handle{ m_NextID++ };
+            FSignalHandle handle{ m_NextID++ };
             auto& binding = m_Bindings.Emplace(handle.ID, FDelegate<TReturn(TArgs...)>{});
             binding.Delegate.Bind(object, method);
             return handle;
@@ -76,9 +90,9 @@ namespace Fusion
 
         // Non-const member function (Ptr<T>)
         template<typename TObject, typename TMethod>
-        FEventHandle Add(Ref<TObject> object, TMethod method)
+        FSignalHandle Add(Ref<TObject> object, TMethod method)
         {
-            FEventHandle handle{ m_NextID++ };
+            FSignalHandle handle{ m_NextID++ };
             auto& binding = m_Bindings.Emplace(handle.ID, FDelegate<TReturn(TArgs...)>{});
             binding.Delegate.Bind(object, method);
             return handle;
@@ -86,9 +100,9 @@ namespace Fusion
 
         // Const member function (Ptr<const T>)
         template<typename TObject, typename TMethod>
-        FEventHandle Add(Ref<const TObject> object, TMethod method)
+        FSignalHandle Add(Ref<const TObject> object, TMethod method)
         {
-            FEventHandle handle{ m_NextID++ };
+            FSignalHandle handle{ m_NextID++ };
             auto& binding = m_Bindings.Emplace(handle.ID, FDelegate<TReturn(TArgs...)>{});
             binding.Delegate.Bind(object, method);
             return handle;
@@ -98,7 +112,7 @@ namespace Fusion
         // Remove
         // ----------------------------------------------------------------
 
-        void Remove(FEventHandle handle)
+        void Remove(FSignalHandle handle)
         {
             for (SizeT i = 0; i < m_Bindings.Size(); ++i)
             {

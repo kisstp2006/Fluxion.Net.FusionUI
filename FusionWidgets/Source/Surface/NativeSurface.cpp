@@ -2,7 +2,7 @@
 
 namespace Fusion
 {
-	FNativeSurface::FNativeSurface(FWindowHandle windowHandle, FObject* outer) : m_WindowHandle(windowHandle)
+	FNativeSurface::FNativeSurface(FWindowHandle windowHandle) : m_WindowHandle(windowHandle)
 	{
 		
 	}
@@ -28,13 +28,26 @@ namespace Fusion
 		Super::Shutdown();
 	}
 
+	FVec2 FNativeSurface::ScreenToSurfacePoint(FVec2 position)
+	{
+		Ref<FApplicationInstance> application = GetApplication();
+		if (!application)
+			return position;
+		
+#if PLATFORM_MAC
+		return (position - application->GetWindowPosition(m_WindowHandle).ToVec2());
+#else
+		return (position - application->GetWindowPosition(m_WindowHandle).ToVec2()) / GetDpiScale();
+#endif
+	}
+
 	void FNativeSurface::OnWindowResized()
 	{
 		if (Ref<FApplicationInstance> application = GetApplication())
 		{
 			FVec2i pixelSize = application->GetWindowSizeInPixels(m_WindowHandle);
 
-			FVec2 availableSize = FVec2((int)pixelSize.x, (int)pixelSize.y) / m_DpiScale;
+			FVec2 availableSize = FVec2((f32)pixelSize.x, (f32)pixelSize.y) / m_DpiScale;
 
 			if (m_AvailableSize != availableSize)
 			{

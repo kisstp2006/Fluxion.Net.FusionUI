@@ -63,10 +63,14 @@ public:
 				.ClipContent(true)
 				.Name("hstack")
 				(
-					FNew(FDecoratedWidget)
+					FNew(FButton)
 					.FillRatio(1.0f)
 					.Height(30)
-					.Background(FBrush::Solid(FColors::Red)),
+					.Background(FBrush::Solid(FColors::Red))
+					.OnClick([]
+					{
+						FUSION_LOG_INFO("Debug", "Button Clicked!");
+					}),
 
 					FNew(FDecoratedWidget)
 					.FillRatio(1.0f)
@@ -94,11 +98,71 @@ public:
 			)
 		);
 	}
+
+	SampleWindow()
+	{
+		m_GradientOffset = 0.0f;
+		m_DashLength = 10.0f;
+		m_DashGap = 5.0f;
+		m_DashPhase = 0.0f;
+	}
 	
 	void PaintOverlay(FPainter& painter) override
 	{
-		FPen pen;
+		FPen gradientPen = FPen::Gradient(
+			FGradient::Linear()
+			.AddStop(FColor(0.10f, 0.20f, 1.00f), 0.00f) // blue
+			.AddStop(FColor(0.00f, 0.85f, 0.90f), 0.17f) // cyan
+			.AddStop(FColor(0.10f, 0.90f, 0.30f), 0.33f) // green
+			.AddStop(FColor(0.95f, 0.95f, 0.10f), 0.50f) // yellow
+			.AddStop(FColor(0.10f, 0.90f, 0.30f), 0.67f) // green
+			.AddStop(FColor(0.00f, 0.85f, 0.90f), 0.83f) // cyan
+			.AddStop(FColor(0.10f, 0.20f, 1.00f), 1.00f) // blue
+		)
+		.DashGap(m_DashGap)
+		.DashLength(m_DashLength)
+		.DashGap(m_DashGap)
+		.DashPhase(m_DashPhase)
+		.Style(EPenStyle::Dashed)
+		.Thickness(3.0f)
+		.GradientSpace(EGradientSpace::WorldSpace);
+
+		painter.SetPen(gradientPen);
+
+		const FVec2 sz = GetLayoutSize();
+
+		// Drawing area: horizontally centered, in the lower half
+		const f32 drawW = FMath::Min(sz.x * 0.80f, 500.0f);
+		const f32 drawH = drawW * 0.35f;
+		const FVec2 orig = FVec2((sz.x - drawW) * 0.5f, sz.y * 0.62f);
+
+		auto P = [&](f32 x, f32 y) -> FVec2
+		{
+			return FVec2(orig.x + x * drawW, orig.y + y * drawH);
+		};
+		
+		// Segment 1: straight horizontal line from left
+		painter.PathInsert(P(0.00f, 0.50f));
+		painter.PathInsert(P(0.20f, 0.50f));
+
+		// Segment 2: cubic curve swooping up then down
+		painter.PathBezierCubicCurveTo(
+			P(0.20f, 0.50f), P(0.30f, 0.00f), P(0.45f, 0.00f), P(0.50f, 0.50f));
+
+		// Segment 3: straight line through the middle
+		painter.PathInsert(P(0.65f, 0.50f));
+
+		// Segment 4: cubic curve swooping down then up to the right end
+		painter.PathBezierCubicCurveTo(
+			P(0.65f, 0.50f), P(0.75f, 1.00f), P(0.88f, 1.00f), P(1.00f, 0.50f));
+
+		painter.PathStroke(false);
 	}
+
+	FUSION_PROPERTY(f32, GradientOffset);
+	FUSION_PROPERTY(f32, DashLength);
+	FUSION_PROPERTY(f32, DashGap);
+	FUSION_PROPERTY(f32, DashPhase);
 };
 
 int main(int argc, char* argv[])

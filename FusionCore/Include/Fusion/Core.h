@@ -45,5 +45,5 @@
 #include "Fusion/Object/Object.h"
 
 #include "Fusion/Delegates/Delegate.h"
-#include "Fusion/Delegates/Event.h"
+#include "Fusion/Delegates/Signal.h"
 

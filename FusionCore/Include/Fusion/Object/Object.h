@@ -11,8 +11,9 @@
 #include "WeakRef.h"
 
 #define FUSION_CLASS_BODY(SelfClass) typedef SelfClass Self;\
-    virtual FTypeID GetClassTypeID() const { return ::Fusion::GetTypeID<Self>(); }\
-    virtual FName GetClassName() const { thread_local Fusion::FName className = #SelfClass; return className; }
+    public:\
+	    virtual FTypeID GetClassTypeID() const { return ::Fusion::GetTypeID<Self>(); }\
+	    virtual FName GetClassName() const { thread_local Fusion::FName className = #SelfClass; return className; }
 
 #define FUSION_CLASS(SelfClass, SuperClass) typedef SuperClass Super; \
     FUSION_CLASS_BODY(SelfClass)

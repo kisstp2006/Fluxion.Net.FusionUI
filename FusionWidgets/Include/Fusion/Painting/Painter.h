@@ -12,6 +12,9 @@ namespace Fusion
 
         FPainter(FLayer* layer);
 
+        FPainter(const FPainter&) = delete;
+        FPainter& operator=(const FPainter&) = delete;
+
         // - Public API -
 
         void ResetState();

@@ -201,6 +201,74 @@ namespace Fusion
 		m_RegisteredSinks.Remove(eventSink);
 	}
 
+	FVec2 FSDL3PlatformBackend::GetGlobalMousePosition()
+	{
+		return m_InputState.globalMousePosition;
+	}
+
+	FVec2 FSDL3PlatformBackend::GetMouseWheelDelta()
+	{
+		return m_InputState.wheelDelta;
+	}
+
+	bool FSDL3PlatformBackend::IsKeyDown(EKeyCode key)
+	{
+		if (!m_InputState.stateChangesThisTick.KeyExists(key))
+			return false;
+		return m_InputState.stateChangesThisTick[key] == true;
+	}
+
+	bool FSDL3PlatformBackend::IsKeyUp(EKeyCode key)
+	{
+		if (!m_InputState.stateChangesThisTick.KeyExists(key))
+			return false;
+		return m_InputState.stateChangesThisTick[key] == false;
+	}
+
+	bool FSDL3PlatformBackend::IsKeyHeld(EKeyCode key)
+	{
+		if (!m_InputState.keyStates.KeyExists(key))
+			return false;
+		return m_InputState.keyStates[key];
+	}
+
+	bool FSDL3PlatformBackend::IsMouseButtonDown(EMouseButton mouseButton)
+	{
+		if (!m_InputState.mouseButtonStateChanges.KeyExists(mouseButton))
+			return false;
+		return m_InputState.mouseButtonStateChanges[mouseButton] > 0;
+	}
+
+	bool FSDL3PlatformBackend::IsMouseButtonUp(EMouseButton mouseButton)
+	{
+		if (!m_InputState.mouseButtonStateChanges.KeyExists(mouseButton))
+			return false;
+		return m_InputState.mouseButtonStateChanges[mouseButton] == 0;
+	}
+
+	bool FSDL3PlatformBackend::IsMouseButtonHeld(EMouseButton mouseButton)
+	{
+		if (!m_InputState.mouseButtonStates.KeyExists(mouseButton))
+			return false;
+		return m_InputState.mouseButtonStates[mouseButton] > 0;
+	}
+
+	int FSDL3PlatformBackend::GetMouseButtonClicks(EMouseButton mouseButton)
+	{
+		if (!m_InputState.mouseButtonStates.KeyExists(mouseButton))
+			return 0;
+		return m_InputState.mouseButtonStates[mouseButton];
+	}
+
+	bool FSDL3PlatformBackend::TestModifiers(EKeyModifier modifier)
+	{
+		return FEnumHasFlag(m_InputState.modifierStates, modifier);
+	}
+
+	EKeyModifier FSDL3PlatformBackend::GetModifierStates()
+	{
+		return m_InputState.modifierStates;
+	}
 
 	FWindowHandle FSDL3PlatformBackend::CreateWindow(FInstanceHandle instance, const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info)
 	{
@@ -287,6 +355,22 @@ namespace Fusion
 		}
 
 		return sdlWindow->GetSize();
+	}
+
+	FVec2i FSDL3PlatformBackend::GetWindowPosition(FWindowHandle window)
+	{
+		if (!m_WindowsByHandle.KeyExists(window))
+		{
+			return {};
+		}
+
+		FSDL3PlatformWindow* sdlWindow = m_WindowsByHandle[window];
+		if (!sdlWindow)
+		{
+			return {};
+		}
+
+		return sdlWindow->GetPosition();
 	}
 
 	f32 FSDL3PlatformBackend::GetDpiScaleForWindow(FWindowHandle window)
@@ -502,42 +586,42 @@ namespace Fusion
 		{
 		case SDL_EVENT_KEY_DOWN:
 			m_InputWindowHandle = event.key.windowID;
-			if (m_KeyStates[(FKeyCode)event.key.key])
+			if (m_KeyStates[(EKeyCode)event.key.key])
 			{
 				//keyStatesDelayed[(FKeyCode)event.key.key] = { .state = true, .lastEnabledTime = curTime };
 			}
 			else
 			{
-				m_StateChangesThisTick[(FKeyCode)event.key.key] = true;
+				m_StateChangesThisTick[(EKeyCode)event.key.key] = true;
 			}
-			m_KeyStates[(FKeyCode)event.key.key] = true;
-			m_ModifierStates = (FKeyModifier)event.key.mod;
+			m_KeyStates[(EKeyCode)event.key.key] = true;
+			m_ModifierStates = (EKeyModifier)event.key.mod;
 			break;
 		case SDL_EVENT_KEY_UP:
 			m_InputWindowHandle = event.key.windowID;
-			if (m_KeyStates[(FKeyCode)event.key.key])
+			if (m_KeyStates[(EKeyCode)event.key.key])
 			{
-				m_StateChangesThisTick[(FKeyCode)event.key.key] = false;
+				m_StateChangesThisTick[(EKeyCode)event.key.key] = false;
 			}
-			m_KeyStates[(FKeyCode)event.key.key] = false;
+			m_KeyStates[(EKeyCode)event.key.key] = false;
 			//keyStatesDelayed[(FKeyCode)event.key.key] = { .state = false, .lastEnabledTime = 0 };
-			m_ModifierStates = (FKeyModifier)event.key.mod;
+			m_ModifierStates = (EKeyModifier)event.key.mod;
 			break;
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			m_InputWindowHandle = event.button.windowID;
-			if (m_MouseButtonStates[(FMouseButton)event.button.button] != event.button.clicks)
+			if (m_MouseButtonStates[(EMouseButton)event.button.button] != event.button.clicks)
 			{
-				m_MouseButtonStateChanges[(FMouseButton)event.button.button] = event.button.clicks;
+				m_MouseButtonStateChanges[(EMouseButton)event.button.button] = event.button.clicks;
 			}
-			m_MouseButtonStates[(FMouseButton)event.button.button] = event.button.clicks;
+			m_MouseButtonStates[(EMouseButton)event.button.button] = event.button.clicks;
 			break;
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 			m_InputWindowHandle = event.button.windowID;
-			if (m_MouseButtonStates[(FMouseButton)event.button.button] != 0)
+			if (m_MouseButtonStates[(EMouseButton)event.button.button] != 0)
 			{
-				m_MouseButtonStateChanges[(FMouseButton)event.button.button] = 0;
+				m_MouseButtonStateChanges[(EMouseButton)event.button.button] = 0;
 			}
-			m_MouseButtonStates[(FMouseButton)event.button.button] = 0;
+			m_MouseButtonStates[(EMouseButton)event.button.button] = 0;
 			break;
 		case SDL_EVENT_MOUSE_MOTION:
 			m_InputWindowHandle = event.motion.windowID;
@@ -557,10 +641,10 @@ namespace Fusion
 		break;
 		}
 
-		if (m_MouseButtonStates[FMouseButton::Left] != 0 && (mouseBtnMask & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) == 0)
+		if (m_MouseButtonStates[EMouseButton::Left] != 0 && (mouseBtnMask & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) == 0)
 		{
-			m_MouseButtonStateChanges[FMouseButton::Left] = 0;
-			m_MouseButtonStates[FMouseButton::Left] = 0;
+			m_MouseButtonStateChanges[EMouseButton::Left] = 0;
+			m_MouseButtonStates[EMouseButton::Left] = 0;
 		}
 	}
 

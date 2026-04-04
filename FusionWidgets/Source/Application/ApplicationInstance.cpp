@@ -17,7 +17,7 @@ namespace Fusion
 
 	bool FApplicationInstance::Initialize(const FApplicationInstanceDesc& desc)
 	{
-		m_PlatformBackend = desc.platformBackend;
+		m_PlatformBackend = desc.PlatformBackend;
 		
 #if FUSION_USE_SDL3
 		if (!m_PlatformBackend)
@@ -33,7 +33,7 @@ namespace Fusion
 			return false;
 		}
 
-		m_RenderBackend = desc.renderBackend;
+		m_RenderBackend = desc.RenderBackend;
 
 #if FUSION_USE_VULKAN
 		if (!m_RenderBackend)
@@ -96,6 +96,37 @@ namespace Fusion
 
 	void FApplicationInstance::Tick()
 	{
+		ZoneScoped;
+
+		m_PrevScreenMousePos = m_ScreenMousePos;
+		m_ScreenMousePos = m_PlatformBackend->GetGlobalMousePosition();
+		m_WheelDelta = m_PlatformBackend->GetMouseWheelDelta();
+
+		if (m_IsFirstTick)
+		{
+			m_IsFirstTick = false;
+			m_PrevScreenMousePos = m_ScreenMousePos;
+		}
+
+		Ref<FSurface> curFocus = m_CurFocusSurface.Lock();
+		Ref<FSurface> focus = m_FocusSurface.Lock();
+
+		// TODO: Fix Surface focus logic
+
+		if (focus != curFocus)
+		{
+			if (curFocus) curFocus->DispatchSurfaceUnfocusEvent();
+			if (focus)    focus->DispatchSurfaceFocusEvent();
+		}
+
+		if (focus)
+		{
+			focus->DispatchMouseEvents();  // surface resolves coords + runs state machine
+			focus->DispatchKeyEvents();    // routes to curFocusedWidget
+		}
+
+		m_CurFocusSurface = m_FocusSurface;
+
 		for (Ref<FSurface> surface : m_Surfaces)
 		{
 			surface->TickSurface();
@@ -104,7 +135,9 @@ namespace Fusion
 
 	Ref<FNativeSurface> FApplicationInstance::CreateNativeSurfaceForWindow(FWindowHandle window)
 	{
-		Ref<FNativeSurface> nativeSurface = new FNativeSurface(window, this);
+		Ref<FNativeSurface> nativeSurface = new FNativeSurface(window);
+		AttachSubobject(nativeSurface);
+
 		nativeSurface->m_Application = Ref(this);
 
 		m_NativeSurfacesByWindow[window] = nativeSurface;
@@ -114,6 +147,22 @@ namespace Fusion
 		nativeSurface->Initialize();
 
 		return nativeSurface;
+	}
+
+	void FApplicationInstance::FocusSurface(Ref<FSurface> surface)
+	{
+		m_FocusSurface = surface;
+	}
+
+	void FApplicationInstance::UnfocusSurface(Ref<FSurface> surface)
+	{
+		if (Ref<FSurface> focus = m_FocusSurface.Lock())
+		{
+			if (surface == focus)
+			{
+				m_FocusSurface = nullptr;
+			}
+		}
 	}
 
 	FRenderTargetHandle FApplicationInstance::AcquireWindowRenderTarget(FWindowHandle window)
@@ -164,6 +213,30 @@ namespace Fusion
 	void FApplicationInstance::OnWindowRestored(FWindowHandle window)
 	{
 		NotifyWindowResize(window);
+	}
+
+	void FApplicationInstance::OnWindowKeyboardFocusChanged(FWindowHandle window, bool gotFocus)
+	{
+		if (!gotFocus)
+			return;
+
+		auto it = m_NativeSurfacesByWindow.Find(window);
+		if (it == m_NativeSurfacesByWindow.End() || it->second.IsNull())
+			return;
+
+		FocusSurface(it->second);
+	}
+
+	void FApplicationInstance::OnWindowMouseFocusChanged(FWindowHandle window, bool gotFocus)
+	{
+		if (!gotFocus)
+			return;
+
+		auto it = m_NativeSurfacesByWindow.Find(window);
+		if (it == m_NativeSurfacesByWindow.End() || it->second.IsNull())
+			return;
+
+		FocusSurface(it->second);
 	}
 
 	void FApplicationInstance::NotifyWindowResize(FWindowHandle window)

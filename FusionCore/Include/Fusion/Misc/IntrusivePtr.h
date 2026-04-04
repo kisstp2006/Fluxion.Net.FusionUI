@@ -173,13 +173,13 @@ namespace Fusion
 
         inline T& operator*() const
         {
-            FUSION_ASSERT_THROW(ptr != nullptr, FNullPointerException, "he dereferenced IntrusivePtr<T> is NULL.");
+            FUSION_ASSERT_THROW(ptr != nullptr, FNullPointerException, "The dereferenced IntrusivePtr<T> is NULL.");
             return *ptr;
         }
 
         inline T* operator->() const
         {
-            FUSION_ASSERT_THROW(ptr != nullptr, FNullPointerException, "he dereferenced IntrusivePtr<T> is NULL.");
+            FUSION_ASSERT_THROW(ptr != nullptr, FNullPointerException, "The dereferenced IntrusivePtr<T> is NULL.");
             return ptr;
         }
 

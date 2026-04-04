@@ -115,13 +115,13 @@ namespace Fusion
 
         T* operator->() const
         {
-            FUSION_ASSERT_THROW(IsValid(), FNullPointerException, "Trying to dereference a Null Ptr<T>");
+            FUSION_ASSERT_THROW(IsValid(), FNullPointerException, "Trying to dereference a Null Ref<T>");
 	        return Get();
         }
 
         T& operator*() const
         {
-            FUSION_ASSERT_THROW(IsValid(), FNullPointerException, "Trying to dereference a Null Ptr<T>");
+            FUSION_ASSERT_THROW(IsValid(), FNullPointerException, "Trying to dereference a Null Ref<T>");
 	        return *Get();
         }
 

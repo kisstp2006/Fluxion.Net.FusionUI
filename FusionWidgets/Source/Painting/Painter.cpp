@@ -529,10 +529,14 @@ namespace Fusion
 
 	bool FPainter::PathStrokeInternal(bool closed)
 	{
-		if (!m_CurrentPen.IsValidPen())
+		if (!m_CurrentPen.IsValid())
 			return true;
 
 		ZoneScoped;
+
+		FRect minMax = FRect(m_PathMin, m_PathMax);
+		if (minMax.GetWidth() <= 0 || minMax.GetHeight() <= 0)
+			return true;
 
 		f32 thickness = m_CurrentPen.GetThickness();
 
@@ -544,7 +548,11 @@ namespace Fusion
 		FUIDrawItem drawItem{};
 		drawItem.clipRectIndex = GetCurrentClipIndex();
 
-		if (m_CurrentPen.HasGradient())
+		const bool hasGradient = m_CurrentPen.HasGradient();
+		const bool isGradientArcLength = hasGradient && m_CurrentPen.GetGradientSpace() == EGradientSpace::ArcLength;
+		const bool isGradientWorldSpace = hasGradient && m_CurrentPen.GetGradientSpace() == EGradientSpace::WorldSpace;
+
+		if (hasGradient)
 		{
 			const FGradient& g = m_CurrentPen.GetGradient();
 			drawItem.shaderType = EUIShaderType::LinearGradient;
@@ -556,7 +564,7 @@ namespace Fusion
 				m_DrawList->gradientStopArray.Insert({ .packedColor = stop.Color.ToU32(), .position = stop.Position });
 			}
 
-			drawItem.data[0] = 0.0f; // angle=0: shader computes gradientT = uv.x directly
+			drawItem.data[0] = isGradientArcLength ? 0.0f : m_CurrentPen.GetGradient().GetAngle(); // angle=0: shader computes gradientT = uv.x directly
 		}
 		else
 		{
@@ -565,8 +573,6 @@ namespace Fusion
 
 		u32 drawItemIndex = m_DrawList->AddDrawItem(drawItem);
 
-		const bool hasGradient = m_CurrentPen.HasGradient();
-
 		if (m_CurrentPen.GetStyle() == EPenStyle::Solid && closed && hasGradient)
 		{
 			m_Path.Insert(m_Path[0]);
@@ -574,7 +580,7 @@ namespace Fusion
 
 		// Pre-compute per-point t values (0→1 along m_Path length) for gradient pens
 		m_TempPoints.RemoveAll();
-		if (m_CurrentPen.HasGradient())
+		if (isGradientArcLength)
 		{
 			const int numPoints = (int)m_Path.GetCount();
 			const int segCount = closed ? numPoints : numPoints - 1;
@@ -605,7 +611,7 @@ namespace Fusion
 		case EPenStyle::Solid:
 			// Only do closed line if we are not rendering a gradient
 			m_DrawList->AddPolyLine(m_Path.GetData(), (int)m_Path.GetCount(), color, thickness, closed && !hasGradient, m_AntiAliased, drawItemIndex,
-				hasGradient ? m_TempPoints.GetData() : nullptr);
+				isGradientArcLength ? m_TempPoints.GetData() : nullptr, isGradientWorldSpace ? &minMax : nullptr);
 			break;
 		case EPenStyle::Dashed:
 		{
@@ -650,7 +656,7 @@ namespace Fusion
 						f32  uvs[2] = { t0 + (t1 - t0) * aFrac, t0 + (t1 - t0) * bFrac };
 
 						m_DrawList->AddPolyLine(pts, 2, color, thickness, false, m_AntiAliased, drawItemIndex,
-							hasGradient ? uvs : nullptr);
+							isGradientArcLength ? uvs : nullptr, isGradientWorldSpace ? &minMax : nullptr);
 
 						dashOffset += drawLen;
 						segPos += drawLen;
@@ -720,7 +726,7 @@ namespace Fusion
 						f32  uvs[2] = { t0 + (t1 - t0) * aFrac, t0 + (t1 - t0) * bFrac };
 
 						m_DrawList->AddPolyLine(pts, 2, color, thickness, false, m_AntiAliased, drawItemIndex,
-							hasGradient ? uvs : nullptr);
+							isGradientArcLength ? uvs : nullptr, isGradientWorldSpace ? &minMax : nullptr);
 
 						dashOffset += drawLen;
 						segPos += drawLen;

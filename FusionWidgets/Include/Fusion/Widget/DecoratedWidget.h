@@ -18,8 +18,6 @@ namespace Fusion
         FUSION_PROPERTY(FPen, Border);
         FUSION_PROPERTY(FShape, Shape);
 
-        FUSION_WIDGET;
-
     };
 
 } // namespace Fusion

@@ -22,15 +22,15 @@ namespace Fusion
         FVec2 wheelDelta{};
         u64 curTime = 0;
 
-        FHashMap<FKeyCode, bool> keyStates{};
+        FHashMap<EKeyCode, bool> keyStates{};
         //HashMap<FKeyCode, Internal::FKeyStateDelayed> keyStatesDelayed{};
-        FHashMap<FMouseButton, int> mouseButtonStates{};
+        FHashMap<EMouseButton, int> mouseButtonStates{};
 
         // Per-Tick changes
-        FHashMap<FKeyCode, bool> stateChangesThisTick{};
-        FHashMap<FMouseButton, int> mouseButtonStateChanges{};
+        FHashMap<EKeyCode, bool> stateChangesThisTick{};
+        FHashMap<EMouseButton, int> mouseButtonStateChanges{};
 
-        FKeyModifier modifierStates{};
+        EKeyModifier modifierStates{};
     };
 
     class FUSIONSDL3PLATFORM_API FSDL3PlatformBackend : public IFPlatformBackend
@@ -63,6 +63,22 @@ namespace Fusion
 
         void DeregisterEventSink(IFPlatformEventSink* eventSink) override;
 
+        FVec2 GetGlobalMousePosition() override;
+
+        FVec2 GetMouseWheelDelta() override;
+
+        bool IsKeyDown(EKeyCode key) override;
+        bool IsKeyUp(EKeyCode key) override;
+        bool IsKeyHeld(EKeyCode key) override;
+
+        bool IsMouseButtonDown(EMouseButton mouseButton) override;
+        bool IsMouseButtonUp(EMouseButton mouseButton) override;
+        bool IsMouseButtonHeld(EMouseButton mouseButton) override;
+        int  GetMouseButtonClicks(EMouseButton mouseButton) override;
+
+        bool         TestModifiers(EKeyModifier modifier) override;
+        EKeyModifier GetModifierStates() override;
+
         // - Windowing -
 
         FWindowHandle CreateWindow(FInstanceHandle instance, const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info) override;
@@ -72,6 +88,8 @@ namespace Fusion
         FVec2i GetWindowSizeInPixels(FWindowHandle window) override;
 
         FVec2i GetWindowSize(FWindowHandle window) override;
+
+        FVec2i GetWindowPosition(FWindowHandle window) override;
 
 		f32 GetDpiScaleForWindow(FWindowHandle window) override;
 
@@ -116,15 +134,15 @@ namespace Fusion
         FArray<u64> m_FocusGainedWindows{};
         FArray<u64> m_FocusLostWindows{};
 
-        FHashMap<FKeyCode, bool> m_KeyStates{};
+        FHashMap<EKeyCode, bool> m_KeyStates{};
         //HashMap<FKeyCode, Internal::KeyStateDelayed> keyStatesDelayed{};
-        FHashMap<FMouseButton, int> m_MouseButtonStates{};
+        FHashMap<EMouseButton, int> m_MouseButtonStates{};
 
         // Per-Tick changes
-        FHashMap<FKeyCode, bool> m_StateChangesThisTick{};
-        FHashMap<FMouseButton, int> m_MouseButtonStateChanges{};
+        FHashMap<EKeyCode, bool> m_StateChangesThisTick{};
+        FHashMap<EMouseButton, int> m_MouseButtonStateChanges{};
 
-        FKeyModifier m_ModifierStates{};
+        EKeyModifier m_ModifierStates{};
 
         FSDL3InputState m_InputState{};
     };
