@@ -10,7 +10,7 @@ namespace Fusion::Vulkan
         SizeT ByteSize = 0;
     };
 
-    struct FSnapshotDrawDataBufferViews
+    struct FDrawDataBufferViews
     {
         FRenderTargetHandle RenderTarget;
 

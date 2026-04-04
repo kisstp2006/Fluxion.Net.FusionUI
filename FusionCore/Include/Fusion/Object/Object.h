@@ -31,7 +31,7 @@ namespace Fusion
     {
 		FUSION_CLASS_BODY(FObject)
     protected:
-        FObject(FName name = "Object", Ref<FObject> outer = nullptr);
+        FObject(FName name = "Object");
 
     public:
 
@@ -90,15 +90,19 @@ namespace Fusion
         friend struct Internal::RefCountBlock;
 
         template<FObjectType TObject, typename... TArgs>
-        friend Ref<TObject> NewObject(TArgs&&... args);
+        friend Ref<TObject> NewObject(FObject* outer, TArgs&&... args);
     };
 
     template<FObjectType TObject, typename... TArgs>
-    Ref<TObject> NewObject(TArgs&&... args)
+    Ref<TObject> NewObject(FObject* outer, TArgs&&... args)
     {
         Ref<TObject> object = new TObject(std::forward<TArgs>(args)...);
         static_cast<FObject*>(object.Get())->m_Flags &= ~EObjectFlags::PendingConstruction;
         static_cast<FObject*>(object.Get())->OnConstruct();
+        if (outer)
+        {
+            outer->AttachSubobject(object);
+        }
         return object;
     }
 

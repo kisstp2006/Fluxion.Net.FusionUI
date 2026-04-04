@@ -5,7 +5,7 @@
 
 namespace Fusion
 {
-	FObject::FObject(FName name, Ref<FObject> outer) : m_Outer(outer), m_Name(MoveTemp(name)), m_Uuid(FUuid::Random())
+	FObject::FObject(FName name) : m_Name(name), m_Uuid(FUuid::Random())
     {
 		m_Flags |= EObjectFlags::PendingConstruction;
     }

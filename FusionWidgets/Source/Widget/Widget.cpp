@@ -6,13 +6,18 @@
 namespace Fusion
 {
 
-	FWidget::FWidget(Ref<FObject> outer) : Super("Widget", outer)
+	FWidget::FWidget() : Super("Widget")
 	{
 		m_ClipShape = FRectangle();
 		m_MaxHeight = FNumericLimits<f32>::Infinity();
 		m_MaxWidth = FNumericLimits<f32>::Infinity();
 		m_Pivot = FVec2(0.5f, 0.5f);
 		m_Opacity = 1.0f;
+	}
+
+	FWidget::~FWidget()
+	{
+
 	}
 
 	void FWidget::MarkPaintDirty()
@@ -123,7 +128,7 @@ namespace Fusion
 		return FVec2(constrainedWidth, constrainedHeight);
 	}
 
-	FVec2 FWidget::MeasureContent(FVec2 availableSize)
+	FVec2 FWidget::MeasureContent([[maybe_unused]] FVec2 availableSize)
 	{
 		return m_DesiredSize = GetMinimumContentSize();
 	}
@@ -133,6 +138,11 @@ namespace Fusion
 		ZoneScoped;
 
 		m_WidgetFlags &= ~EWidgetFlags::LayoutDirty;
+
+		if (GetName() == "hstack")
+		{
+			FString str;
+		}
 
 		FVec2 newLayoutSize = ApplyLayoutConstraints(finalSize);
 		if (m_LayoutSize == newLayoutSize)
@@ -195,11 +205,11 @@ namespace Fusion
 		}
 	}
 
-	void FWidget::Paint(FPainter& painter)
+	void FWidget::Paint([[maybe_unused]] FPainter& painter)
 	{
 	}
 
-	void FWidget::PaintOverlay(FPainter& painter)
+	void FWidget::PaintOverlay([[maybe_unused]] FPainter& painter)
 	{
 	}
 

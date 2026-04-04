@@ -30,7 +30,9 @@ namespace Fusion
         FUSION_CLASS(FWidget, FObject)
     public:
 
-        FWidget(Ref<FObject> outer = nullptr);
+        FWidget();
+
+        ~FWidget();
 
         // - Flags -
 

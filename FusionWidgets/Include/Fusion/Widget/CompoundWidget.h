@@ -8,7 +8,7 @@ namespace Fusion
         FUSION_CLASS(FCompoundWidget, FWidget)
     public:
 
-        FCompoundWidget(Ref<FObject> outer = nullptr);
+        FCompoundWidget();
 
         // - Public API -
 

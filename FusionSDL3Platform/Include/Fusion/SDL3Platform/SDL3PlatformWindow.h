@@ -19,6 +19,7 @@ namespace Fusion
 		FWindowHandle GetWindowHandle() const { return windowHandle; }
 
 		FVec2i GetSizeInPixels();
+		FVec2i GetSize();
 
 		f32 GetDpiScale();
 

@@ -29,6 +29,8 @@ namespace Fusion
 
 		f32 GetDpiScaleForWindow(FWindowHandle windowHandle);
 
+		FVec2i GetWindowSizeInPixels(FWindowHandle windowHandle);
+
 		// - Lifecycle -
 
 		bool Initialize(const FApplicationInstanceDesc& desc);
@@ -43,7 +45,7 @@ namespace Fusion
 
 		FInstanceHandle GetInstanceHandle() const { return m_InstanceHandle; }
 
-		FRenderCapabilities GetRenderCapabilities() const { return m_RenderCapabilities; }
+		FRenderBackendCapabilities GetRenderCapabilities() const { return m_RenderCapabilities; }
 
 		// - Render Target -
 
@@ -56,6 +58,13 @@ namespace Fusion
 	protected:
 
 		void OnWindowDestroyed(FWindowHandle window) override;
+
+		void OnWindowResized(FWindowHandle window, u32 newWidth, u32 newHeight) override;
+		void OnWindowMaximized(FWindowHandle window) override;
+		void OnWindowMinimized(FWindowHandle window) override;
+		void OnWindowRestored(FWindowHandle window) override;
+
+		void NotifyWindowResize(FWindowHandle window);
 
 		FInstanceHandle m_InstanceHandle = FInstanceHandle::NullValue;
 
@@ -71,7 +80,7 @@ namespace Fusion
 		bool m_RenderBackendAllocated = false;
 		IFRenderBackend* m_RenderBackend = nullptr;
 
-		FRenderCapabilities m_RenderCapabilities{};
+		FRenderBackendCapabilities m_RenderCapabilities{};
     };
     
 } // namespace Fusion

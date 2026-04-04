@@ -12,7 +12,7 @@ namespace Fusion
         FUSION_CLASS(FSurface, FObject)
     protected:
 
-        FSurface(FObject* outer = nullptr);
+        FSurface(FName name = "Surface");
 
     public:
 
@@ -45,6 +45,8 @@ namespace Fusion
         virtual void Shutdown();
 
         virtual void TickSurface();
+
+        virtual void OnSurfaceResize();
 
     public:
 
@@ -79,7 +81,7 @@ namespace Fusion
 
         Ref<FWidget> m_RootWidget;
 
-        FRenderCapabilities m_RenderCapabilities{};
+        FRenderBackendCapabilities m_RenderCapabilities{};
 
         FRenderTargetHandle m_RenderTarget;
 

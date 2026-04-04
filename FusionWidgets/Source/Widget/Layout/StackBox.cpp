@@ -5,7 +5,7 @@
 
 namespace Fusion
 {
-	FStackBox::FStackBox(FObject* outer) : Super(outer)
+	FStackBox::FStackBox()
 	{
 		m_HAlign = EHAlign::Fill;
 		m_VAlign = EVAlign::Fill;
@@ -24,6 +24,11 @@ namespace Fusion
 	FVec2 FStackBox::MeasureContent(FVec2 availableSize)
 	{
         ZoneScoped;
+
+        if (GetName() == "hstack")
+        {
+            FString string;
+        }
 
         FVec2 contentAvailable = FVec2(
             FMath::Max(0.0f, availableSize.x - m_Padding.left - m_Padding.right),
@@ -91,6 +96,11 @@ namespace Fusion
 	{
         ZoneScoped;
 
+        if (GetName() == "RootStack")
+        {
+            FString string;
+        }
+
         Super::ArrangeContent(finalSize);
 
         bool isHorizontal = (m_StackDirection == EStackDirection::Horizontal);
@@ -116,7 +126,7 @@ namespace Fusion
         FArray<FillEntry> fillEntries;
         fillEntries.Reserve(GetChildCount());
 
-        for (int i = 0; i < GetChildCount(); i++)
+        for (int i = 0; i < (int)GetChildCount(); i++)
         {
             Ref<FWidget> child = GetChildAt(i);
             if (child->Excluded()) continue;
@@ -206,7 +216,7 @@ namespace Fusion
         bool isFirst = true;
         int  fillSlot = 0; // walking index into fillEntries (same order as children)
 
-        for (int i = 0; i < GetChildCount(); i++)
+        for (int i = 0; i < (int)GetChildCount(); i++)
         {
             Ref<FWidget> child = GetChildAt(i);
             if (child->Excluded()) continue;
@@ -322,6 +332,8 @@ namespace Fusion
 
 	void FVerticalStack::OnPropertyModified(const FName& propertyName)
 	{
+        Super::OnPropertyModified(propertyName);
+
         thread_local const FName stackDirectionProperty = "StackDirection";
 
         if (propertyName == stackDirectionProperty)
@@ -332,6 +344,8 @@ namespace Fusion
 
 	void FHorizontalStack::OnPropertyModified(const FName& propertyName)
 	{
+        Super::OnPropertyModified(propertyName);
+
         thread_local const FName stackDirectionProperty = "StackDirection";
 
         if (propertyName == stackDirectionProperty)

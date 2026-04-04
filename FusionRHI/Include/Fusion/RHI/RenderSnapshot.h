@@ -7,7 +7,7 @@ namespace Fusion
 {
 	FUSION_DEFINE_HANDLE_TYPE(FRenderTargetHandle, u32);
 
-	struct FRenderPass
+	struct FUIRenderPass
 	{
 		FRenderTargetHandle Handle;
 
@@ -16,35 +16,35 @@ namespace Fusion
 		SizeT DrawCmdCount = 0;
 	};
 
+	using FUISplitRangeArray = FStableDynamicArray<FSplitRange,   64>;
+	using FUIRenderPassArray = FStableDynamicArray<FUIRenderPass, 32>;
+
     class FUSIONRHI_API FRenderSnapshot : public FIntrusiveBase
     {
     public:
 
 		FRenderSnapshot() = default;
 
-		using FSplitRangeArray = FStableDynamicArray<FSplitRange, 64>;
-		using FRenderPassArray = FStableDynamicArray<FRenderPass, 32>;
-
 		FUIVertexArray vertexArray;
-		FSplitRangeArray vertexSplits;
+		FUISplitRangeArray vertexSplits;
 
 		FUIIndexArray indexArray;
-		FSplitRangeArray indexSplits;
+		FUISplitRangeArray indexSplits;
 
 		FUIDrawItemArray drawItemArray;
-		FSplitRangeArray drawItemSplits;
+		FUISplitRangeArray drawItemSplits;
 
 		FUIDrawCmdArray drawCmdArray;
-		FSplitRangeArray drawCmdSplits;
+		FUISplitRangeArray drawCmdSplits;
 
 		FUIClipRectArray clipRectArray;
-		FSplitRangeArray clipRectSplits;
+		FUISplitRangeArray clipRectSplits;
 
 		FUIGradientStopArray gradientStopArray;
-		FSplitRangeArray gradientStopSplits;
+		FUISplitRangeArray gradientStopSplits;
 
 		//! @brief This array defines the actual order of draw commands.
-		FRenderPassArray renderPassArray;
+		FUIRenderPassArray renderPassArray;
 
 		FUIViewData viewData;
 

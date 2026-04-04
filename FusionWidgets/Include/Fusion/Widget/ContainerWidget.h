@@ -11,7 +11,7 @@ namespace Fusion
         FUSION_CLASS(FContainerWidget, FWidget)
     public:
 
-        FContainerWidget(Ref<FObject> outer = nullptr);
+        FContainerWidget();
 
         // - Public API -
 

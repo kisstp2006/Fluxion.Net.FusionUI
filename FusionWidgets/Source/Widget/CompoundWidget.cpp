@@ -5,7 +5,7 @@
 
 namespace Fusion
 {
-	FCompoundWidget::FCompoundWidget(Ref<FObject> outer) : Super(outer)
+	FCompoundWidget::FCompoundWidget()
 	{
 		
 	}

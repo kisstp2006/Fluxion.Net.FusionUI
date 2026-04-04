@@ -268,7 +268,7 @@ namespace Fusion::Vulkan
 	// Vulkan Render Backend
 	// -----------------------------------------------------------------
 
-	FRenderCapabilities FVulkanRenderBackend::GetRenderCapabilities()
+	FRenderBackendCapabilities FVulkanRenderBackend::GetRenderCapabilities()
 	{
 		return {
 			.MinConstantBufferOffsetAlignment = m_PhysicalDeviceProperties.limits.minUniformBufferOffsetAlignment,
@@ -419,7 +419,7 @@ namespace Fusion::Vulkan
 
 			// TODO: Handle splits within a snapshot
 			
-			FSnapshotDrawDataBufferViews views{};
+			FDrawDataBufferViews views{};
 
 			views.RenderTarget = renderTargetHandle;
 
@@ -473,7 +473,7 @@ namespace Fusion::Vulkan
 
 		for (SizeT i = 0; i < m_OffsetDataPerSnapshot.Size(); i++)
 		{
-			FSnapshotDrawDataBufferViews& views = m_OffsetDataPerSnapshot[i];
+			FDrawDataBufferViews& views = m_OffsetDataPerSnapshot[i];
 			IPtr<FRenderTarget> renderTarget = m_RenderTargetsByHandle[views.RenderTarget];
 			IPtr<FRenderSnapshot> snapshot = renderTarget->m_Snapshot;
 
@@ -681,6 +681,8 @@ namespace Fusion::Vulkan
 			presentImageIndices.Add(swapChain->m_CurrentImageIndex);
 		}
 
+		// - Tick Destruction -
+
 		TickDestructionQueue();
 
 		VkCommandBuffer cmdBuffer = m_CommandBuffers[m_FrameSlot];
@@ -694,13 +696,19 @@ namespace Fusion::Vulkan
 
 		vkBeginCommandBuffer(cmdBuffer, &beginInfo);
 		{
-			for (SizeT i = 0; i < m_OffsetDataPerSnapshot.Size(); i++)
+			for (SizeT snapshotIdx = 0; snapshotIdx < m_OffsetDataPerSnapshot.Size(); snapshotIdx++)
 			{
 				VkClearValue colorClear;
 				colorClear.color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
 
-				IPtr<FRenderTarget> renderTarget = m_RenderTargetsByHandle[m_OffsetDataPerSnapshot[i].RenderTarget];
+				const FDrawDataBufferViews& views = m_OffsetDataPerSnapshot[snapshotIdx];
+
+				IPtr<FRenderTarget> renderTarget = m_RenderTargetsByHandle[views.RenderTarget];
 				if (renderTarget->m_Type != ERenderTargetType::Window)
+					continue;
+
+				IPtr<FRenderSnapshot> snapshot = renderTarget->m_Snapshot;
+				if (!snapshot)
 					continue;
 
 				IPtr<FSwapChain> swapChain = m_SwapChainsByWindowHandle[renderTarget->m_Window];
@@ -713,14 +721,62 @@ namespace Fusion::Vulkan
 				renderPassInfo.pClearValues = &colorClear;
 				renderPassInfo.framebuffer = swapChain->m_FrameBuffers[swapChain->m_CurrentImageIndex];
 				renderPassInfo.renderArea = {
-					.offset = {.x = 0, .y = 0 },
-					.extent = {.width = swapChain->m_Width, .height = swapChain->m_Height }
+					.offset = { .x = 0, .y = 0 },
+					.extent = { .width = swapChain->m_Width, .height = swapChain->m_Height }
 				};
 				renderPassInfo.renderPass = m_RenderPass;
 
 				vkCmdBeginRenderPass(cmdBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 				{
+					const VkViewport viewport{
+						.x = 0,
+						.y = 0,
+						.width = (float)swapChain->m_Width,
+						.height = (float)swapChain->m_Height,
+						.minDepth = 0.0f,
+						.maxDepth = 1.0f
+					};
+					vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
 
+					const VkRect2D scissor{
+						.offset = {.x = 0, .y = 0 },
+						.extent = {.width = swapChain->m_Width, .height = swapChain->m_Height }
+					};
+					vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
+
+					vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainGraphicsPipeline->m_Pipeline);
+
+					// View Data set
+					vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainGraphicsPipeline->m_PipelineLayout,
+						1, 1, &views.ViewDataSet, 0, nullptr);
+
+					// Draw Data set
+					vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainGraphicsPipeline->m_PipelineLayout,
+						3, 1, &views.DrawDataSet, 0, nullptr);
+
+					// Vertex & Index Buffers
+					vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &drawBuffer->m_Buffer, &views.VertexBuffer.StartOffset);
+					vkCmdBindIndexBuffer(cmdBuffer, drawBuffer->m_Buffer, views.IndexBuffer.StartOffset, sizeof(FUIIndex) == 4 ? VK_INDEX_TYPE_UINT32 : VK_INDEX_TYPE_UINT16);
+
+					for (SizeT i = 0; i < snapshot->renderPassArray.GetCount(); ++i)
+					{
+						const SizeT layerIndex = snapshot->renderPassArray[i].LayerIndex;
+						const SizeT drawCmdStartIndex = snapshot->renderPassArray[i].DrawCmdStartIndex;
+						const SizeT drawCmdCount = snapshot->renderPassArray[i].DrawCmdCount;
+
+						vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_MainGraphicsPipeline->m_PipelineLayout, 
+							2, 1, &views.LayerTransformSets[layerIndex], 0, nullptr);
+
+						for (SizeT drawCmdIndex = drawCmdStartIndex; drawCmdIndex < drawCmdStartIndex + drawCmdCount; drawCmdIndex++)
+						{
+							FUIDrawCmd drawCmd = snapshot->drawCmdArray[drawCmdIndex];
+
+							u32 globalVertexOffset = snapshot->vertexSplits[layerIndex].StartOffset / sizeof(FUIVertex) + drawCmd.VertexOffset;
+							u32 globalIndexOffset = snapshot->indexSplits[layerIndex].StartOffset / sizeof(FUIIndex) + drawCmd.VertexOffset;
+
+							vkCmdDrawIndexed(cmdBuffer, drawCmd.IndexCount, 1, globalIndexOffset, (int32_t)globalVertexOffset, 0);
+						}
+					}
 				}
 				vkCmdEndRenderPass(cmdBuffer);
 

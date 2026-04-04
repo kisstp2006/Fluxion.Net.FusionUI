@@ -273,6 +273,22 @@ namespace Fusion
 		return sdlWindow->GetSizeInPixels();
 	}
 
+	FVec2i FSDL3PlatformBackend::GetWindowSize(FWindowHandle window)
+	{
+		if (!m_WindowsByHandle.KeyExists(window))
+		{
+			return {};
+		}
+
+		FSDL3PlatformWindow* sdlWindow = m_WindowsByHandle[window];
+		if (!sdlWindow)
+		{
+			return {};
+		}
+
+		return sdlWindow->GetSize();
+	}
+
 	f32 FSDL3PlatformBackend::GetDpiScaleForWindow(FWindowHandle window)
 	{
 		if (!m_WindowsByHandle.KeyExists(window))

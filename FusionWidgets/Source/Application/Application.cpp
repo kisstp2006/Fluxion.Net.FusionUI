@@ -65,6 +65,8 @@ namespace Fusion
 			m_RenderBackend->RenderTick();
 		});
 
+		m_MainWindow = nullptr;
+
 		while (!m_PlatformBackend->IsUserRequestingExit())
 		{
 			m_PlatformBackend->PumpEvents();

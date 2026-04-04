@@ -8,7 +8,7 @@ namespace Fusion
         FUSION_CLASS(FDecoratedWidget, FCompoundWidget)
     public:
 
-        FDecoratedWidget(Ref<FObject> outer = nullptr);
+        FDecoratedWidget();
 
         void Paint(FPainter& painter) override;
 

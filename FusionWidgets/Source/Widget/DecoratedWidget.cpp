@@ -2,7 +2,7 @@
 
 namespace Fusion
 {
-	FDecoratedWidget::FDecoratedWidget(Ref<FObject> outer) : Super(outer)
+	FDecoratedWidget::FDecoratedWidget()
 	{
 		m_Shape = FRectangle();
 	}
@@ -14,7 +14,9 @@ namespace Fusion
 		painter.SetBrush(m_Background);
 		painter.SetPen(m_Border);
 
-		painter.FillAndStrokeShape(FRect(0, 0, GetLayoutSize().width, GetLayoutSize().height), m_Shape);
+		FVec2 layoutSize = GetLayoutSize();
+
+		painter.FillAndStrokeShape(FRect(0, 0, layoutSize.width, layoutSize.height), m_Shape);
 	}
 
 } // namespace Fusion

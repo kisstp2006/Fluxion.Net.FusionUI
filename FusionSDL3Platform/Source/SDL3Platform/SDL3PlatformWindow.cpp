@@ -72,6 +72,13 @@ namespace Fusion
 		return FVec2i(w, h);
 	}
 
+	FVec2i FSDL3PlatformWindow::GetSize()
+	{
+		int w = 0, h = 0;
+		SDL_GetWindowSize(sdlWindow, &w, &h);
+		return FVec2i(w, h);
+	}
+
 	f32 FSDL3PlatformWindow::GetDpiScale()
 	{
 		return SDL_GetWindowDisplayScale(sdlWindow);

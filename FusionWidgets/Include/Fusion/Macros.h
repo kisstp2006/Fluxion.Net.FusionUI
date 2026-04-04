@@ -2,7 +2,7 @@
 #pragma once
 
 #define FNew(WidgetClass, ...) \
-    (* NewObject<WidgetClass>(__VA_ARGS__))
+    (* NewObject<WidgetClass>(this))
 
 #define FAssignNew(WidgetClass, VariableName) FNew(WidgetClass).Assign(VariableName)
 

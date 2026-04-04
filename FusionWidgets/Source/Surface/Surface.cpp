@@ -5,9 +5,9 @@
 
 namespace Fusion
 {
-	FSurface::FSurface(FObject* outer) : Super("Surface", outer)
+	FSurface::FSurface(FName name) : Super("Surface")
 	{
-		m_LayerTree = NewObject<FLayerTree>();
+		
 	}
 
 	void FSurface::Initialize()
@@ -16,6 +16,8 @@ namespace Fusion
 		FUSION_ASSERT(application.IsValid(), "Application Instance not found!");
 
 		m_RenderCapabilities = application->GetRenderCapabilities();
+
+		m_LayerTree = NewObject<FLayerTree>(this);
 	}
 
 	void FSurface::Shutdown()
@@ -62,7 +64,7 @@ namespace Fusion
 				return false;
 			});
 
-		for (int i = m_PendingLayoutRoots.Size() - 1; i >= 0; i--)
+		for (int i = (int)m_PendingLayoutRoots.Size() - 1; i >= 0; i--)
 		{
 			Ref<FWidget> root = m_PendingLayoutRoots[i];
 			m_PendingLayoutRoots.RemoveAt(i);
@@ -109,6 +111,11 @@ namespace Fusion
 		snapshot->viewData.ViewProjectionMatrix = snapshot->viewData.ProjectionMatrix * snapshot->viewData.ViewMatrix;
 
 		application->SubmitSnapshot(m_RenderTarget, snapshot);
+	}
+
+	void FSurface::OnSurfaceResize()
+	{
+		MarkRootLayoutDirty();
 	}
 
 	void FSurface::SetOwningWidget(Ref<FWidget> widget)
@@ -170,7 +177,7 @@ namespace Fusion
 
 		layer->m_NeedsCompositing = false;
 
-		const SizeT constantBufferAlignment = m_RenderCapabilities.MinConstantBufferOffsetAlignment;
+		//const SizeT constantBufferAlignment = m_RenderCapabilities.MinConstantBufferOffsetAlignment;
 		const SizeT structuredBufferAlignment = m_RenderCapabilities.MinStructuredBufferOffsetAlignment;
 
 		FUIDrawList* drawList = layer->GetDrawList();
@@ -217,7 +224,7 @@ namespace Fusion
 		{
 			SizeT sp = layer->GetSplitPoint(i);
 
-			FRenderPass rp1 = {
+			FUIRenderPass rp1 = {
 				//.renderTarget = nullptr,
 				.LayerIndex = (SizeT)layerIndex,
 				.DrawCmdStartIndex = cmdBase + prevSplit,
@@ -236,7 +243,7 @@ namespace Fusion
 			CompositeLayer(snapshot, layer->GetChild(i), (int)snapshot->vertexSplits.GetCount());
 		}
 
-		FRenderPass rp2 = {
+		FUIRenderPass rp2 = {
 			//.renderTarget = nullptr,
 			.LayerIndex = (SizeT)layerIndex,
 			.DrawCmdStartIndex = cmdBase + prevSplit,

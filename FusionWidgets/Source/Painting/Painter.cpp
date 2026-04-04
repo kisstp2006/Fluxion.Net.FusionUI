@@ -754,6 +754,8 @@ namespace Fusion
 		ZoneScoped;
 
 		FRect minMax = FRect(m_PathMin, m_PathMax);
+		if (minMax.GetWidth() <= 0 || minMax.GetHeight() <= 0)
+			return true;
 
 		FColor brushColor = m_CurrentBrush.GetColor();
 		brushColor.a *= GetCurrentOpacity();

@@ -22,7 +22,7 @@ namespace Fusion
 	};
 	FUSION_ENUM_CLASS(EGraphicsBackendType);
 
-	struct FRenderCapabilities
+	struct FRenderBackendCapabilities
 	{
 		SizeT MinConstantBufferOffsetAlignment = 0x40;
 		SizeT MinStructuredBufferOffsetAlignment = 0x10;
@@ -45,7 +45,7 @@ namespace Fusion
 
 		virtual EGraphicsBackendType GetGraphicsBackendType() { return EGraphicsBackendType::None; }
 
-		virtual FRenderCapabilities GetRenderCapabilities() = 0;
+		virtual FRenderBackendCapabilities GetRenderCapabilities() = 0;
 
 		// - Lifecycle -
 

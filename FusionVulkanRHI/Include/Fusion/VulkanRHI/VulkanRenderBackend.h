@@ -174,7 +174,7 @@ namespace Fusion::Vulkan
             return EGraphicsBackendType::Vulkan;
         }
 
-        FRenderCapabilities GetRenderCapabilities() override;
+        FRenderBackendCapabilities GetRenderCapabilities() override;
 
         bool IsInitialized(FInstanceHandle instance) override
         {
@@ -313,7 +313,7 @@ namespace Fusion::Vulkan
 
         // - Transient Resources -
 
-        FArray<FSnapshotDrawDataBufferViews> m_OffsetDataPerSnapshot;
+        FArray<FDrawDataBufferViews> m_OffsetDataPerSnapshot;
 
         FBuffer* m_NullBuffer = nullptr;
         VkDescriptorBufferInfo m_NullBufferInfo{};

@@ -71,6 +71,8 @@ namespace Fusion
 
         FVec2i GetWindowSizeInPixels(FWindowHandle window) override;
 
+        FVec2i GetWindowSize(FWindowHandle window) override;
+
 		f32 GetDpiScaleForWindow(FWindowHandle window) override;
 
 	protected:

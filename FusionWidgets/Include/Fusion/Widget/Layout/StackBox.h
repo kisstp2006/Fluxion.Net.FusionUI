@@ -17,7 +17,7 @@ namespace Fusion
         FUSION_CLASS(FStackBox, FContainerWidget)
     public:
 
-        FStackBox(FObject* outer = nullptr);
+        FStackBox();
 
         // - Public API -
 
@@ -81,9 +81,9 @@ namespace Fusion
         FUSION_CLASS(FVerticalStack, FStackBox)
     public:
 
-        FVerticalStack(FObject* outer = nullptr) : Super(outer)
+        FVerticalStack()
         {
-	        
+            m_StackDirection = EStackDirection::Vertical;
         }
 
         void OnPropertyModified(const FName& propertyName) override;
@@ -95,9 +95,9 @@ namespace Fusion
         FUSION_CLASS(FHorizontalStack, FStackBox)
     public:
 
-        FHorizontalStack(FObject* outer = nullptr) : Super(outer)
+        FHorizontalStack()
         {
-
+            m_StackDirection = EStackDirection::Horizontal;
         }
 
         void OnPropertyModified(const FName& propertyName) override;

@@ -10,6 +10,11 @@ namespace Fusion
 		return m_PlatformBackend->GetDpiScaleForWindow(windowHandle);
 	}
 
+	FVec2i FApplicationInstance::GetWindowSizeInPixels(FWindowHandle windowHandle)
+	{
+		return m_PlatformBackend->GetWindowSizeInPixels(windowHandle);
+	}
+
 	bool FApplicationInstance::Initialize(const FApplicationInstanceDesc& desc)
 	{
 		m_PlatformBackend = desc.platformBackend;
@@ -141,4 +146,32 @@ namespace Fusion
 		m_Surfaces.Remove(nativeSurface);
 	}
 
+	void FApplicationInstance::OnWindowResized(FWindowHandle window, u32 newWidth, u32 newHeight)
+	{
+		NotifyWindowResize(window);
+	}
+
+	void FApplicationInstance::OnWindowMaximized(FWindowHandle window)
+	{
+		NotifyWindowResize(window);
+	}
+
+	void FApplicationInstance::OnWindowMinimized(FWindowHandle window)
+	{
+		NotifyWindowResize(window);
+	}
+
+	void FApplicationInstance::OnWindowRestored(FWindowHandle window)
+	{
+		NotifyWindowResize(window);
+	}
+
+	void FApplicationInstance::NotifyWindowResize(FWindowHandle window)
+	{
+		auto it = m_NativeSurfacesByWindow.Find(window);
+		if (it != m_NativeSurfacesByWindow.End() && it->second != nullptr)
+		{
+			it->second->OnWindowResized();
+		}
+	}
 } // namespace Fusion

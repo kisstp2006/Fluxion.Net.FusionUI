@@ -2,7 +2,7 @@
 
 namespace Fusion
 {
-	FContainerWidget::FContainerWidget(Ref<FObject> outer) : Super(outer)
+	FContainerWidget::FContainerWidget()
 	{
 		
 	}

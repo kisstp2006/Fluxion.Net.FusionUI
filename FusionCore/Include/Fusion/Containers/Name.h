@@ -21,7 +21,7 @@ namespace Fusion
 	        if (str)
 	        {
 	            m_Hash = CalculateHash(str, std::strlen(str));
-				FString m_String = str;
+				m_String = str;
 	        }
 	    }
 
@@ -30,7 +30,7 @@ namespace Fusion
 		    if (!str.IsEmpty())
 		    {
 	            m_Hash = str.GetHash();
-				FString m_String = str;
+				m_String = str;
 		    }
 	    }
 
@@ -39,7 +39,7 @@ namespace Fusion
 	        if (!str.empty())
 	        {
 	            m_Hash = CalculateHash(str.data(), str.size());
-				FString m_String = str;
+				m_String = str;
 	        }
 	    }
 
@@ -62,7 +62,7 @@ namespace Fusion
 
 	private:
 	    SizeT m_Hash = 0;
-		FString m_String = nullptr;
+		FString m_String{};
 	
 	};
 

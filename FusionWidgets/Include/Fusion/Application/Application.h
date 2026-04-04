@@ -22,7 +22,7 @@ namespace Fusion
         template<class TWidget, class... TArgs>
         TWidget& CreateWindow(TArgs&&... args) requires TFIsDerivedClass<FWidget, TWidget>::Value
 		{
-            Ref<TWidget> ptr = NewObject<TWidget>(std::forward<TArgs>(args)...);
+            Ref<TWidget> ptr = NewObject<TWidget>(nullptr, std::forward<TArgs>(args)...);
             m_MainWindow = ptr;
             return *ptr;
 		}

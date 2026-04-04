@@ -5,7 +5,7 @@
 
 namespace Fusion
 {
-	FLayer::FLayer(FName name, FObject* outer) : Super(name, outer)
+	FLayer::FLayer(FName name, FObject* outer) : Super(name)
 	{
 		
 	}

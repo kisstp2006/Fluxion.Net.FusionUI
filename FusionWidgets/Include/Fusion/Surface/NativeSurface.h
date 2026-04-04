@@ -21,6 +21,8 @@ namespace Fusion
 
         bool IsNativeSurface() const final { return true; }
 
+        void OnWindowResized();
+
     protected:
 
         FWindowHandle m_WindowHandle = FWindowHandle::NullValue;
