@@ -14,13 +14,13 @@ namespace Fusion
 
         void Paint(FPainter& painter) override;
 
-        void ApplyStyle(FStyle& style) override;
+    public:
 
-    public: // - Fusion Properties - 
-
-        FUSION_STYLE_PROPERTY(FBrush, Background);
-        FUSION_STYLE_PROPERTY(FPen, Border);
-        FUSION_STYLE_PROPERTY(FShape, Shape);
+        FUSION_STYLE_PROPERTIES(
+            (FBrush, Background),
+            (FPen,   Border),
+            (FShape, Shape)
+        );
 
     };
 

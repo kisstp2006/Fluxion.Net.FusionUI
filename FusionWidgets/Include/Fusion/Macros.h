@@ -82,6 +82,7 @@
 #define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkLayoutDirty())
 
 #define FUSION_STYLE_PROPERTY(PropertyType, PropertyName) __FUSION_STYLE_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty())
+#define FUSION_LAYOUT_STYLE_PROPERTY(PropertyType, PropertyName) __FUSION_STYLE_PROPERTY(PropertyType, PropertyName, self.MarkLayoutDirty())
 
 #define FUSION_PROPERTY_GET(PropertyType, PropertyName) \
 	PropertyType PropertyName()
@@ -119,3 +120,28 @@
 	}
 
 #define FUSION_APPLY_STYLES(...) FUSION_FOR_EACH(FUSION_APPLY_STYLE, __VA_ARGS__)
+
+// Per-pair helpers used by FUSION_STYLE_PROPERTIES.
+// Pair is always a parenthesised (Type, Name) token group.
+//
+// DECL: juxtapose the macro name with the already-parenthesised pair so the
+//       preprocessor sees a normal two-argument call — no unpacking needed.
+#define __FUSION_SP_DECL(Pair)        FUSION_STYLE_PROPERTY Pair
+//
+// APPLY: __FUSION_SP_NAME expands the pair to just its Name token, but
+//        FUSION_APPLY_STYLE uses # / ## which suppress argument expansion.
+//        The extra indirection (__FUSION_SP_APPLY2) forces full expansion of
+//        Name before it reaches those operators.
+#define __FUSION_SP_NAME(Type, Name)  Name
+#define __FUSION_SP_APPLY(Pair)       __FUSION_SP_APPLY2(__FUSION_SP_NAME Pair)
+#define __FUSION_SP_APPLY2(Name)      FUSION_APPLY_STYLE(Name)
+
+// Declares every (Type, Name) style property AND generates the ApplyStyle override.
+// Replaces individual FUSION_STYLE_PROPERTY calls + the hand-written ApplyStyle body.
+#define FUSION_STYLE_PROPERTIES(...) \
+    FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_DECL, __VA_ARGS__)) \
+    void ApplyStyle(FStyle& style) override \
+    { \
+        Super::ApplyStyle(style); \
+        FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_APPLY, __VA_ARGS__)) \
+    }
