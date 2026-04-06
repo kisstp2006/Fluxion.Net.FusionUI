@@ -124,7 +124,9 @@ namespace Fusion
 
 		if (propertyName == styleProperty)
 		{
-			// TODO: Update styling
+			m_CachedStyle = nullptr;
+			m_StyleCached = false;
+			RefreshStyle();
 		}
 		else if (propertyName == opacityProperty)
 		{
@@ -230,10 +232,11 @@ namespace Fusion
 
 	void FWidget::RefreshStyle()
 	{
-		if (Ref<FStyle> style = ResolveStyle())
-		{
-			ApplyStyle(*style);
-		}
+		m_CachedStyle = ResolveStyle();
+		m_StyleCached = true;
+
+		if (m_CachedStyle)
+			ApplyStyle(*m_CachedStyle);
 	}
 
 	void FWidget::RefreshStyleRecursively()
@@ -375,7 +378,17 @@ namespace Fusion
 			m_StyleState &= ~state;
 
 		if (m_StyleState != prev)
-			RefreshStyle();
+		{
+			if (m_StyleCached)
+			{
+				if (m_CachedStyle)
+					ApplyStyle(*m_CachedStyle);
+			}
+			else
+			{
+				RefreshStyle();
+			}
+		}
 	}
 
 } // namespace Fusion

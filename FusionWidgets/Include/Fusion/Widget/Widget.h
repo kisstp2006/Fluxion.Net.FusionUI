@@ -285,6 +285,8 @@ namespace Fusion
 
         FAffineTransform m_CachedLayerSpaceTransform;
         FRect m_CachedLayerSpaceAABB;
+        Ref<FStyle> m_CachedStyle;
+        bool m_StyleCached = false;
 
         EWidgetFlags m_WidgetFlags = EWidgetFlags::None;
         EStyleState m_StyleState = EStyleState::Default;

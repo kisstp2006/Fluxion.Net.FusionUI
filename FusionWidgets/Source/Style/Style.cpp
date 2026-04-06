@@ -45,6 +45,18 @@ namespace Fusion
 		return *this;
 	}
 
+	FStyle& FStyle::CopyFrom(const FStyle& other)
+	{
+		for (auto& [name, val] : other.m_BrushValues)  m_BrushValues[name] = val;
+		for (auto& [name, val] : other.m_PenValues)    m_PenValues[name]   = val;
+		for (auto& [name, val] : other.m_ColorValues)  m_ColorValues[name] = val;
+		for (auto& [name, val] : other.m_ShapeValues)  m_ShapeValues[name] = val;
+		for (auto& [name, val] : other.m_FloatValues)  m_FloatValues[name] = val;
+		for (auto& [name, val] : other.m_Vec2Values)   m_Vec2Values[name]  = val;
+		for (auto& [name, val] : other.m_Vec4Values)   m_Vec4Values[name]  = val;
+		return *this;
+	}
+
 	bool FStyle::TryGet(const FName& propertyName, FBrush& outBrush, EStyleState state)
 	{
 		auto it = m_BrushValues.Find(propertyName);

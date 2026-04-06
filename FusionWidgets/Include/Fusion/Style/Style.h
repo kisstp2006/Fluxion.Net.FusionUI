@@ -90,7 +90,11 @@ namespace Fusion
             else if constexpr (std::is_same_v<T, FVec2>)   return Vec2(propertyName, value, state);
             else if constexpr (std::is_same_v<T, FVec4>)   return Vec4(propertyName, value, state);
             else static_assert(sizeof(T) == 0, "FStyle::Set — unsupported property type");
+
+            return *this;
         }
+
+        FStyle& CopyFrom(const FStyle& other);
 
         bool TryGet(const FName& propertyName, FBrush& outBrush, EStyleState state);
         bool TryGet(const FName& propertyName, FPen& outPen, EStyleState state);

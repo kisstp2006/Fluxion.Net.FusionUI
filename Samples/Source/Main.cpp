@@ -49,7 +49,7 @@ public:
 			.ContentHAlign(EHAlign::Fill)
 			.HAlign(EHAlign::Fill)
 			.VAlign(EVAlign::Fill)
-			.Padding(FMargin(5, 5, 5, 5))
+			.Padding(FMargin(1, 1, 1, 1) * 5)
 			.Spacing(10)
 			.Name("RootStack")
 			(
