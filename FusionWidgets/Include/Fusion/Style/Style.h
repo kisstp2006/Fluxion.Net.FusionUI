@@ -89,7 +89,7 @@ namespace Fusion
 
     private:
 
-        WeakRef<FTheme> m_StyleSheet;
+        WeakRef<FTheme> m_Theme;
 
         FHashMap<FName, FStyleValue<FBrush>> m_BrushValues;
         FHashMap<FName, FStyleValue<FPen>>   m_PenValues;

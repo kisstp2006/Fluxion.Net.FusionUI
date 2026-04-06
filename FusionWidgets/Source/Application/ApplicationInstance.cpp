@@ -180,9 +180,9 @@ namespace Fusion
 		m_RenderBackend->SubmitSnapshot(renderTarget, snapshot);
 	}
 
-	void FApplicationInstance::SetRootStyleSheet(Ref<FTheme> styleSheet)
+	void FApplicationInstance::SetRootTheme(Ref<FTheme> theme)
 	{
-		m_RootStyleSheet = styleSheet;
+		m_RootTheme = theme;
 	}
 
 	void FApplicationInstance::RefreshStyleRecursively()

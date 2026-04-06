@@ -184,9 +184,9 @@ int main(int argc, char* argv[])
 {
 	FApplication app(argc, argv);
 
-	Ref<FTheme> styleSheet = app.CreateDefaultStyleSheet();
+	Ref<FTheme> theme = app.CreateDefaultTheme();
 
-	styleSheet->Merge(FUSION_STYLE_SHEET {
+	theme->MergeStyleSheet(FUSION_STYLE_SHEET {
 
 		FUSION_STYLE(FButton, "Button/Primary", Shape, Background, Border)
 		{

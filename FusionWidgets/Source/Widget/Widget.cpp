@@ -254,9 +254,9 @@ namespace Fusion
 		FName styleName = m_Style.IsValid() ? m_Style : GetClassName();
 		if (Ref<FSurface> surface = GetParentSurface())
 		{
-			if (Ref<FTheme> styleSheet = surface->GetStyleSheet())
+			if (Ref<FTheme> theme = surface->GetTheme())
 			{
-				return styleSheet->FindStyle(styleName);
+				return theme->FindStyle(styleName);
 			}
 		}
 

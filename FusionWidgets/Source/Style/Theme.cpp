@@ -41,7 +41,7 @@ namespace Fusion
 		else
 		{
 			style = NewObject<FStyle>(this);
-			style->m_StyleSheet = Ref(this);
+			style->m_Theme = Ref(this);
 
 			m_Styles[name] = style;
 		}

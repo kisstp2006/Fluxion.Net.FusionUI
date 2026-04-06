@@ -10,19 +10,19 @@ namespace Fusion
 		
 	}
 
-	Ref<FTheme> FSurface::GetStyleSheet() const
+	Ref<FTheme> FSurface::GetTheme() const
 	{
-        if (m_StyleSheet)
-            return m_StyleSheet;
+        if (m_Theme)
+            return m_Theme;
 
         if (Ref<FSurface> parent = GetParentSurface())
         {
-            return parent->GetStyleSheet();
+            return parent->GetTheme();
         }
 
         if (Ref<FApplicationInstance> application = GetApplication())
         {
-            return application->GetStyleSheet();
+            return application->GetTheme();
         }
 
         return nullptr;

@@ -10,10 +10,10 @@ namespace Fusion
 		m_MainApplication = new FApplicationInstance("FusionApplication");
 	}
 
-	Ref<FTheme> FApplication::CreateDefaultStyleSheet()
+	Ref<FTheme> FApplication::CreateDefaultTheme()
 	{
-		m_MainStyleSheet = NewObject<FTheme>(nullptr);
-		return m_MainStyleSheet;
+		m_MainTheme = NewObject<FTheme>(nullptr);
+		return m_MainTheme;
 	}
 
 	int FApplication::Run()
@@ -42,8 +42,8 @@ namespace Fusion
 
 		// TODO: This is all sample code for now
 
-		if (m_MainStyleSheet)
-			m_MainApplication->SetRootStyleSheet(m_MainStyleSheet);
+		if (m_MainTheme)
+			m_MainApplication->SetRootTheme(m_MainTheme);
 
 		m_MainApplication->Initialize({
 			m_PlatformBackend,

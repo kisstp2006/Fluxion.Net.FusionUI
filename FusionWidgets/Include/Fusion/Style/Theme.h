@@ -2,6 +2,9 @@
 
 namespace Fusion
 {
+    class FTheme;
+
+    using FStyleSheet = void(*)(FTheme*);
 
     class FUSIONWIDGETS_API FTheme : public FObject
     {
@@ -22,10 +25,9 @@ namespace Fusion
 
         FStyle& Style(const FName& name);
 
-        template<typename TCallable>
-        void Merge(TCallable&& callable)
+        void MergeStyleSheet(FStyleSheet&& styleSheet)
         {
-            callable(this);
+            styleSheet(this);
         }
 
     private:
@@ -34,7 +36,5 @@ namespace Fusion
 
         FHashMap<FName, Ref<FStyle>> m_Styles;
     };
-
-    using FStyleSheet = void(*)(FTheme*);
 
 } // namespace Fusion

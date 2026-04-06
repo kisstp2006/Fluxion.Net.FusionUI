@@ -71,9 +71,9 @@ namespace Fusion
 
 		// - Style -
 
-		Ref<FTheme> GetStyleSheet() const { return m_RootStyleSheet; }
+		Ref<FTheme> GetTheme() const { return m_RootTheme; }
 
-		void SetRootStyleSheet(Ref<FTheme> styleSheet);
+		void SetRootTheme(Ref<FTheme> styleSheet);
 
 		void RefreshStyleRecursively();
 
@@ -98,7 +98,7 @@ namespace Fusion
 		WeakRef<FSurface> m_CurFocusSurface;
 		WeakRef<FSurface> m_FocusSurface;
 
-		Ref<FTheme> m_RootStyleSheet;
+		Ref<FTheme> m_RootTheme;
 
 		FVec2 m_ScreenMousePos;
 		FVec2 m_PrevScreenMousePos;

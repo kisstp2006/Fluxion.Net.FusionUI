@@ -28,7 +28,7 @@ namespace Fusion
             return *ptr;
 		}
 
-        Ref<FTheme> CreateDefaultStyleSheet();
+        Ref<FTheme> CreateDefaultTheme();
 
         int Run();
 
@@ -38,7 +38,7 @@ namespace Fusion
         FVec2i m_InitialWindowSize = FVec2i(1200, 900);
 
 		Ref<FApplicationInstance> m_MainApplication;
-        Ref<FTheme> m_MainStyleSheet;
+        Ref<FTheme> m_MainTheme;
 
 		IFRenderBackend* m_RenderBackend = nullptr;
 		IFPlatformBackend* m_PlatformBackend = nullptr;
