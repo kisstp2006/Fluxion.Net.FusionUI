@@ -98,6 +98,31 @@ namespace Fusion
 	{
 		ZoneScoped;
 
+		auto curTime = std::chrono::steady_clock::now();
+		m_DeltaTime = std::chrono::duration<f32>(curTime - m_PreviousTime).count();
+
+		// - Animation -
+
+		for (auto& [ownerUuid, animationsBySlot] : m_AnimationSlotsByWidget)
+		{
+			for (auto& [slot, animation] : animationsBySlot)
+			{
+				if (!animation->IsOwnerValid())
+				{
+					m_AnimationsToDestroy.Add({ ownerUuid, slot });
+					continue;
+				}
+
+				animation->Tick(m_DeltaTime);
+
+				if (animation->GetState() == EAnimationState::Completed ||
+					animation->GetState() == EAnimationState::Idle)
+				{
+					m_AnimationsToDestroy.Add({ ownerUuid, slot });
+				}
+			}
+		}
+
 		m_PrevScreenMousePos = m_ScreenMousePos;
 		m_ScreenMousePos = m_PlatformBackend->GetGlobalMousePosition();
 		m_WheelDelta = m_PlatformBackend->GetMouseWheelDelta();
@@ -131,6 +156,8 @@ namespace Fusion
 		{
 			surface->TickSurface();
 		}
+
+		m_PreviousTime = MoveTemp(curTime);
 	}
 
 	Ref<FNativeSurface> FApplicationInstance::CreateNativeSurfaceForWindow(FWindowHandle window)
@@ -195,6 +222,76 @@ namespace Fusion
 		for (Ref<FSurface> surface : m_Surfaces)
 		{
 			surface->RefreshStyleRecursively();
+		}
+	}
+
+	void FApplicationInstance::PlayAnimation(Ref<FAnimation> animation, Ref<FObject> owner, FName slot)
+	{
+		if (!animation.IsValid() || !owner.IsValid())
+			return;
+
+		FUuid ownerUuid = owner->GetUuid();
+
+		// Stop and destroy any existing animation on this slot
+		auto ownerIt = m_AnimationSlotsByWidget.Find(ownerUuid);
+		if (ownerIt != m_AnimationSlotsByWidget.end())
+		{
+			auto slotIt = ownerIt->second.Find(slot);
+			if (slotIt != ownerIt->second.end())
+			{
+				slotIt->second->Stop();
+				slotIt->second->BeginDestroy();
+				ownerIt->second.Remove(slot);
+			}
+		}
+
+		animation->Play();
+
+		m_AnimationSlotsByWidget[ownerUuid][slot] = animation;
+	}
+
+	void FApplicationInstance::TerminateAnimation(Ref<FObject> owner, FName slot, bool complete)
+	{
+		if (!owner.IsValid())
+			return;
+
+		FUuid ownerUuid = owner->GetUuid();
+
+		auto ownerIt = m_AnimationSlotsByWidget.Find(ownerUuid);
+		if (ownerIt == m_AnimationSlotsByWidget.end())
+			return;
+
+		auto slotIt = ownerIt->second.Find(slot);
+		if (slotIt == ownerIt->second.end())
+			return;
+
+		Ref<FAnimation>& animation = slotIt->second;
+
+		if (complete)
+			animation->Apply(1.0f);
+
+		animation->Stop();
+		m_AnimationsToDestroy.Add({ ownerUuid, slot });
+	}
+
+	void FApplicationInstance::TerminateAllAnimations(Ref<FObject> owner, bool complete)
+	{
+		if (!owner.IsValid())
+			return;
+
+		FUuid ownerUuid = owner->GetUuid();
+
+		auto ownerIt = m_AnimationSlotsByWidget.Find(ownerUuid);
+		if (ownerIt == m_AnimationSlotsByWidget.end())
+			return;
+
+		for (auto& [slot, animation] : ownerIt->second)
+		{
+			if (complete)
+				animation->Apply(1.0f);
+
+			animation->Stop();
+			m_AnimationsToDestroy.Add({ ownerUuid, slot });
 		}
 	}
 

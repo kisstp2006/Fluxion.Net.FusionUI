@@ -1664,6 +1664,7 @@ namespace Fusion::Vulkan
 		vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, swapChain->m_Surface, &presentModesCount, presentModes.Data());
 
 		VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
+		//presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
 
 		swapChainCI.presentMode = presentMode;
 		swapChainCI.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;

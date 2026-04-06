@@ -12,6 +12,7 @@ public:
 
 	Ref<FVerticalStack> vstack;
 	Ref<FHorizontalStack> hstack;
+	Ref<FDecoratedWidget> gradBar;
 
 	Ref<FButton> btn0;
 
@@ -77,9 +78,16 @@ public:
 					.FillRatio(1.0f)
 					.Height(32)
 					.Style("Button/Secondary")
-					.OnClick([]
+					.OnClick([this]
 					{
 						FUSION_LOG_INFO("Debug", "Secondary clicked!");
+
+						FAnimate_Tween(gradBar, Transform)
+						.To(!rotated ? FAffineTransform::Rotation(FMath::Deg2Rad(90)) : FAffineTransform::Identity())
+						.Duration(0.5f)
+						.Play();
+
+						rotated = !rotated;
 					}),
 
 					FNew(FButton)
@@ -100,7 +108,7 @@ public:
 					.Border(FPen())
 				),
 
-				FNew(FDecoratedWidget)
+				FAssignNew(FDecoratedWidget, gradBar)
 				.Border(gradientPen)
 				.Background(FColors::White)
 				.Shape(FRoundedRectangle(5.0f))
@@ -180,6 +188,8 @@ public:
 	FUSION_PROPERTY(f32, DashLength);
 	FUSION_PROPERTY(f32, DashGap);
 	FUSION_PROPERTY(f32, DashPhase);
+
+	bool rotated = false;
 };
 
 int main(int argc, char* argv[])

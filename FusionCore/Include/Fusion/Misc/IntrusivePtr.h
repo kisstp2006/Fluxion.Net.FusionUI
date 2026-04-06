@@ -228,5 +228,16 @@ namespace Fusion
 
     template<typename T>
     using IPtr = IntrusivePtr<T>;
+
+    template<typename T>
+    struct TPtrType<IntrusivePtr<T>> : TFTrueType
+    {
+        typedef T Type;
+
+        static T* GetRawPtr(IntrusivePtr<T> ptr)
+        {
+            return ptr.Get();
+        }
+    };
     
 } // namespace Fusion

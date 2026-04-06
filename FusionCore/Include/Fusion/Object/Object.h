@@ -29,6 +29,7 @@ namespace Fusion
     {
 		None = 0,
         PendingConstruction = FUSION_BIT(0),
+        PendingDestruction = FUSION_BIT(1),
     };
     FUSION_ENUM_CLASS_FLAGS(EObjectFlags);
 
@@ -52,6 +53,8 @@ namespace Fusion
 
         EObjectFlags GetFlags() const { return m_Flags; }
 
+        bool IsPendingDestruction() const { return FEnumHasFlag(m_Flags, EObjectFlags::PendingDestruction); }
+
         Ref<FObject> GetSubobject(u32 index) const
         {
             FUSION_ASSERT_THROW(index < static_cast<int>(m_Subobjects.Size()), FOutOfBoundsException, "Index out of bounds");
@@ -63,6 +66,8 @@ namespace Fusion
 		void SetName(const FName& name) { m_Name = name; }
 
 		FUuid GetUuid() const { return m_Uuid; }
+
+        void BeginDestroy();
 
     protected:
 

@@ -5,6 +5,7 @@
 
 #include <type_traits>
 #include <concepts>
+#include <tuple>
 
 namespace Fusion
 {
@@ -92,6 +93,38 @@ namespace Fusion
     };
 
     template<typename T>
+    struct TPtrType : TFFalseType
+    {
+        typedef void Type;
+
+        static T* GetRawPtr(T ptr) { return nullptr; }
+    };
+
+    template<typename T>
+    struct TPtrType<T*> : TFTrueType
+    {
+        typedef T Type;
+
+        static T* GetRawPtr(T* ptr) { return ptr; }
+    };
+
+    template<typename T>
+    struct TPtrType<Ref<T>> : TFTrueType
+    {
+        typedef T Type;
+
+        static T* GetRawPtr(Ref<T> ptr);
+    };
+
+    template<typename T>
+    struct TPtrType<WeakRef<T>> : TFTrueType
+    {
+        typedef T Type;
+
+        static T* GetRawPtr(WeakRef<T> ptr);
+    };
+
+    template<typename T>
     struct TFIsIntegralType : TFFalseType {};
 
     template<>
@@ -123,6 +156,105 @@ namespace Fusion
         {
             return lhs == rhs;
         }
+    };
+
+    // Function
+
+    template <typename T, typename = void>
+    struct TFunctionTraits
+    {
+        static constexpr bool Value = false;
+    };
+
+    template <typename T>
+    struct TFunctionTraits<T, std::void_t<decltype(&T::operator())>> : TFunctionTraits<decltype(&T::operator())>
+    {
+    };
+
+    // For generic types, directly use the result of the signature of its 'operator()'
+
+    template <typename TClassType, typename TReturnType, typename... Args>
+    struct TFunctionTraits<TReturnType(TClassType::*)(Args...) const> // we specialize for pointers to const member function
+    {
+        enum { NumArgs = sizeof...(Args) };
+
+        static constexpr bool Value = true;
+
+        typedef TReturnType ReturnType;
+        typedef TClassType ClassType;
+
+        typedef TReturnType(TClassType::* FuncSignature)(Args...) const;
+
+        typedef std::tuple<Args...> Tuple;
+
+        template <SizeT i>
+        struct Arg
+        {
+            typedef typename std::tuple_element<i, std::tuple<Args...>>::type Type;
+            // the i-th argument is equivalent to the i-th tuple element of a tuple
+            // composed of those arguments.
+        };
+    };
+
+    template <typename TClassType, typename TReturnType, typename... Args>
+    struct TFunctionTraits<TReturnType(TClassType::*)(Args...)> // we specialize for pointers to member function
+    {
+        enum { NumArgs = sizeof...(Args) };
+
+        static constexpr bool Value = true;
+
+        typedef TReturnType ReturnType;
+        typedef TClassType ClassType;
+
+        typedef TReturnType(TClassType::* FuncSignature)(Args...);
+
+        typedef std::tuple<Args...> Tuple;
+
+        template <SizeT i>
+        struct Arg
+        {
+            typedef typename std::tuple_element<i, std::tuple<Args...>>::type Type;
+            // the i-th argument is equivalent to the i-th tuple element of a tuple
+            // composed of those arguments.
+        };
+    };
+
+    template <typename TReturnType, typename... Args>
+    struct TFunctionTraits<TReturnType(*)(Args...)> // we specialize for pointers to global functions
+    {
+        enum { NumArgs = sizeof...(Args) };
+
+        static constexpr bool Value = true;
+
+        typedef TReturnType ReturnType;
+        typedef void ClassType;
+
+        typedef TReturnType(*FuncSignature)(Args...);
+
+        typedef std::tuple<Args...> Tuple;
+
+        template <SizeT i>
+        struct Arg
+        {
+            typedef typename std::tuple_element<i, std::tuple<Args...>>::type Type;
+            // the i-th argument is equivalent to the i-th tuple element of a tuple
+            // composed of those arguments.
+        };
+    };
+
+    template<class TCastClassType, typename T, typename = void>
+    struct TMemberFunctionCast : TFFalseType
+    {
+
+    };
+
+    template<class TCastClassType, typename TRetType, class TClassType, class... TArgs>
+    struct TMemberFunctionCast<TCastClassType, TRetType(TClassType::*)(TArgs...)>
+    {
+        using TCastedFuncTraits = TFunctionTraits<TRetType(TCastClassType::*)(TArgs...)>;
+        using TCastedFuncSignature = TCastedFuncTraits::FuncSignature;
+
+        static constexpr bool Value = TCastedFuncTraits::Value;
     };
     
 } // namespace Fusion

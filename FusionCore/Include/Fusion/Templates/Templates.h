@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bitset>
+#include <memory>
 
 namespace Fusion
 {
@@ -148,6 +149,56 @@ namespace Fusion
             f(std::integral_constant<decltype(Start), Start>());
             constexpr_for<Start + Inc, End, Inc>(f);
         }
+    }
+
+    template<typename T>
+    class UniquePtr
+    {
+    public:
+
+        UniquePtr(T* ptr = nullptr) : impl(ptr)
+        {
+
+        }
+
+        UniquePtr(std::unique_ptr<T>&& move) : impl(std::move(move))
+        {
+
+        }
+
+        inline void Reset(T* ptr)
+        {
+            impl.reset(ptr);
+        }
+
+        inline T* Release()
+        {
+            return impl.release();
+        }
+
+        inline T* Get() const
+        {
+            return impl.get();
+        }
+
+        inline operator T* () const
+        {
+            return impl.get();
+        }
+
+        inline T* operator->() const
+        {
+            return impl.get();
+        }
+
+    private:
+        std::unique_ptr<T> impl = nullptr;
+    };
+
+    template<typename T, typename... TArgs>
+    UniquePtr<T> MakeUnique(TArgs&&... args)
+    {
+        return UniquePtr<T>(new T(args...));
     }
 
 } // namespace Fusion

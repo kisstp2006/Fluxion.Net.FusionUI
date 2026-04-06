@@ -156,4 +156,10 @@ namespace Fusion
         friend class FObject;
     };
 
+    template <typename T>
+    T* TPtrType<Ref<T>>::GetRawPtr(Ref<T> ptr)
+    {
+        return ptr.Get();
+    }
+
 } // namespace Fusion

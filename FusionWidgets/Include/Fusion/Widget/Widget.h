@@ -295,7 +295,4 @@ namespace Fusion
         friend class FSurface;
     };
 
-    template<class T>
-    concept FWidgetClassType = TFIsDerivedClass<FWidget, T>::Value;
-
 } // namespace Fusion

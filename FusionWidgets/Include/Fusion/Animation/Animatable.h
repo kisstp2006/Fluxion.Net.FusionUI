@@ -2,6 +2,10 @@
 
 namespace Fusion
 {
+    class FWidget;
+
+    template<class T>
+    concept FWidgetClassType = TFIsDerivedClass<FWidget, T>::Value;
 
     template<typename T>
     struct FAnimatable

@@ -114,4 +114,10 @@ namespace Fusion
         template<typename U> friend class WeakRef;
     };
 
+    template <typename T>
+    T* TPtrType<WeakRef<T>>::GetRawPtr(WeakRef<T> ptr)
+    {
+        return Ref<T>(ptr).Get();
+    }
+
 } // namespace Fusion

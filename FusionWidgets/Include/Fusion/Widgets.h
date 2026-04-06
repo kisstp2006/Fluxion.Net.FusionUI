@@ -44,6 +44,8 @@
 #include "Animation/Animatable.h"
 #include "Animation/EasingCurve.h"
 #include "Animation/Animation.h"
+#include "Animation/TweenAnimation.h"
+#include "Animation/AnimateBuilder.h"
 
 // Painting
 #include "Painting/Painter.h"

@@ -43,6 +43,17 @@ namespace Fusion
 		}
 	}
 
+	void FObject::BeginDestroy()
+	{
+		if (IsPendingDestruction())
+			return;
+
+		if (Ref<FObject> parent = GetOuter())
+		{
+			parent->DetachSubobject(this);
+		}
+	}
+
     FObject::~FObject()
 	{
 		

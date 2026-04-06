@@ -11,22 +11,36 @@
 #define FUSION_WIDGET(WidgetClass, SuperClass)\
 	FUSION_CLASS(WidgetClass, SuperClass)
 
-#define __FUSION_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)\
-	template<typename TSelf>\
-	TSelf& __BypassSetter_##PropertyName(this TSelf& self, PropertyType const& value) {\
-		ZoneScoped;\
+#define __FUSION_STYLE_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)\
+	void __StyleBypassSetter_##PropertyName(PropertyType const& value) {\
+		ZoneScoped; auto& self = *this;\
 		if constexpr (TFEquitable<PropertyType>::Value)\
 		{\
-			if (TFEquitable<PropertyType>::AreEqual(self.m_##PropertyName, value))\
-				return self;\
+			if (TFEquitable<PropertyType>::AreEqual(m_##PropertyName, value))\
+				return;\
 		}\
 		thread_local const Fusion::FName nameValue = #PropertyName;\
-		self.m_##PropertyName = value;\
-		if ((self.GetFlags() & EObjectFlags::PendingConstruction) == 0) {\
-			 static_cast<Fusion::FWidget&>(self).OnPropertyModified(nameValue);\
+		m_##PropertyName = value;\
+		if ((GetFlags() & EObjectFlags::PendingConstruction) == 0) {\
+			 OnPropertyModified(nameValue);\
 			 DirtyFunc;\
 		}\
-		return self;\
+	}
+
+#define __FUSION_ANIM_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)\
+	void __AnimBypassSetter_##PropertyName(PropertyType const& value) {\
+		ZoneScoped; auto& self = *this;\
+		if constexpr (TFEquitable<PropertyType>::Value)\
+		{\
+			if (TFEquitable<PropertyType>::AreEqual(m_##PropertyName, value))\
+				return;\
+		}\
+		thread_local const Fusion::FName nameValue = #PropertyName;\
+		m_##PropertyName = value;\
+		if ((GetFlags() & EObjectFlags::PendingConstruction) == 0) {\
+			 OnPropertyModified(nameValue);\
+			 DirtyFunc;\
+		}\
 	}
 
 #define __FUSION_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
@@ -50,7 +64,8 @@
 			}\
 			return self;\
 		}\
-		__FUSION_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)
+		__FUSION_STYLE_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)\
+		__FUSION_ANIM_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)
 
 #define __FUSION_STYLE_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
     protected:\
@@ -75,7 +90,8 @@
 			}\
 			return self;\
 		}\
-		__FUSION_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)
+		__FUSION_STYLE_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)\
+		__FUSION_ANIM_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)\
 
 
 #define FUSION_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty())
@@ -112,7 +128,7 @@
 		decltype(m_##PropertyName) value;\
 		if (style.TryGet(#PropertyName, value, GetStyleState()))\
 		{\
-			__BypassSetter_##PropertyName(value);\
+			__StyleBypassSetter_##PropertyName(value);\
 		}\
 	}
 

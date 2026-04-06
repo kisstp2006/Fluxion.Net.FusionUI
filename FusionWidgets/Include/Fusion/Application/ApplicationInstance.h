@@ -5,10 +5,13 @@
 
 namespace Fusion
 {
+	class FAnimation;
 	class FWidget;
 	class FSurface;
 	class FNativeSurface;
 	class FTheme;
+
+	FUSION_SIGNAL_TYPE(FVoidSignal);
 
 	struct FApplicationInstanceDesc
 	{
@@ -77,6 +80,14 @@ namespace Fusion
 
 		void RefreshStyleRecursively();
 
+		// - Animation -
+
+		void PlayAnimation(Ref<FAnimation> animation, Ref<FObject> owner, FName slot);
+
+		void TerminateAnimation(Ref<FObject> owner, FName slot, bool complete = false);
+
+		void TerminateAllAnimations(Ref<FObject> owner, bool complete = false);
+
 	protected:
 
 		void OnWindowDestroyed(FWindowHandle window) override;
@@ -105,6 +116,13 @@ namespace Fusion
 		FVec2 m_WheelDelta;
 
 		bool m_IsFirstTick = true;
+		f32 m_DeltaTime = 0.0f;
+		std::chrono::steady_clock::time_point m_PreviousTime = std::chrono::steady_clock::now();
+
+		FHashMap<FUuid, FHashMap<FName, Ref<FAnimation>>> m_AnimationSlotsByWidget;
+
+		// Flat list of (ownerUuid, slot) pairs queued for removal this tick
+		FArray<FPair<FUuid, FName>> m_AnimationsToDestroy;
 
 	private:
 
