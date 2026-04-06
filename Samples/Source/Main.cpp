@@ -70,15 +70,18 @@ public:
 					.FillRatio(1.0f)
 					.Height(32)
 					.Style("Button/Primary")
-					.OnClick([this, gradientPen] mutable
+					.OnClick([this, gradientPen]
 					{
 						FUSION_LOG_INFO("Debug", "Primary clicked!");
 
+						FPen toPen = gradientPen;
+						toPen.GradientOffset(1.0f);
+
 						FAnimate_Tween(gradBar, Border)
-						.Duration(1.0f)
-						.Loop(EAnimationLoopMode::PingPong)
+						.Duration(5.0f)
+						.Loop(EAnimationLoopMode::Loop)
 						.From(gradientPen)
-						.To(gradientPen.GradientOffset(1.0f))
+						.To(toPen)
 						.Play();
 					}),
 

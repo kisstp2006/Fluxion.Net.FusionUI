@@ -27,22 +27,6 @@
 		}\
 	}
 
-#define __FUSION_ANIM_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)\
-	void __AnimBypassSetter_##PropertyName(PropertyType const& value) {\
-		ZoneScoped; auto& self = *this;\
-		if constexpr (TFEquitable<PropertyType>::Value)\
-		{\
-			if (TFEquitable<PropertyType>::AreEqual(m_##PropertyName, value))\
-				return;\
-		}\
-		thread_local const Fusion::FName nameValue = #PropertyName;\
-		m_##PropertyName = value;\
-		if ((GetFlags() & EObjectFlags::PendingConstruction) == 0) {\
-			 OnPropertyModified(nameValue);\
-			 DirtyFunc;\
-		}\
-	}
-
 #define __FUSION_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
     protected:\
 		PropertyType m_##PropertyName = {};\
@@ -65,7 +49,20 @@
 			return self;\
 		}\
 		__FUSION_STYLE_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)\
-		__FUSION_ANIM_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)
+		void __AnimBypassSetter_##PropertyName(PropertyType const& value) {\
+			ZoneScoped; auto& self = *this;\
+			if constexpr (TFEquitable<PropertyType>::Value)\
+			{\
+				if (TFEquitable<PropertyType>::AreEqual(m_##PropertyName, value))\
+					return;\
+			}\
+			thread_local const Fusion::FName nameValue = #PropertyName;\
+			m_##PropertyName = value;\
+			if ((GetFlags() & EObjectFlags::PendingConstruction) == 0) {\
+				 OnPropertyModified(nameValue);\
+				 DirtyFunc;\
+			}\
+		}
 
 #define __FUSION_STYLE_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
     protected:\
@@ -91,7 +88,23 @@
 			return self;\
 		}\
 		__FUSION_STYLE_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)\
-		__FUSION_ANIM_BYPASS_SETTER(PropertyType, PropertyName, DirtyFunc)\
+		void __AnimBypassSetter_##PropertyName(PropertyType const& value) {\
+			ZoneScoped; auto& self = *this;\
+			if constexpr (TFEquitable<PropertyType>::Value)\
+			{\
+				if (self.m_Inline##PropertyName.has_value() && TFEquitable<PropertyType>::AreEqual(self.m_Inline##PropertyName.value(), value))\
+					return;\
+				if (!self.m_Inline##PropertyName.has_value() && TFEquitable<PropertyType>::AreEqual(self.m_##PropertyName, value))\
+					return;\
+			}\
+			thread_local const Fusion::FName nameValue = #PropertyName;\
+			if (self.m_Inline##PropertyName.has_value()) m_Inline##PropertyName = value;\
+			else m_##PropertyName = value;\
+			if ((GetFlags() & EObjectFlags::PendingConstruction) == 0) {\
+				 OnPropertyModified(nameValue);\
+				 DirtyFunc;\
+			}\
+		}
 
 
 #define FUSION_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty())
