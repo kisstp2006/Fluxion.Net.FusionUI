@@ -50,6 +50,7 @@ namespace Fusion
         EGradientType                GetType()   const { return m_Type; }
         EGradientExtend              GetExtend() const { return m_Extend; }
         const FArray<FGradientStop>& GetStops()  const { return m_Stops; }
+        FArray<FGradientStop>&       GetStops()        { return m_Stops; }
 
         f32   GetAngle()      const { return m_Angle; }       // Linear + Conical
         f32   GetStartPoint() const { return m_StartPoint; }  // Linear
@@ -59,6 +60,11 @@ namespace Fusion
 
         bool operator==(const FGradient& rhs) const;
         bool operator!=(const FGradient& rhs) const { return !(*this == rhs); }
+
+        // - Setters -
+
+        void SetType(EGradientType type) { m_Type = type; }
+        void SetAngle(f32 angle)         { m_Angle = angle; }
 
     private:
 

@@ -76,8 +76,8 @@ namespace Fusion
 
 		// Fluent setters
 		FBrush& Color(const FColor& color)           { m_Color = color;          return *this; }
-		FBrush& Fit(EImageFit fit)                   { m_ImageFit = fit;         return *this; }
-		FBrush& Tiling(EBrushTiling tiling)          { m_Tiling = tiling;        return *this; }
+		FBrush& ImageFit(EImageFit fit)                   { m_ImageFit = fit;         return *this; }
+		FBrush& BrushTiling(EBrushTiling tiling)          { m_Tiling = tiling;        return *this; }
 		FBrush& SliceMargins(const FMargin& margins) { m_SliceMargins = margins; return *this; }
 		FBrush& BrushSize(FVec2 size)                { m_BrushSize = size;       return *this; }
 		FBrush& BrushPosition(FVec2 pos)             { m_BrushPos = pos;         return *this; }
