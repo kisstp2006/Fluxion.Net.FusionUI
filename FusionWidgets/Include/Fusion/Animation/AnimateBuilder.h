@@ -86,6 +86,84 @@ namespace Fusion
         friend class FAnimate;
     };
 
+    template<typename T>
+    class FSpringBuilder
+    {
+    public:
+
+        FSpringBuilder& Target(T t) { target = MoveTemp(t); targetValid = true; return *this; }
+        FSpringBuilder& Stiffness(f32 s) { stiffness = s; return *this; }
+        FSpringBuilder& Damping(f32 d) { damping = d; return *this; }
+        FSpringBuilder& SettleEpsilon(f32 e) { settleEpsilon = e; return *this; }
+        FSpringBuilder& Delay(f32 d) { delay = d; return *this; }
+        FSpringBuilder& Owner(Ref<FObject> o) { owner = MoveTemp(o); return *this; }
+
+        FSpringBuilder& OnComplete(std::function<void()> cb)
+        {
+            onComplete = MoveTemp(cb);
+            onCompleteValid = true;
+            return *this;
+        }
+
+        Ref<FAnimation> Build(Ref<FObject> outer)
+        {
+            if (!targetValid)
+                return nullptr;
+
+            const T current = getter();
+
+            Ref<FSpringAnimation> anim = NewObject<FSpringAnimation>(outer.Get(), name);
+            anim->AssignOwner(owner);
+            anim->m_Stiffness = stiffness;
+            anim->m_Damping = damping;
+            anim->m_SettleEpsilon = settleEpsilon;
+            anim->SetSpring(current, target, MoveTemp(setter));
+            anim->SetDelay(delay);
+
+            if (onCompleteValid)
+                anim->OnComplete().Add(onComplete);
+
+            return anim;
+        }
+
+        Ref<FAnimation> Play()
+        {
+            if (!targetValid || !owner.IsValid())
+                return nullptr;
+            Ref<FAnimation> anim = Build(owner.Get());
+            application->PlayAnimation(anim, owner, name);
+            return anim;
+        }
+
+        Ref<FAnimation> Play(FName slot)
+        {
+            if (!targetValid || !owner.IsValid())
+                return nullptr;
+            name = slot;
+            Ref<FAnimation> anim = Build(owner.Get());
+            application->PlayAnimation(anim, owner, name);
+            return anim;
+        }
+
+    private:
+
+        FName                         name;
+        Ref<FObject>                  owner;
+        Ref<FApplicationInstance>     application;
+        std::function<void(const T&)> setter;
+        std::function<T()>            getter;
+        T                             target{};
+        bool                          targetValid = false;
+        f32                           stiffness = 200.0f;
+        f32                           damping = 20.0f;
+        f32                           settleEpsilon = 0.001f;
+        f32                           delay = 0.0f;
+        std::function<void()>         onComplete;
+        bool                          onCompleteValid = false;
+
+        friend class FAnimate;
+    };
+
     class FAnimate
     {
     public:
@@ -107,12 +185,35 @@ namespace Fusion
             return builder;
         }
 
+        template<class TWidgetType, typename T>
+        static FSpringBuilder<T> Spring(FName name, TWidgetType* target, T(TWidgetType::* getter)() const, void (TWidgetType::* setter)(const T&))
+        {
+            FUSION_ASSERT(target != nullptr, "FAnimate::Tween called on null target!");
+
+            FSpringBuilder<T> builder{};
+            builder.name = name;
+            builder.application = target->GetApplication();
+            FUSION_ASSERT(target != nullptr, "FAnimate::Tween called on target that does not have an FApplicationInstance!");
+
+            builder.setter = [target, setter](const T& v) { (target->*setter)(v); };
+            builder.getter = [target, getter]() -> T { return (target->*getter)(); };
+            builder.owner = target;
+            return builder;
+        }
+
     };
     
 } // namespace Fusion
 
 #define FAnimate_Tween(widgetPtr, PropertyName)\
     FAnimate::Tween<TPtrType<decltype(widgetPtr)>::Type>(\
+		#PropertyName, TPtrType<decltype(widgetPtr)>::GetRawPtr(widgetPtr),\
+		(decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().##PropertyName()) (TPtrType<decltype(widgetPtr)>::Type::*)() const)& TPtrType<decltype(widgetPtr)>::Type::##PropertyName,\
+		(void (TPtrType<decltype(widgetPtr)>::Type::*)(const decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().##PropertyName())&))& TPtrType<decltype(widgetPtr)>::Type::__AnimBypassSetter_##PropertyName\
+	)
+
+#define FAnimate_Spring(widgetPtr, PropertyName)\
+    FAnimate::Spring<TPtrType<decltype(widgetPtr)>::Type>(\
 		#PropertyName, TPtrType<decltype(widgetPtr)>::GetRawPtr(widgetPtr),\
 		(decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().##PropertyName()) (TPtrType<decltype(widgetPtr)>::Type::*)() const)& TPtrType<decltype(widgetPtr)>::Type::##PropertyName,\
 		(void (TPtrType<decltype(widgetPtr)>::Type::*)(const decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().##PropertyName())&))& TPtrType<decltype(widgetPtr)>::Type::__AnimBypassSetter_##PropertyName\

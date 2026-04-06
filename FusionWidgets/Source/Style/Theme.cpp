@@ -29,6 +29,11 @@ namespace Fusion
 		return nullptr;
 	}
 
+	void FTheme::ClearAll()
+	{
+		m_Styles.Clear();
+	}
+
 	FStyle& FTheme::Style(const FName& name)
 	{
 		Ref<FStyle> style;
@@ -40,7 +45,7 @@ namespace Fusion
 		}
 		else
 		{
-			style = NewObject<FStyle>(this);
+			style = NewObject<FStyle>(nullptr);
 			style->m_Theme = Ref(this);
 
 			m_Styles[name] = style;

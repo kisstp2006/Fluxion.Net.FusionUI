@@ -99,7 +99,7 @@
 			}\
 			thread_local const Fusion::FName nameValue = #PropertyName;\
 			if (self.m_Inline##PropertyName.has_value()) m_Inline##PropertyName = value;\
-			else m_##PropertyName = value;\
+			else self.m_##PropertyName = value;\
 			if ((GetFlags() & EObjectFlags::PendingConstruction) == 0) {\
 				 OnPropertyModified(nameValue);\
 				 DirtyFunc;\

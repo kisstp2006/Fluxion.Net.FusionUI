@@ -93,9 +93,9 @@ public:
 					{
 						FUSION_LOG_INFO("Debug", "Secondary clicked!");
 
-						FAnimate_Tween(gradBar, Transform)
-						.To(!rotated ? FAffineTransform::Rotation(FMath::Deg2Rad(90)) : FAffineTransform::Identity())
-						.Duration(0.5f)
+						FAnimate_Spring(gradBar, Transform)
+						.Target(!rotated ? FAffineTransform::Rotation(FMath::Deg2Rad(90)) : FAffineTransform::Identity())
+						//.Duration(0.5f)
 						.Play();
 
 						rotated = !rotated;

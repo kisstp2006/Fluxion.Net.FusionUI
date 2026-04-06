@@ -21,6 +21,8 @@ namespace Fusion
 
         Ref<FStyle> FindStyle(const FName& name) const;
 
+        void ClearAll();
+
         // - Builder API -
 
         FStyle& Style(const FName& name);

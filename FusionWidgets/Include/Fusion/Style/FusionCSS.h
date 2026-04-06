@@ -91,10 +91,10 @@ namespace Fusion::CSS
 ///     FUSION_ON(Hovered) { Background = FColor(0.38f, 0.65f, 0.98f); }
 /// }
 #define FUSION_STYLE(WidgetClass, StyleName, ...)                                      \
-    if (Fusion::CSS::FStyleContext _fusion_css_ctx{styleSheet->Style(StyleName)};     \
+    if (Fusion::CSS::FStyleContext _fusion_css_ctx{theme->Style(StyleName)};     \
         true)                                                                          \
 	if (auto Extends = [&](const FName& name) -> void {                                \
-			if (Ref<FStyle> parent = styleSheet->FindStyle(name))                       \
+			if (Ref<FStyle> parent = theme->FindStyle(name))                       \
 				_fusion_css_ctx.Style.CopyFrom(*parent);                                \
 		}; true)                                                                        \
     if (auto [__VA_ARGS__] = std::tuple{                                               \
@@ -155,4 +155,4 @@ namespace Fusion::CSS
 /// {
 ///     FUSION_STYLE(FButton, "Button/Primary", Shape, Background, Border) { ... }
 /// });
-#define FUSION_STYLE_SHEET [](FTheme* styleSheet) -> void
+#define FUSION_STYLE_SHEET [](FTheme* theme) -> void
