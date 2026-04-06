@@ -42,7 +42,8 @@ public:
 			.AddStop(FColor(1.00f, 0.00f, 0.50f), 1.000f) // magenta
 		)
 		.Thickness(3.0f)
-		.GradientSpace(EGradientSpace::ArcLength);
+		.GradientSpace(EGradientSpace::ArcLength)
+		.GradientOffset(0.0f);
 
 
 		Child(
@@ -69,9 +70,16 @@ public:
 					.FillRatio(1.0f)
 					.Height(32)
 					.Style("Button/Primary")
-					.OnClick([]
+					.OnClick([this, gradientPen] mutable
 					{
 						FUSION_LOG_INFO("Debug", "Primary clicked!");
+
+						FAnimate_Tween(gradBar, Border)
+						.Duration(1.0f)
+						.Loop(EAnimationLoopMode::PingPong)
+						.From(gradientPen)
+						.To(gradientPen.GradientOffset(1.0f))
+						.Play();
 					}),
 
 					FNew(FButton)
@@ -112,7 +120,8 @@ public:
 				.Border(gradientPen)
 				.Background(FColors::White)
 				.Shape(FRoundedRectangle(5.0f))
-				.Height(35),
+				.Height(35)
+				.Name("GradientBorder"),
 
 				FNew(FDecoratedWidget)
 				.Background(gradient)
@@ -144,10 +153,11 @@ public:
 			.AddStop(FColor(0.00f, 0.85f, 0.90f), 0.83f) // cyan
 			.AddStop(FColor(0.10f, 0.20f, 1.00f), 1.00f) // blue
 		)
-		.DashGap(m_DashGap)
-		.DashLength(m_DashLength)
-		.DashGap(m_DashGap)
-		.DashPhase(m_DashPhase)
+		.GradientOffset(GradientOffset())
+		.DashGap(DashGap())
+		.DashLength(DashLength())
+		.DashGap(DashGap())
+		.DashPhase(DashPhase())
 		.Style(EPenStyle::Dashed)
 		.Thickness(3.0f)
 		.GradientSpace(EGradientSpace::WorldSpace);
