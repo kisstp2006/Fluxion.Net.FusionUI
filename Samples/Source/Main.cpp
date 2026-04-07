@@ -12,7 +12,8 @@ public:
 
 	Ref<FVerticalStack> vstack;
 	Ref<FHorizontalStack> hstack;
-	Ref<FDecoratedWidget> gradBar;
+	Ref<FDecoratedWidget> gradientBorder;
+	Ref<FDecoratedWidget> gradientWidget;
 
 	Ref<FButton> btn0;
 
@@ -77,7 +78,7 @@ public:
 						FPen toPen = gradientPen;
 						toPen.GradientOffset(1.0f);
 
-						FAnimate_Tween(gradBar, Border)
+						FAnimate_Tween(gradientBorder, Border)
 						.Duration(5.0f)
 						.Loop(EAnimationLoopMode::Loop)
 						.From(gradientPen)
@@ -93,9 +94,8 @@ public:
 					{
 						FUSION_LOG_INFO("Debug", "Secondary clicked!");
 
-						FAnimate_Spring(gradBar, Transform)
+						FAnimate_Spring(gradientBorder, Transform)
 						.Target(!rotated ? FAffineTransform::Rotation(FMath::Deg2Rad(90)) : FAffineTransform::Identity())
-						//.Duration(0.5f)
 						.Play();
 
 						rotated = !rotated;
@@ -119,14 +119,14 @@ public:
 					.Border(FPen())
 				),
 
-				FAssignNew(FDecoratedWidget, gradBar)
+				FAssignNew(FDecoratedWidget, gradientBorder)
 				.Border(gradientPen)
 				.Background(FColors::White)
 				.Shape(FRoundedRectangle(5.0f))
 				.Height(35)
 				.Name("GradientBorder"),
 
-				FNew(FDecoratedWidget)
+				FAssignNew(FDecoratedWidget, gradientWidget)
 				.Background(gradient)
 				.Height(100),
 
