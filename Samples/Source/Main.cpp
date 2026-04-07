@@ -147,6 +147,7 @@ public:
 
 				FAssignNew(FDecoratedWidget, gradientWidget)
 				.Background(gradient)
+				.Shape(FRoundedRectangle(5.0f))
 				.Height(100),
 
 				FNew(FWidget)

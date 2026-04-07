@@ -14,7 +14,7 @@ message(STATUS "[Fusion] FreeType not found, fetching via FetchContent...")
 FetchContent_Declare(
     freetype
     GIT_REPOSITORY https://gitlab.freedesktop.org/freetype/freetype.git
-    GIT_TAG        VER-2-13-3
+    GIT_TAG        VER-2-14-0
     GIT_SHALLOW    TRUE
 )
 
