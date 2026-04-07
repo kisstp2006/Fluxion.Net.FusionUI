@@ -114,7 +114,7 @@ public:
 					{
 						FUSION_LOG_INFO("Debug", "Destructive clicked!");
 
-						FBrush altGradient = FGradient::Linear(FMath::Deg2Rad(45 + 90))
+						FBrush altGradient = FGradient::Linear(FMath::Deg2Rad(45 + 180))
 							.AddStop(FColor(0.00f, 0.08f, 0.30f), 0.0f)   // deep navy
 							.AddStop(FColor(0.00f, 0.45f, 0.65f), 0.35f)  // ocean blue
 							.AddStop(FColor(0.00f, 0.75f, 0.55f), 0.65f)  // teal

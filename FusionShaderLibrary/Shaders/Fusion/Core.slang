@@ -60,6 +60,8 @@ SamplerState _Samplers[16];
 [[vk::binding(1, 0)]]
 Texture2DArray<float4> _TextureArray;
 
+[[vk::binding(2, 0)]]
+Texture2DArray<float> _FontAtlas;
 
 // = Per Surface Resources =
 
@@ -73,8 +75,8 @@ cbuffer _ViewData
     float2   _PixelResolution;
 };
 
-
-// = Per Layer Resources =
+// -------------------------------
+// = Per Layer Transforms =
 
 [[vk::binding(0, 2)]]
 cbuffer _LayerData

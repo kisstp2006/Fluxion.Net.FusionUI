@@ -620,9 +620,6 @@ namespace Fusion
 
 		layer->m_NeedsCompositing = false;
 
-		//const SizeT constantBufferAlignment = m_RenderCapabilities.MinConstantBufferOffsetAlignment;
-		const SizeT structuredBufferAlignment = m_RenderCapabilities.MinStructuredBufferOffsetAlignment;
-
 		FUIDrawList* drawList = layer->GetDrawList();
 
 		snapshot->vertexSplits.Insert({ .StartOffset = snapshot->vertexArray.GetByteSize(), .ByteSize = drawList->vertexArray.GetByteSize() });
@@ -631,29 +628,18 @@ namespace Fusion
 		snapshot->indexSplits.Insert({ .StartOffset = snapshot->indexArray.GetByteSize(), .ByteSize = drawList->indexArray.GetByteSize() });
 		snapshot->indexArray.Insert(drawList->indexArray.GetData(), (int)drawList->indexArray.GetCount());
 
-		{
-			SizeT alignedOffset = FMemoryUtils::AlignUp(snapshot->drawItemArray.GetByteSize(), structuredBufferAlignment);
-			snapshot->drawItemArray.InsertRange((int)((alignedOffset - snapshot->drawItemArray.GetByteSize()) / sizeof(FUIDrawItem)));
-			snapshot->drawItemSplits.Insert({ .StartOffset = alignedOffset, .ByteSize = drawList->drawItemArray.GetByteSize() });
-			snapshot->drawItemArray.Insert(drawList->drawItemArray.GetData(), (int)drawList->drawItemArray.GetCount());
-		}
+		snapshot->drawItemSplits.Insert({ .StartOffset = snapshot->drawItemArray.GetByteSize(), .ByteSize = drawList->drawItemArray.GetByteSize() });
+		snapshot->drawItemArray.Insert(drawList->drawItemArray.GetData(), (int)drawList->drawItemArray.GetCount());
 
 		snapshot->drawCmdSplits.Insert({ .StartOffset = snapshot->drawCmdArray.GetByteSize(), .ByteSize = drawList->drawCmdArray.GetByteSize() });
 		snapshot->drawCmdArray.Insert(drawList->drawCmdArray.GetData(), (int)drawList->drawCmdArray.GetCount());
 
-		{
-			SizeT alignedOffset = FMemoryUtils::AlignUp(snapshot->clipRectArray.GetByteSize(), structuredBufferAlignment);
-			snapshot->clipRectArray.InsertRange((int)((alignedOffset - snapshot->clipRectArray.GetByteSize()) / sizeof(FUIClipRect)));
-			snapshot->clipRectSplits.Insert({ .StartOffset = alignedOffset, .ByteSize = drawList->clipRectArray.GetByteSize() });
-			snapshot->clipRectArray.Insert(drawList->clipRectArray.GetData(), (int)drawList->clipRectArray.GetCount());
-		}
+		snapshot->clipRectSplits.Insert({ .StartOffset = snapshot->clipRectArray.GetByteSize(), .ByteSize = drawList->clipRectArray.GetByteSize() });
+		snapshot->clipRectArray.Insert(drawList->clipRectArray.GetData(), (int)drawList->clipRectArray.GetCount());
 
-		{
-			SizeT alignedOffset = FMemoryUtils::AlignUp(snapshot->gradientStopArray.GetByteSize(), structuredBufferAlignment);
-			snapshot->gradientStopArray.InsertRange((int)((alignedOffset - snapshot->gradientStopArray.GetByteSize()) / sizeof(FUIGradientStop)));
-			snapshot->gradientStopSplits.Insert({ .StartOffset = alignedOffset, .ByteSize = drawList->gradientStopArray.GetByteSize() });
-			snapshot->gradientStopArray.Insert(drawList->gradientStopArray.GetData(), (int)drawList->gradientStopArray.GetCount());
-		}
+		snapshot->gradientStopSplits.Insert({ .StartOffset = snapshot->gradientStopArray.GetByteSize(), .ByteSize = drawList->gradientStopArray.GetByteSize() });
+		snapshot->gradientStopArray.Insert(drawList->gradientStopArray.GetData(), (int)drawList->gradientStopArray.GetCount());
+		
 
 		u32 drawCmdSplitCount = layer->GetSplitPointCount();
 
