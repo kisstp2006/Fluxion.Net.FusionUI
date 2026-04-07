@@ -13,6 +13,8 @@ CMakeUserPresets.json
 
 [Bb]uild
 
+.DS_Store
+
 cmake-build-*
 
 # CLion
