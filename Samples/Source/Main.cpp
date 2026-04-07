@@ -21,8 +21,6 @@ public:
 	{
 		Super::Construct();
 
-		Background(FColor(0.13f, 0.13f, 0.15f));
-
 		FGradient gradient =
 			FGradient::Linear(FMath::Deg2Rad(45.0f))
 			.AddStop(FColor(0.06f, 0.01f, 0.18f), 0.0f)   // deep violet
@@ -52,7 +50,6 @@ public:
 			.ContentHAlign(EHAlign::Fill)
 			.HAlign(EHAlign::Fill)
 			.VAlign(EVAlign::Fill)
-			.Padding(FMargin(1, 1, 1, 1) * 5)
 			.Spacing(10)
 			.Name("RootStack")
 			(
@@ -238,6 +235,12 @@ int main(int argc, char* argv[])
 
 	theme->MergeStyleSheet(FUSION_STYLE_SHEET
 	{
+		FUSION_STYLE(SampleWindow, "SampleWindow", Background, Padding)
+		{
+			Background = FColor(0.13f, 0.13f, 0.15f);
+			Padding	   = FMargin(1, 1, 1, 1) * 5;
+		}
+		
 		FUSION_STYLE(FButton, "Button/Base", Shape, Background, Border)
 		{
 			Shape = FRoundedRectangle(5.0f);

@@ -112,8 +112,6 @@ namespace Fusion
 
         Ref<FStyle> ResolveStyle();
 
-        virtual void ApplyStyle(FStyle& style);
-
         bool TestStyleState(EStyleState state) const { return FEnumHasAllFlags(m_StyleState, state); }
 
         // Hierarchy
@@ -183,7 +181,10 @@ namespace Fusion
         FUSION_PROPERTY(FAffineTransform, Transform);
 
         FUSION_LAYOUT_PROPERTY(FMargin, Margin);
-        FUSION_LAYOUT_PROPERTY(FMargin, Padding);
+
+        __FUSION_STYLE_PROPERTIES_FWIDGET(
+            (FMargin, Padding,  Layout)
+        );
 
         FUSION_LAYOUT_PROPERTY(FVec2, Pivot);
 

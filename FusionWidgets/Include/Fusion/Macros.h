@@ -165,6 +165,14 @@
 #define __FUSION_SP_APPLY(Tuple)                 __FUSION_SP_APPLY2(__FUSION_SP_NAME Tuple)
 #define __FUSION_SP_APPLY2(Name)                 FUSION_APPLY_STYLE(Name)
 
+// For internal use only! Do not use this!
+#define __FUSION_STYLE_PROPERTIES_FWIDGET(...) \
+    FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_DECL, __VA_ARGS__)) \
+    virtual void ApplyStyle(FStyle& style) \
+    { \
+        FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_APPLY, __VA_ARGS__)) \
+    }
+
 // Declares every (Type, Name) style property AND generates the ApplyStyle override.
 // Replaces individual FUSION_STYLE_PROPERTY calls + the hand-written ApplyStyle body.
 #define FUSION_STYLE_PROPERTIES(...) \

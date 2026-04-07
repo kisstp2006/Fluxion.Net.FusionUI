@@ -83,10 +83,14 @@ cbuffer _LayerData
 };
 
 
-// = Per Draw Call Resources =
+// -------------------------------
+// = Draw Items (Per Layer) =
 
 [[vk::binding(0, 3)]]
 StructuredBuffer<FUIDrawItem> _DrawItems;
+
+// -------------------------------
+// = Auxiliary Resources =
 
 [[vk::binding(0, 4)]]
 StructuredBuffer<FUIClipRect> _ClipRects;

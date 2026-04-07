@@ -266,11 +266,6 @@ namespace Fusion
 		return nullptr;
 	}
 
-	void FWidget::ApplyStyle(FStyle& style)
-	{
-
-	}
-
 	void FWidget::SetParentSurfaceRecursive(Ref<FSurface> surface)
 	{
 		ZoneScoped;
