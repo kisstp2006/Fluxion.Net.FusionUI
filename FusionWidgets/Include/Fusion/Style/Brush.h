@@ -57,6 +57,7 @@ namespace Fusion
 		EBrushStyle  GetBrushStyle()  const { return m_BrushStyle; }
 		EBrushTiling GetBrushTiling() const { return m_Tiling; }
 		const FGradient& GetGradient() const { return m_Gradient; }
+		FGradient& GetGradient()			 { return m_Gradient; }
 
 		// For SolidFill: the fill color. For Image/Gradient: the tint color (multiplied with texture/gradient output).
 		const FColor& GetColor()     const { return m_Color; }

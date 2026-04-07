@@ -109,7 +109,7 @@ namespace Fusion
         indexWritePtr = indexArray.GetData() + curIndexCount;
     }
 
-    void FUIDrawList::AddPolyLine(const FVec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased, u32 drawItemIndex, const f32* uvXValues, const FRect* minMaxPos)
+    void FUIDrawList::AddPolyLine(const FVec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased, u32 drawItemIndex, const f32* uvXValues, const FRect* minMaxPos, f32 gradientOffset)
     {
         ZoneScoped;
 

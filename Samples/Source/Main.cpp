@@ -24,7 +24,7 @@ public:
 		Background(FColor(0.13f, 0.13f, 0.15f));
 
 		FGradient gradient =
-			FGradient::Linear(45.0f)
+			FGradient::Linear(FMath::Deg2Rad(45.0f))
 			.AddStop(FColor(0.06f, 0.01f, 0.18f), 0.0f)   // deep violet
 			.AddStop(FColor(0.49f, 0.07f, 0.64f), 0.35f)  // vivid purple
 			.AddStop(FColor(0.93f, 0.26f, 0.42f), 0.65f)  // hot pink
@@ -81,8 +81,17 @@ public:
 						FAnimate_Tween(gradientBorder, Border)
 						.Duration(5.0f)
 						.Loop(EAnimationLoopMode::Loop)
+						.Easing(EEasingType::Linear)
 						.From(gradientPen)
 						.To(toPen)
+						.Play();
+
+						FAnimate_Tween(this, GradientOffset)
+						.Duration(3.0f)
+						.Loop(EAnimationLoopMode::Loop)
+						.Easing(EEasingType::Linear)
+						.From(0.0f)
+						.To(1.0f)
 						.Play();
 					}),
 
@@ -105,10 +114,23 @@ public:
 					.FillRatio(1.0f)
 					.Height(32)
 					.Style("Button/Destructive")
-					.OnClick([this]
+					.OnClick([this, gradient]
 					{
-						btn0->Disabled(!btn0->Disabled());
 						FUSION_LOG_INFO("Debug", "Destructive clicked!");
+
+						FBrush altGradient = FGradient::Linear(FMath::Deg2Rad(45 + 90))
+							.AddStop(FColor(0.00f, 0.08f, 0.30f), 0.0f)   // deep navy
+							.AddStop(FColor(0.00f, 0.45f, 0.65f), 0.35f)  // ocean blue
+							.AddStop(FColor(0.00f, 0.75f, 0.55f), 0.65f)  // teal
+							.AddStop(FColor(0.20f, 0.95f, 0.50f), 1.0f);  // bright mint
+
+						FAnimate_Spring(gradientWidget, Background)
+						.Target(gradientToggled ? gradient : altGradient)
+						.Stiffness(80.0f)
+						.Damping(12.0f)
+						.Play();
+
+						gradientToggled = !gradientToggled;
 					}),
 
 					FNew(FButton)
@@ -146,6 +168,8 @@ public:
 	
 	void PaintOverlay(FPainter& painter) override
 	{
+		f32 go = GradientOffset();
+
 		FPen gradientPen = FPen::Gradient(
 			FGradient::Linear()
 			.AddStop(FColor(0.10f, 0.20f, 1.00f), 0.00f) // blue
@@ -156,14 +180,14 @@ public:
 			.AddStop(FColor(0.00f, 0.85f, 0.90f), 0.83f) // cyan
 			.AddStop(FColor(0.10f, 0.20f, 1.00f), 1.00f) // blue
 		)
-		.GradientOffset(GradientOffset())
+		.GradientOffset(go)
 		.DashGap(DashGap())
 		.DashLength(DashLength())
 		.DashGap(DashGap())
 		.DashPhase(DashPhase())
 		.Style(EPenStyle::Dashed)
 		.Thickness(3.0f)
-		.GradientSpace(EGradientSpace::WorldSpace);
+		.GradientSpace(EGradientSpace::ArcLength);
 
 		painter.SetPen(gradientPen);
 
@@ -203,6 +227,7 @@ public:
 	FUSION_PROPERTY(f32, DashPhase);
 
 	bool rotated = false;
+	bool gradientToggled = false;
 };
 
 int main(int argc, char* argv[])

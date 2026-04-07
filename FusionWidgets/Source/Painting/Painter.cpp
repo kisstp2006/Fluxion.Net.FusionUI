@@ -611,7 +611,7 @@ namespace Fusion
 		case EPenStyle::Solid:
 			// Only do closed line if we are not rendering a gradient
 			m_DrawList->AddPolyLine(m_Path.GetData(), (int)m_Path.GetCount(), color, thickness, closed && !hasGradient, m_AntiAliased, drawItemIndex,
-				isGradientArcLength ? m_TempPoints.GetData() : nullptr, isGradientWorldSpace ? &minMax : nullptr);
+				isGradientArcLength ? m_TempPoints.GetData() : nullptr, isGradientWorldSpace ? &minMax : nullptr, isGradientWorldSpace ? m_CurrentPen.GetGradientOffset() : 0.0f);
 			break;
 		case EPenStyle::Dashed:
 		{
