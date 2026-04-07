@@ -1,3 +1,7 @@
+#pragma once
+
+#include <cstddef>
+
 // Preprocessor utilities
 // Macros with __ prefix are considered engine internals and should not be used directly
 

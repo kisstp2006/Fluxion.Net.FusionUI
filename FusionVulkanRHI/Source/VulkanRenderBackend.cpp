@@ -788,7 +788,7 @@ namespace Fusion::Vulkan
 						1, 1, &views.ViewDataSet, 0, nullptr);
 
 					// Vertex & Index Buffers
-					vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &drawBuffer->m_Buffer, &views.VertexBuffer.StartOffset);
+					vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &drawBuffer->m_Buffer, (const VkDeviceSize*)&views.VertexBuffer.StartOffset);
 					vkCmdBindIndexBuffer(cmdBuffer, drawBuffer->m_Buffer, views.IndexBuffer.StartOffset, sizeof(FUIIndex) == 4 ? VK_INDEX_TYPE_UINT32 : VK_INDEX_TYPE_UINT16);
 
 					for (SizeT i = 0; i < snapshot->renderPassArray.GetCount(); ++i)

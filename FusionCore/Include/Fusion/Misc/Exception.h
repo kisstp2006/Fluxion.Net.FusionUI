@@ -3,7 +3,7 @@
 // Copyright (c) 2026 Neil Mewada
 // SPDX-License-Identifier: MIT
 
-#include "Containers/String.h"
+#include "Fusion/Containers/String.h"
 
 #include <exception>
 #include "cpptrace/cpptrace.hpp"

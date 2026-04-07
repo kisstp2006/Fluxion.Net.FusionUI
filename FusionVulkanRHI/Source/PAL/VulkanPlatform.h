@@ -29,10 +29,10 @@ namespace Fusion::Vulkan
 } // namespace Fusion
 
 #if FUSION_PLATFORM_WINDOWS
-#include "PAL/Windows/VulkanWindowsPlatform.h"
+#include "Windows/VulkanWindowsPlatform.h"
 #undef max
 #elif FUSION_PLATFORM_MAC
-#include "PAL/Mac/VulkanMacPlatform.h"
+#include "Mac/VulkanMacPlatform.h"
 #elif FUSION_PLATFORM_LINUX
 
 #endif

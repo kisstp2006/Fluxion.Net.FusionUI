@@ -6,7 +6,7 @@ add_fusion_target(FusionSDL3Platform STATIC
         PRIVATE fusionsdl3platform_private_files.cmake
         PUBLIC  fusionsdl3platform_public_files.cmake
     INCLUDE_DIRECTORIES
-        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include
+        PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR}/Include
     PCHHEADER
         PRIVATE Include/Fusion/SDL3Platform.h
     BUILD_DEPENDENCIES
