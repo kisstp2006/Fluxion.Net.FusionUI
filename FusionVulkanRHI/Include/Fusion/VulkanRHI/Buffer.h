@@ -16,17 +16,19 @@ namespace Fusion::Vulkan
 
         FBufferView VertexBuffer;
         FBufferView IndexBuffer;
-        FBufferView ClipRects;
-        FBufferView GradientStops;
+        //FBufferView ClipRects;
+        //FBufferView GradientStops;
         FBufferView ViewData;
 
         FArray<FBufferView> LayerTransformBuffers;
         FArray<FBufferView> DrawItemBuffers;
+        FArray<FBufferView> ClipRectsBuffers;
+        FArray<FBufferView> GradientStopBuffers;
 
         VkDescriptorSet ViewDataSet = VK_NULL_HANDLE;
         FArray<VkDescriptorSet> LayerTransformSets;
         FArray<VkDescriptorSet> DrawDataSets;
-        VkDescriptorSet AuxiliaryDataSet;
+        //VkDescriptorSet AuxiliaryDataSet;
     };
     
     class FUSIONVULKANRHI_API FUIDrawBuffer : public FIntrusiveBase

@@ -89,13 +89,10 @@ cbuffer _LayerData
 [[vk::binding(0, 3)]]
 StructuredBuffer<FUIDrawItem> _DrawItems;
 
-// -------------------------------
-// = Auxiliary Resources =
-
-[[vk::binding(0, 4)]]
+[[vk::binding(1, 3)]]
 StructuredBuffer<FUIClipRect> _ClipRects;
 
-[[vk::binding(1, 4)]]
+[[vk::binding(2, 3)]]
 StructuredBuffer<FUIGradientStop> _GradientStops;
 
 // ---------------------------------------------------------
