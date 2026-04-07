@@ -14,6 +14,7 @@ add_fusion_target(FusionRHI STATIC
             Fusion::Core
             Fusion::Platform
             Fusion::ShaderLibrary
+            Fusion::Resources
 )
 
 if(FUSION_BUILD_TESTS)

@@ -21,8 +21,7 @@ public:
 	{
 		Super::Construct();
 
-		FGradient gradient =
-			FGradient::Linear(FMath::Deg2Rad(45.0f))
+		FGradient gradient = FGradient::Linear(FMath::Deg2Rad(45.0f))
 			.AddStop(FColor(0.06f, 0.01f, 0.18f), 0.0f)   // deep violet
 			.AddStop(FColor(0.49f, 0.07f, 0.64f), 0.35f)  // vivid purple
 			.AddStop(FColor(0.93f, 0.26f, 0.42f), 0.65f)  // hot pink
