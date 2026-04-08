@@ -295,7 +295,7 @@ namespace Fusion::Vulkan
 
 	FAtlasHandle FVulkanRenderBackend::CreateLayeredAtlas(bool grayscale, u32 resolution, u32 maxLayers)
 	{
-
+		//FTextureAtlas* atlas = new FTextureAtlas(this, resolution, maxLayers, grayscale ? VK_FORMAT_R8_UNORM : VK_FORMAT_R8G8B8A8_UNORM, kImageCount);
 
 		return {};
 	}

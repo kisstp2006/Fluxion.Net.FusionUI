@@ -59,8 +59,10 @@ namespace Fusion::Vulkan
 		m_ImageCI.extent.width = size;
 		m_ImageCI.extent.height = size;
 		m_ImageCI.mipLevels = 1;
+		m_ImageCI.samples = VK_SAMPLE_COUNT_1_BIT;
 		m_ImageCI.arrayLayers = layerCount;
 		m_ImageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		m_ImageCI.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		m_ImageCI.flags = m_SparseResidency ? (VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT | VK_IMAGE_CREATE_SPARSE_BINDING_BIT) : 0;
 		
 		// Image View CI
@@ -116,7 +118,7 @@ namespace Fusion::Vulkan
 
 				imageReqs.size = blocksX * blocksY * blockByteSize;
 
-				m_AllocCI.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+				m_AllocCI.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 				m_AllocCI.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
 
 				VmaAllocationInfo allocationInfo{};

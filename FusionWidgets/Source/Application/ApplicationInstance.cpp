@@ -64,6 +64,8 @@ namespace Fusion
 		m_RenderCapabilities = m_RenderBackend->GetRenderCapabilities();
 		FUSION_ASSERT(m_RenderCapabilities.MinStructuredBufferOffsetAlignment > 0, "Invalid value for MinStructuredBufferOffsetAlignment.");
 
+		m_RenderBackend->CreateLayeredAtlas(true, 2048, 4);
+
 		return true;
 	}
 
