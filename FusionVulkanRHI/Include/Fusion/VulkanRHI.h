@@ -11,4 +11,5 @@
 
 #include "VulkanRHI/Defines.h"
 #include "VulkanRHI/Buffer.h"
+#include "VulkanRHI/TextureAtlas.h"
 #include "VulkanRHI/VulkanRenderBackend.h"

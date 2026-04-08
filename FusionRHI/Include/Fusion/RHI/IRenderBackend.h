@@ -7,11 +7,13 @@ namespace Fusion
 {
 	using FResourceHandle = FHandle<u32>;
 
+	FUSION_DEFINE_HANDLE_TYPE(FAtlasHandle, u32);
+
 	enum class ERenderTargetType
 	{
 		Window = 0,
-
 	};
+	FUSION_ENUM_CLASS(ERenderTargetType);
 
 	enum class EGraphicsBackendType
 	{
@@ -54,6 +56,10 @@ namespace Fusion
 		virtual bool InitializeInstance(FInstanceHandle instance) = 0;
 
 		virtual void ShutdownInstance(FInstanceHandle instance) = 0;
+
+		// - Atlas -
+
+		virtual FAtlasHandle CreateLayeredAtlas(bool grayscale, u32 resolution, u32 maxLayers) = 0;
 
 		// - Rendering -
 

@@ -31,7 +31,7 @@ namespace Fusion::Vulkan
         //VkDescriptorSet AuxiliaryDataSet;
     };
     
-    class FUSIONVULKANRHI_API FUIDrawBuffer : public FIntrusiveBase
+    class FUSIONVULKANRHI_API FMappedBuffer : public FIntrusiveBase
     {
     public:
 
@@ -40,9 +40,9 @@ namespace Fusion::Vulkan
             return (offset + alignment - 1) & ~(alignment - 1);
         }
 
-        FUIDrawBuffer(FVulkanRenderBackend* backend, VkDeviceSize initialSize, VkDeviceSize growSize);
+        FMappedBuffer(FVulkanRenderBackend* backend, VkDeviceSize initialSize, VkDeviceSize growSize);
 
-        ~FUIDrawBuffer();
+        ~FMappedBuffer();
 
         void EnsureCapacity(VkDeviceSize capacity);
 

@@ -158,32 +158,6 @@ namespace Fusion::Vulkan
 	}
 
 	// -----------------------------------------------------------------
-	// Texture
-	// -----------------------------------------------------------------
-
-	FTexture::~FTexture()
-	{
-		VkImage image = !m_IsExternalImage ? m_Image : VK_NULL_HANDLE;
-		VkImageView imageView = m_ImageView;
-		VkDevice device = m_Device;
-
-		if (imageView || image)
-		{
-			m_RenderBackend->DeferDestruction([image, imageView, device]
-			{
-				if (imageView)
-					vkDestroyImageView(device, imageView, VULKAN_CPU_ALLOCATOR);
-				if (image)
-					vkDestroyImage(device, image, VULKAN_CPU_ALLOCATOR);
-			});
-		}
-
-		m_IsExternalImage = false;
-		m_Image = VK_NULL_HANDLE;
-		m_ImageView = VK_NULL_HANDLE;
-	}
-
-	// -----------------------------------------------------------------
 	// SwapChain
 	// -----------------------------------------------------------------
 
@@ -288,9 +262,7 @@ namespace Fusion::Vulkan
 			InitializeVulkan();
 		}
 
-		IntrusivePtr<FRenderInstance> renderInstance = new FRenderInstance();
-		
-		
+		IPtr<FRenderInstance> renderInstance = new FRenderInstance();
 
 		instances.Add(instance, renderInstance);
 
@@ -312,13 +284,20 @@ namespace Fusion::Vulkan
 		}
 	}
 
-	void FVulkanRenderBackend::SubmitSnapshot(FRenderTargetHandle renderTarget, IntrusivePtr<FRenderSnapshot> snapshot)
+	void FVulkanRenderBackend::SubmitSnapshot(FRenderTargetHandle renderTarget, IPtr<FRenderSnapshot> snapshot)
 	{
 		auto it = m_RenderTargetsByHandle.Find(renderTarget);
 		if (it == m_RenderTargetsByHandle.End())
 			return;
 
 		it->second->m_Snapshot = snapshot;
+	}
+
+	FAtlasHandle FVulkanRenderBackend::CreateLayeredAtlas(bool grayscale, u32 resolution, u32 maxLayers)
+	{
+
+
+		return {};
 	}
 
 	FRenderTargetHandle FVulkanRenderBackend::AcquireWindowRenderTarget(FWindowHandle window)
@@ -333,7 +312,7 @@ namespace Fusion::Vulkan
 		m_RenderTargetIndexAllocator += 1;
 		auto handle = FRenderTargetHandle(m_RenderTargetIndexAllocator);
 
-		IntrusivePtr<FRenderTarget> renderTarget = new FRenderTarget;
+		IPtr<FRenderTarget> renderTarget = new FRenderTarget;
 		renderTarget->m_Type = ERenderTargetType::Window;
 		renderTarget->m_Window = window;
 
@@ -415,7 +394,7 @@ namespace Fusion::Vulkan
 			auto snapshot = renderTarget->m_Snapshot;
 
 			if (currentOffset > 0)
-				currentOffset = FUIDrawBuffer::AlignUp(currentOffset, alignment);
+				currentOffset = FMappedBuffer::AlignUp(currentOffset, alignment);
 			
 			FDrawDataBufferViews views{};
 
@@ -429,14 +408,14 @@ namespace Fusion::Vulkan
 			views.IndexBuffer.ByteSize = snapshot->indexArray.GetByteSize();
 			currentOffset += views.IndexBuffer.ByteSize;
 
-			currentOffset = FUIDrawBuffer::AlignUp(currentOffset, alignment);
+			currentOffset = FMappedBuffer::AlignUp(currentOffset, alignment);
 			views.ViewData.StartOffset = currentOffset;
 			views.ViewData.ByteSize = sizeof(snapshot->viewData);
 			currentOffset += views.ViewData.ByteSize;
 
 			for (int i = 0; i < snapshot->transformMatricesPerLayer.GetCount(); i++)
 			{
-				currentOffset = FUIDrawBuffer::AlignUp(currentOffset, alignment);
+				currentOffset = FMappedBuffer::AlignUp(currentOffset, alignment);
 
 				views.LayerTransformBuffers.Add({
 					.StartOffset = currentOffset,
@@ -448,7 +427,7 @@ namespace Fusion::Vulkan
 
 			for (int i = 0; i < snapshot->drawItemSplits.GetCount(); i++)
 			{
-				currentOffset = FUIDrawBuffer::AlignUp(currentOffset, alignment);
+				currentOffset = FMappedBuffer::AlignUp(currentOffset, alignment);
 
 				views.DrawItemBuffers.Add({
 					.StartOffset = currentOffset,
@@ -460,7 +439,7 @@ namespace Fusion::Vulkan
 
 			for (int i = 0; i < snapshot->clipRectSplits.GetCount(); i++)
 			{
-				currentOffset = FUIDrawBuffer::AlignUp(currentOffset, alignment);
+				currentOffset = FMappedBuffer::AlignUp(currentOffset, alignment);
 
 				views.ClipRectsBuffers.Add({
 					.StartOffset = currentOffset,
@@ -472,7 +451,7 @@ namespace Fusion::Vulkan
 
 			for (int i = 0; i < snapshot->gradientStopSplits.GetCount(); i++)
 			{
-				currentOffset = FUIDrawBuffer::AlignUp(currentOffset, alignment);
+				currentOffset = FMappedBuffer::AlignUp(currentOffset, alignment);
 
 				views.GradientStopBuffers.Add({
 					.StartOffset = currentOffset,
@@ -485,7 +464,7 @@ namespace Fusion::Vulkan
 			m_OffsetDataPerSnapshot.Add(views);
 		}
 
-		FUIDrawBuffer* drawBuffer = m_UIDrawDataBuffers[m_FrameSlot];
+		FMappedBuffer* drawBuffer = m_UIDrawDataBuffers[m_FrameSlot];
 
 		drawBuffer->EnsureCapacity(currentOffset);
 		u8* dataPtr = drawBuffer->m_MappedData;
@@ -955,7 +934,7 @@ namespace Fusion::Vulkan
 		FUSION_ASSERT(m_PhysicalDevice != VK_NULL_HANDLE, "Failed to find a suitable Vulkan physical device.");
 
 		vkGetPhysicalDeviceProperties(m_PhysicalDevice, &m_PhysicalDeviceProperties);
-
+		vkGetPhysicalDeviceFeatures(m_PhysicalDevice, &m_PhysicalDeviceFeatures);
 		vkGetPhysicalDeviceMemoryProperties(m_PhysicalDevice, &m_PhysicalDeviceMemoryProperties);
 
 		m_IsUnifiedMemory = true;
@@ -1067,6 +1046,14 @@ namespace Fusion::Vulkan
 
 		VkPhysicalDeviceFeatures deviceFeaturesToUse{};
 		deviceFeaturesToUse.samplerAnisotropy = VK_FALSE;
+
+		if (m_PhysicalDeviceFeatures.sparseBinding && m_PhysicalDeviceFeatures.sparseResidencyImage2D)
+		{
+			deviceFeaturesToUse.sparseBinding = VK_TRUE;
+			deviceFeaturesToUse.sparseResidencyImage2D = VK_TRUE;
+		}
+
+		deviceCI.pEnabledFeatures = &deviceFeaturesToUse;
 		
 		result = vkCreateDevice(m_PhysicalDevice, &deviceCI, VULKAN_CPU_ALLOCATOR, &m_Device);
 		VULKAN_CHECK(result, "Failed to create VkDevice.");
@@ -1477,7 +1464,7 @@ namespace Fusion::Vulkan
 
 		for (int i = 0; i < kImageCount; i++)
 		{
-			m_UIDrawDataBuffers[i] = new FUIDrawBuffer(this, kBufferInitialSize, kBufferGrowSize);
+			m_UIDrawDataBuffers[i] = new FMappedBuffer(this, kBufferInitialSize, kBufferGrowSize);
 		}
 
 		m_NullBuffer = new FBuffer(this, 256);
@@ -1583,7 +1570,7 @@ namespace Fusion::Vulkan
 
 	void FVulkanRenderBackend::CreateOrUpdateSwapChain(FWindowHandle window)
 	{
-		IntrusivePtr<FSwapChain> swapChain = m_SwapChainsByWindowHandle[window];
+		IPtr<FSwapChain> swapChain = m_SwapChainsByWindowHandle[window];
 
 		VkResult result = VK_SUCCESS;
 
@@ -1687,7 +1674,7 @@ namespace Fusion::Vulkan
 
 		for (uint32_t i = 0; i < swapChainImageCount; i++)
 		{
-			IntrusivePtr<FTexture> texture = new FTexture(this, m_Device);
+			IPtr<FTexture> texture = new FTexture(this, m_Device);
 
 			texture->m_IsExternalImage = true;
 			texture->m_Image = swapChainImages[i];
@@ -1773,7 +1760,7 @@ namespace Fusion::Vulkan
 			return;
 		}
 
-		IntrusivePtr<FSwapChain> swapChain = m_SwapChainsByWindowHandle[window];
+		IPtr<FSwapChain> swapChain = m_SwapChainsByWindowHandle[window];
 
 		if (swapChain == nullptr)
 		{

@@ -5,7 +5,7 @@
 
 namespace Fusion::Vulkan
 {
-	FUIDrawBuffer::FUIDrawBuffer(FVulkanRenderBackend* backend, VkDeviceSize initialSize, VkDeviceSize growSize)
+	FMappedBuffer::FMappedBuffer(FVulkanRenderBackend* backend, VkDeviceSize initialSize, VkDeviceSize growSize)
 		: m_Backend(backend), m_Device(m_Backend->GetVkDevice()), m_BufferSize(initialSize), m_GrowSize(growSize)
 	{
 		m_BufferCI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -24,12 +24,12 @@ namespace Fusion::Vulkan
 		m_MappedData = (u8*)alloc.pMappedData;
 	}
 
-	FUIDrawBuffer::~FUIDrawBuffer()
+	FMappedBuffer::~FMappedBuffer()
 	{
 		vmaDestroyBuffer(m_Backend->GetVmaAllocator(), m_Buffer, m_Allocation);
 	}
 
-	void FUIDrawBuffer::EnsureCapacity(VkDeviceSize capacity)
+	void FMappedBuffer::EnsureCapacity(VkDeviceSize capacity)
 	{
 		if (m_BufferSize < capacity)
 		{
@@ -53,7 +53,7 @@ namespace Fusion::Vulkan
 		}
 	}
 
-	void FUIDrawBuffer::DeferredDestroy()
+	void FMappedBuffer::DeferredDestroy()
 	{
 		VmaAllocator vmaAllocator = m_Backend->GetVmaAllocator();
 		VkBuffer buffer = m_Buffer;

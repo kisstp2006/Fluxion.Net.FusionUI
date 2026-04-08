@@ -6,6 +6,7 @@
 namespace Fusion::Vulkan
 {
     class FVulkanRenderBackend;
+    class FTexture;
 
     // - Descriptor Pool -
 
@@ -30,28 +31,6 @@ namespace Fusion::Vulkan
         
         int m_CurPoolIndex = 0;
         FArray<VkDescriptorPool> m_Pools{};
-    };
-
-    // - Image -
-
-    struct FUSIONVULKANRHI_API FTexture : FIntrusiveBase
-    {
-        FTexture(FVulkanRenderBackend* renderBackend, VkDevice device) : m_RenderBackend(renderBackend), m_Device(device)
-        {
-	        
-        }
-
-        ~FTexture();
-
-        FVulkanRenderBackend* m_RenderBackend = nullptr;
-        VkDevice m_Device = VK_NULL_HANDLE;
-
-        bool m_IsExternalImage = false;
-
-        VkImage m_Image = VK_NULL_HANDLE;
-        VkImageView m_ImageView = VK_NULL_HANDLE;
-
-        VkFormat m_Format = VK_FORMAT_R8G8B8A8_UNORM;
     };
 
     // - Shader -
@@ -169,6 +148,16 @@ namespace Fusion::Vulkan
             return m_IsResizableBAR;
         }
 
+        VkQueue GetGraphicsQueue() const
+        {
+            return m_GraphicsQueue;
+        }
+
+        const VkPhysicalDeviceFeatures& GetFeatures() const
+        {
+            return m_PhysicalDeviceFeatures;
+        }
+
         EGraphicsBackendType GetGraphicsBackendType() override
         {
             return EGraphicsBackendType::Vulkan;
@@ -197,6 +186,10 @@ namespace Fusion::Vulkan
                 .m_Destruction = functor
             });
         }
+
+        // - Atlas -
+
+        FAtlasHandle CreateLayeredAtlas(bool grayscale, u32 resolution, u32 maxLayers) override;
 
         // - Render Target -
 
@@ -247,6 +240,7 @@ namespace Fusion::Vulkan
 
 		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
 		VkPhysicalDeviceProperties m_PhysicalDeviceProperties{};
+        VkPhysicalDeviceFeatures m_PhysicalDeviceFeatures{};
 		VkPhysicalDeviceMemoryProperties m_PhysicalDeviceMemoryProperties{};
 
         FArray<VkQueueFamilyProperties> m_QueueFamilyProperties;
@@ -283,7 +277,7 @@ namespace Fusion::Vulkan
 
         // - SwapChain -
 
-        FHashMap<FWindowHandle, IntrusivePtr<FSwapChain>> m_SwapChainsByWindowHandle;
+        FHashMap<FWindowHandle, IPtr<FSwapChain>> m_SwapChainsByWindowHandle;
 
         // - Render Targets -
 
@@ -296,14 +290,14 @@ namespace Fusion::Vulkan
 
         // - Pipeline -
 
-        IntrusivePtr<FGraphicsPipeline> m_MainGraphicsPipeline;
+        IPtr<FGraphicsPipeline> m_MainGraphicsPipeline;
 
         // - Per Frame Resources -
 
         u32 m_FrameSlot = 0;
         
         FArray<FDescriptorPool*, kImageCount> m_PoolsPerFrame;
-        FArray<IntrusivePtr<FUIDrawBuffer>, kImageCount> m_UIDrawDataBuffers;
+        FArray<IntrusivePtr<FMappedBuffer>, kImageCount> m_UIDrawDataBuffers;
 
         FArray<VkCommandBuffer, kImageCount> m_CommandBuffers;
         FArray<VkSemaphore, kImageCount> m_RenderFinishedSemaphores;
@@ -317,6 +311,10 @@ namespace Fusion::Vulkan
 
         FBuffer* m_NullBuffer = nullptr;
         VkDescriptorBufferInfo m_NullBufferInfo{};
+
+        // - Atlas Resources -
+
+        
     };
 
 } // namespace Fusion

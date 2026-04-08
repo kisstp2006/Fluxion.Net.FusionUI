@@ -18,7 +18,7 @@
 #define FUSION_CLASS(SelfClass, SuperClass) typedef SuperClass Super; \
     FUSION_CLASS_BODY(SelfClass)\
     template<FObjectType TObject, typename... TArgs>\
-	Ref<TObject> NewObject(FObject* outer, TArgs&&... args);
+	friend Ref<TObject> NewObject(FObject* outer, TArgs&&... args);
 
 namespace Fusion
 {
@@ -98,6 +98,9 @@ namespace Fusion
         template<typename T> friend class Ref;
         template<typename T> friend class WeakRef;
         friend struct Internal::RefCountBlock;
+
+        template<FObjectType TObject, typename... TArgs>
+        friend Ref<TObject> NewObject(FObject* outer, TArgs&&... args);
     };
 
     template<FObjectType TObject, typename... TArgs>
