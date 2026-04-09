@@ -18,6 +18,8 @@ namespace Fusion
         u16 Width = 0, Height = 0;
         int BearingX = 0, BearingY = 0;
         int Advance = 0;
+
+        u32 AtlasSize = 0;
     };
 
     class FUSIONWIDGETS_API FFontAtlas : public FObject
@@ -31,7 +33,9 @@ namespace Fusion
 
         static constexpr u32 kAtlasSize = 2048;
         static constexpr u32 kMaxLayers = 8;
-        static constexpr char* kDefaultFamilyName = "Roboto";
+        static constexpr u32 kSdfRenderSize = 32;
+        static constexpr u32 kSdfPadding = 4;
+        static constexpr auto kDefaultFamilyName = "Roboto";
 
         ~FFontAtlas();
 
@@ -59,6 +63,24 @@ namespace Fusion
             bool operator!=(const FFontFaceKey& rhs) const { return !(*this == rhs); }
         };
 
+        struct FFontGlyphKey
+        {
+            FName Family = "";
+            EFontWeight Weight = EFontWeight::Regular;
+            EFontStyle Style = EFontStyle::Normal;
+
+            u32 CodePoint = 0;
+
+            SizeT GetHash() const;
+
+            bool operator==(const FFontGlyphKey& rhs) const
+            {
+                return Family == rhs.Family && Weight == rhs.Weight && Style == rhs.Style && CodePoint == rhs.CodePoint;
+            }
+
+            bool operator!=(const FFontGlyphKey& rhs) const { return !(*this == rhs); }
+        };
+
         struct FFontFace
         {
             FFontFaceKey Key{};
@@ -79,6 +101,21 @@ namespace Fusion
             }
         };
 
+        struct FRowSegment {
+            int X, Y;
+            int Height;
+        };
+
+        struct FAtlasImageLayer : FIntrusiveBase
+        {
+            //u8* Ptr = nullptr;
+            FArray<FRowSegment> Rows;
+
+            FHashMap<FFontGlyphKey, FGlyph> Glyphs;
+
+            bool TryInsertGlyph(FVec2i glyphSize, int& outX, int& outY);
+        };
+
         void LoadGlyphs(FFontFaceKey key, const u32* codePoints, SizeT numCodePoints);
 
         WeakRef<FApplicationInstance> m_ApplicationInstance;
@@ -87,6 +124,9 @@ namespace Fusion
         FFontFace m_DefaultFace{};
 
         FHashMap<FFontFaceKey, FFontFace> m_FontFaces;
+
+        FArray<IPtr<FAtlasImageLayer>> m_AtlasImageLayers;
+        int m_CurLayerIndex = -1;
 
         FAtlasHandle m_AtlasHandle;
     };

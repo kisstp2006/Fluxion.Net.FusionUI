@@ -118,6 +118,9 @@ namespace Fusion::Vulkan
         static constexpr VkDeviceSize kBufferInitialSize = 16_MB;
         static constexpr VkDeviceSize kBufferGrowSize = 16_MB;
 
+        static constexpr VkDeviceSize kStagingBufferInitialSize = 16_MB;
+        static constexpr VkDeviceSize kStagingBufferGrowSize = 16_MB;
+
         FVulkanRenderBackend(IFPlatformBackend* platformBackend) : IFRenderBackend(platformBackend)
         {
 	        
@@ -190,6 +193,10 @@ namespace Fusion::Vulkan
         // - Atlas -
 
         FAtlasHandle CreateLayeredAtlas(bool grayscale, u32 resolution, u32 maxLayers) override;
+
+        void UploadAtlasRegionAsync(FAtlasHandle atlas, u32 layer,
+            FVec2i pos, FVec2i size,
+            const u8* pixels, int pitch) override;
 
         void DestroyAtlas(FAtlasHandle atlas) override;
 
@@ -300,6 +307,7 @@ namespace Fusion::Vulkan
         
         FArray<FDescriptorPool*, kImageCount> m_PoolsPerFrame;
         FArray<IntrusivePtr<FMappedBuffer>, kImageCount> m_UIDrawDataBuffers;
+        FArray<IntrusivePtr<FMappedBuffer>, kImageCount> m_StagingBuffers;
 
         FArray<VkCommandBuffer, kImageCount> m_CommandBuffers;
         FArray<VkSemaphore, kImageCount> m_RenderFinishedSemaphores;
@@ -310,6 +318,8 @@ namespace Fusion::Vulkan
         // - Transient Resources -
 
         FArray<FDrawDataBufferViews> m_OffsetDataPerSnapshot;
+
+        // - Null Buffer -
 
         FBuffer* m_NullBuffer = nullptr;
         VkDescriptorBufferInfo m_NullBufferInfo{};

@@ -36,6 +36,9 @@ namespace Fusion
         const Resources::FResource* resource = Resources::Find("/Fonts/Roboto-Regular.ttf");
         FUSION_ASSERT(resource != nullptr, "Failed to find required resource: /Fonts/Roboto-Regular.ttf");
 
+        m_AtlasImageLayers.Add(new FAtlasImageLayer);
+        m_CurLayerIndex = 0;
+
         LoadFace(kDefaultFamilyName, EFontWeight::Regular, EFontStyle::Normal,
             resource->Data, resource->Size);
 
@@ -92,8 +95,120 @@ namespace Fusion
         return hash;
     }
 
+    SizeT FFontAtlas::FFontGlyphKey::GetHash() const
+    {
+        SizeT hash = Family.GetHash();
+        CombineHash(hash, (std::underlying_type_t<decltype(Weight)>)Weight);
+        CombineHash(hash, (std::underlying_type_t<decltype(Style)>)Style);
+        CombineHash(hash, CodePoint);
+        return hash;
+    }
+
+    bool FFontAtlas::FAtlasImageLayer::TryInsertGlyph(FVec2i glyphSize, int& outX, int& outY)
+    {
+        int bestRowIndex = -1;
+        int bestRowHeight = INT_MAX;
+
+        if (Rows.Empty())
+        {
+            Rows.Add({ .X = glyphSize.width, .Y = 0, .Height = glyphSize.height });
+            outX = 0;
+            outY = 0;
+            return true;
+        }
+
+        for (int i = 0; i < Rows.Size(); i++)
+        {
+            int x = Rows[i].X;
+            int y = Rows[i].Y;
+
+            // Check if the glyph fits at this position
+            if (x + glyphSize.width <= kAtlasSize && y + glyphSize.height <= kAtlasSize)
+            {
+                if (Rows[i].Height >= glyphSize.height && Rows[i].Height < bestRowHeight)
+                {
+                    bestRowHeight = Rows[i].Height;
+                    bestRowIndex = i;
+                }
+            }
+        }
+
+        if (bestRowIndex == -1)
+        {
+            FRowSegment lastRow = Rows.Last();
+            if (lastRow.Y + lastRow.Height + glyphSize.height > kAtlasSize)
+            {
+                return false;
+            }
+
+            Rows.Add({ .X = glyphSize.width, .Y = lastRow.Y + lastRow.Height, .Height = glyphSize.height });
+
+            outX = 0;
+            outY = Rows.Last().Y;
+
+            return true;
+        }
+
+        outX = Rows[bestRowIndex].X;
+        outY = Rows[bestRowIndex].Y;
+
+        Rows[bestRowIndex].X += glyphSize.width;
+
+        return true;
+    }
+
     void FFontAtlas::LoadGlyphs(FFontFaceKey key, const u32* codePoints, SizeT numCodePoints)
     {
-        
+        Ref<FApplicationInstance> application = m_ApplicationInstance.Lock();
+        if (!application)
+            return;
+        IFRenderBackend* renderBackend = application->GetRenderBackend();
+
+        auto it = m_FontFaces.Find(key);
+        if (it == m_FontFaces.End())
+            return;
+
+        FFontFace face = it->second;
+
+        FT_Set_Pixel_Sizes(face.Face, 0, kSdfRenderSize);
+
+        for (int i = 0; i < numCodePoints; i++)
+        {
+            const u32 codePoint = codePoints[i];
+
+            FT_UInt glyphIndex = FT_Get_Char_Index(face.Face, codePoint);
+            if (glyphIndex == 0)
+                continue;
+
+            FT_Load_Glyph(face.Face, glyphIndex, FT_LOAD_DEFAULT);
+            FT_Render_Glyph(face.Face->glyph, FT_RENDER_MODE_SDF);
+
+            FT_GlyphSlot slot = face.Face->glyph;
+
+            FT_Bitmap& bitmap = slot->bitmap;
+
+            FGlyph glyph{};
+            glyph.CodePoint = codePoint;
+            glyph.AtlasSize = kAtlasSize;
+            glyph.Width = bitmap.width;
+            glyph.Height = bitmap.rows;
+            glyph.BearingX = slot->bitmap_left;
+            glyph.BearingY = slot->bitmap_top;
+            glyph.Advance = slot->advance.x >> 6;
+
+            u8* pixels = bitmap.buffer;
+
+            IPtr<FAtlasImageLayer> layer = m_AtlasImageLayers[m_CurLayerIndex];
+            FVec2i glyphSize = FVec2i(glyph.Width + kSdfPadding, glyph.Height + kSdfPadding);
+            int outX = 0, outY = 0;
+
+            if (layer->TryInsertGlyph(glyphSize, outX, outY))
+            {
+                outX += kSdfPadding / 2;
+                outY += kSdfPadding / 2;
+
+
+            }
+        }
     }
 } // namespace Fusion

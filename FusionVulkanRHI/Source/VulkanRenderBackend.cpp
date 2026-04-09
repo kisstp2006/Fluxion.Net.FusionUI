@@ -305,6 +305,12 @@ namespace Fusion::Vulkan
 		return handle;
 	}
 
+	void FVulkanRenderBackend::UploadAtlasRegionAsync(FAtlasHandle atlas, u32 layer, FVec2i pos, FVec2i size,
+		const u8* pixels, int pitch)
+	{
+
+	}
+
 	void FVulkanRenderBackend::DestroyAtlas(FAtlasHandle atlas)
 	{
 		m_AtlasesByHandle.Remove(atlas);
@@ -1477,6 +1483,17 @@ namespace Fusion::Vulkan
 			m_UIDrawDataBuffers[i] = new FMappedBuffer(this, kBufferInitialSize, kBufferGrowSize);
 		}
 
+		// - Staging Buffer -
+
+		m_StagingBuffers.Resize(kImageCount);
+
+		for (int i = 0; i < kImageCount; i++)
+		{
+			m_StagingBuffers[i] = new FMappedBuffer(this, kStagingBufferInitialSize, kStagingBufferGrowSize);
+		}
+
+		// - Null Buffer -
+
 		m_NullBuffer = new FBuffer(this, 256);
 
 		m_NullBufferInfo = {
@@ -1504,9 +1521,15 @@ namespace Fusion::Vulkan
 		}
 		m_UIDrawDataBuffers.Clear();
 
+		for (SizeT i = 0; i < m_StagingBuffers.Size(); i++)
+		{
+			m_StagingBuffers[i]->DeferredDestroy();
+		}
+		m_StagingBuffers.Clear();
+
 		for (SizeT i = 0; i < m_DeferredDestruction.Size(); i++)
 		{
-			m_DeferredDestruction[i].m_Destruction.ExecuteIfBound();
+			m_DeferredDestruction[i].m_Destruction.Execute();
 		}
 		m_DeferredDestruction.Clear();
 

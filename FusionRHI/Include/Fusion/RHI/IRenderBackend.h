@@ -60,6 +60,11 @@ namespace Fusion
 		// - Atlas -
 
 		virtual FAtlasHandle CreateLayeredAtlas(bool grayscale, u32 resolution, u32 maxLayers) = 0;
+
+    	virtual void UploadAtlasRegionAsync(FAtlasHandle atlas, u32 layer,
+    		FVec2i pos, FVec2i size,
+    		const u8* pixels, int pitch) = 0;
+
     	virtual void DestroyAtlas(FAtlasHandle atlas) = 0;
 
 		// - Rendering -
