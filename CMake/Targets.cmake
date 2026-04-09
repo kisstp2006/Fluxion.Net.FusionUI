@@ -68,7 +68,7 @@ function(add_fusion_target NAME TARGET_TYPE)
 
     set(options        VS_STARTUP_PROJECT)
     set(oneValueArgs   FOLDER NAMESPACE ALIAS OUTPUT_DIRECTORY)
-    set(multiValueArgs FILES_CMAKE INCLUDE_DIRECTORIES BUILD_DEPENDENCIES COMPILE_DEFINITIONS PCHHEADER)
+    set(multiValueArgs FILES_CMAKE INCLUDE_DIRECTORIES BUILD_DEPENDENCIES COMPILE_DEFINITIONS PCHHEADER APPLE_FRAMEWORKS)
 
     cmake_parse_arguments(add_fusion_target "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -239,6 +239,33 @@ function(add_fusion_target NAME TARGET_TYPE)
                 INTERFACE ${add_fusion_target_PCHHEADER_INTERFACE}
             )
         endif()
+    endif()
+
+    # ------------------------------------------------------------------
+    # APPLE_FRAMEWORKS  (macOS/iOS only)
+    # ------------------------------------------------------------------
+    if(APPLE AND add_fusion_target_APPLE_FRAMEWORKS)
+        set(multiValueArgs PRIVATE PUBLIC INTERFACE)
+        cmake_parse_arguments(add_fusion_target_APPLE_FRAMEWORKS "" "" "${multiValueArgs}" ${add_fusion_target_APPLE_FRAMEWORKS})
+
+        set(_fw_private "")
+        set(_fw_public "")
+        set(_fw_interface "")
+        foreach(fw ${add_fusion_target_APPLE_FRAMEWORKS_PRIVATE})
+            list(APPEND _fw_private "-framework ${fw}")
+        endforeach()
+        foreach(fw ${add_fusion_target_APPLE_FRAMEWORKS_PUBLIC})
+            list(APPEND _fw_public "-framework ${fw}")
+        endforeach()
+        foreach(fw ${add_fusion_target_APPLE_FRAMEWORKS_INTERFACE})
+            list(APPEND _fw_interface "-framework ${fw}")
+        endforeach()
+
+        target_link_libraries(${NAME}
+            PRIVATE   ${_fw_private}
+            PUBLIC    ${_fw_public}
+            INTERFACE ${_fw_interface}
+        )
     endif()
 
 endfunction()

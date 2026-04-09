@@ -1,4 +1,5 @@
 #include "Fusion/SDL3Platform.h"
+#include "PAL/SDL3Platform.h"
 
 // Copyright (c) 2026 Neil Mewada
 // SPDX-License-Identifier: MIT
@@ -89,7 +90,7 @@ namespace Fusion
 
 	f32 FSDL3PlatformWindow::GetDpiScale()
 	{
-		return SDL_GetWindowDisplayScale(sdlWindow);
+		return FSDL3Platform::GetWindowDpiScale(sdlWindow);
 	}
 } // namespace Fusion
 
