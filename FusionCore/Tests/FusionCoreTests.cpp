@@ -1047,7 +1047,7 @@ TEST(FColorTest, PredefinedColors)
 
 TEST(FStableDynamicArrayTest, DefaultConstructor)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     EXPECT_TRUE(arr.IsEmpty());
     EXPECT_EQ(arr.GetCount(), 0);
     EXPECT_EQ(arr.GetCapacity(), 0);
@@ -1056,7 +1056,7 @@ TEST(FStableDynamicArrayTest, DefaultConstructor)
 
 TEST(FStableDynamicArrayTest, InsertAndCount)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     arr.Insert(1);
     arr.Insert(2);
     arr.Insert(3);
@@ -1069,7 +1069,7 @@ TEST(FStableDynamicArrayTest, InsertAndCount)
 
 TEST(FStableDynamicArrayTest, GrowthIncrement)
 {
-    FStableDynamicArray<int, 4> arr;
+    FStableGrowthArray<int, 4> arr;
     arr.Insert(1);
     arr.Insert(2);
     arr.Insert(3);
@@ -1084,7 +1084,7 @@ TEST(FStableDynamicArrayTest, GrowthIncrement)
 
 TEST(FStableDynamicArrayTest, Reserve)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     arr.Reserve(64);
     EXPECT_GE(arr.GetCapacity(), 64);
     EXPECT_EQ(arr.GetCount(), 0);
@@ -1096,7 +1096,7 @@ TEST(FStableDynamicArrayTest, Reserve)
 
 TEST(FStableDynamicArrayTest, ReservePreservesData)
 {
-    FStableDynamicArray<int, 4> arr;
+    FStableGrowthArray<int, 4> arr;
     arr.Insert(10);
     arr.Insert(20);
     arr.Reserve(64);
@@ -1107,7 +1107,7 @@ TEST(FStableDynamicArrayTest, ReservePreservesData)
 
 TEST(FStableDynamicArrayTest, FirstAndLast)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     arr.Insert(10);
     arr.Insert(20);
     arr.Insert(30);
@@ -1117,7 +1117,7 @@ TEST(FStableDynamicArrayTest, FirstAndLast)
 
 TEST(FStableDynamicArrayTest, RemoveAll)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     arr.Insert(1);
     arr.Insert(2);
     arr.RemoveAll();
@@ -1129,7 +1129,7 @@ TEST(FStableDynamicArrayTest, RemoveAll)
 
 TEST(FStableDynamicArrayTest, RemoveAt)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     arr.Insert(1);
     arr.Insert(2);
     arr.Insert(3);
@@ -1141,7 +1141,7 @@ TEST(FStableDynamicArrayTest, RemoveAt)
 
 TEST(FStableDynamicArrayTest, RemoveAtFirst)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     arr.Insert(10);
     arr.Insert(20);
     arr.Insert(30);
@@ -1153,7 +1153,7 @@ TEST(FStableDynamicArrayTest, RemoveAtFirst)
 
 TEST(FStableDynamicArrayTest, RemoveAtOutOfBounds)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     arr.Insert(1);
     arr.RemoveAt(5); // should not crash, no-op
     EXPECT_EQ(arr.GetCount(), 1);
@@ -1161,7 +1161,7 @@ TEST(FStableDynamicArrayTest, RemoveAtOutOfBounds)
 
 TEST(FStableDynamicArrayTest, RemoveLast)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     arr.Insert(1);
     arr.Insert(2);
     arr.Insert(3);
@@ -1172,7 +1172,7 @@ TEST(FStableDynamicArrayTest, RemoveLast)
 
 TEST(FStableDynamicArrayTest, InsertRange)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     arr.InsertRange(3, 42);
     EXPECT_EQ(arr.GetCount(), 3);
     EXPECT_EQ(arr[0], 42);
@@ -1182,7 +1182,7 @@ TEST(FStableDynamicArrayTest, InsertRange)
 
 TEST(FStableDynamicArrayTest, InsertMultipleValues)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     int values[] = { 5, 10, 15 };
     arr.Insert(values, 3);
     EXPECT_EQ(arr.GetCount(), 3);
@@ -1193,7 +1193,7 @@ TEST(FStableDynamicArrayTest, InsertMultipleValues)
 
 TEST(FStableDynamicArrayTest, GetByteSize)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     arr.Insert(1);
     arr.Insert(2);
     EXPECT_EQ(arr.GetByteSize(), 2 * sizeof(int));
@@ -1201,12 +1201,12 @@ TEST(FStableDynamicArrayTest, GetByteSize)
 
 TEST(FStableDynamicArrayTest, CopyConstructor)
 {
-    FStableDynamicArray<int> a;
+    FStableGrowthArray<int> a;
     a.Insert(1);
     a.Insert(2);
     a.Insert(3);
 
-    FStableDynamicArray<int> b(a);
+    FStableGrowthArray<int> b(a);
     EXPECT_EQ(b.GetCount(), 3);
     EXPECT_EQ(b[0], 1);
     EXPECT_EQ(b[1], 2);
@@ -1219,11 +1219,11 @@ TEST(FStableDynamicArrayTest, CopyConstructor)
 
 TEST(FStableDynamicArrayTest, CopyAssignment)
 {
-    FStableDynamicArray<int> a;
+    FStableGrowthArray<int> a;
     a.Insert(10);
     a.Insert(20);
 
-    FStableDynamicArray<int> b;
+    FStableGrowthArray<int> b;
     b.Insert(99);
     b = a;
 
@@ -1235,11 +1235,11 @@ TEST(FStableDynamicArrayTest, CopyAssignment)
 
 TEST(FStableDynamicArrayTest, MoveConstructor)
 {
-    FStableDynamicArray<int> a;
+    FStableGrowthArray<int> a;
     a.Insert(1);
     a.Insert(2);
 
-    FStableDynamicArray<int> b(std::move(a));
+    FStableGrowthArray<int> b(std::move(a));
     EXPECT_EQ(b.GetCount(), 2);
     EXPECT_EQ(b[0], 1);
     EXPECT_TRUE(a.IsEmpty());
@@ -1248,11 +1248,11 @@ TEST(FStableDynamicArrayTest, MoveConstructor)
 
 TEST(FStableDynamicArrayTest, MoveAssignment)
 {
-    FStableDynamicArray<int> a;
+    FStableGrowthArray<int> a;
     a.Insert(1);
     a.Insert(2);
 
-    FStableDynamicArray<int> b;
+    FStableGrowthArray<int> b;
     b = std::move(a);
     EXPECT_EQ(b.GetCount(), 2);
     EXPECT_TRUE(a.IsEmpty());
@@ -1261,7 +1261,7 @@ TEST(FStableDynamicArrayTest, MoveAssignment)
 
 TEST(FStableDynamicArrayTest, SelfCopyAssignment)
 {
-    FStableDynamicArray<int> a;
+    FStableGrowthArray<int> a;
     a.Insert(1);
     a = a;
     EXPECT_EQ(a.GetCount(), 1);
@@ -1270,7 +1270,7 @@ TEST(FStableDynamicArrayTest, SelfCopyAssignment)
 
 TEST(FStableDynamicArrayTest, SelfMoveAssignment)
 {
-    FStableDynamicArray<int> a;
+    FStableGrowthArray<int> a;
     a.Insert(1);
     a = std::move(a);
     EXPECT_EQ(a.GetCount(), 1);
@@ -1278,7 +1278,7 @@ TEST(FStableDynamicArrayTest, SelfMoveAssignment)
 
 TEST(FStableDynamicArrayTest, RangeBasedFor)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     arr.Insert(10);
     arr.Insert(20);
     arr.Insert(30);
@@ -1291,7 +1291,7 @@ TEST(FStableDynamicArrayTest, RangeBasedFor)
 
 TEST(FStableDynamicArrayTest, Free)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     arr.Insert(1);
     arr.Insert(2);
     arr.Free();
@@ -1303,7 +1303,7 @@ TEST(FStableDynamicArrayTest, Free)
 
 TEST(FStableDynamicArrayTest, InsertAfterFree)
 {
-    FStableDynamicArray<int> arr;
+    FStableGrowthArray<int> arr;
     arr.Insert(1);
     arr.Free();
     arr.Insert(2);

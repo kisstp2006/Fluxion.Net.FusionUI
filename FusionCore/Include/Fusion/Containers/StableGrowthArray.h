@@ -4,27 +4,27 @@ namespace Fusion
 {
     
     template<typename T, SizeT GrowthIncrement = 128>
-    class FStableDynamicArray
+    class FStableGrowthArray
     {
         static_assert(GrowthIncrement > 0);
     public:
 
         static constexpr SizeT IncrementSize = GrowthIncrement;
 
-        FStableDynamicArray()
+        FStableGrowthArray()
         {}
 
-        ~FStableDynamicArray()
+        ~FStableGrowthArray()
         {
             Free();
         }
 
-        FStableDynamicArray(const FStableDynamicArray& copy)
+        FStableGrowthArray(const FStableGrowthArray& copy)
         {
             CopyFrom(copy);
         }
 
-        FStableDynamicArray& operator=(const FStableDynamicArray& copy)
+        FStableGrowthArray& operator=(const FStableGrowthArray& copy)
         {
             if (this == &copy)
                 return *this;
@@ -33,7 +33,7 @@ namespace Fusion
             return *this;
         }
 
-        FStableDynamicArray(FStableDynamicArray&& move) noexcept
+        FStableGrowthArray(FStableGrowthArray&& move) noexcept
         {
             data = move.data;
             count = move.count;
@@ -43,7 +43,7 @@ namespace Fusion
             move.count = move.capacity = 0;
         }
 
-        FStableDynamicArray& operator=(FStableDynamicArray&& move) noexcept
+        FStableGrowthArray& operator=(FStableGrowthArray&& move) noexcept
         {
             if (this == &move)
                 return *this;
@@ -98,24 +98,6 @@ namespace Fusion
             return data[count - 1];
         }
 
-        void Reserve(SizeT totalElementCapacity)
-        {
-            ZoneScoped;
-
-	        if (capacity < totalElementCapacity)
-	        {
-                T* newData = new T[totalElementCapacity];
-                if (data != nullptr)
-                {
-                    memcpy(newData, data, sizeof(T) * count);
-                    delete[] data;
-                }
-                data = newData;
-                
-                capacity = totalElementCapacity;
-	        }
-        }
-
         void Free()
         {
             ZoneScoped;
@@ -140,15 +122,16 @@ namespace Fusion
         {
             ZoneScoped;
 
+            T copy = item; // capture before potential reallocation invalidates a self-reference
 	        if (data == nullptr || count >= capacity)
 	        {
                 Grow();
 	        }
 
-            data[count++] = item;
+            data[count++] = std::move(copy);
         }
 
-        void InsertRange(int numItems, const T& value = {})
+        void InsertRange(SizeT numItems, const T& value = {})
         {
             ZoneScoped;
 
@@ -157,13 +140,13 @@ namespace Fusion
                 Reserve(capacity + std::max<SizeT>(this->count + numItems, GrowthIncrement));
 	        }
 
-            for (int i = 0; i < numItems; i++)
+            for (SizeT i = 0; i < numItems; i++)
             {
                 data[count++] = value;
             }
         }
 
-        void Insert(T* values, int numItems)
+        void Insert(const T* values, SizeT numItems)
         {
             ZoneScoped;
 
@@ -172,9 +155,17 @@ namespace Fusion
                 Reserve(capacity + std::max<SizeT>(this->count + numItems, GrowthIncrement));
             }
 
-            for (int i = 0; i < numItems; i++)
+            if constexpr (std::is_trivially_copyable_v<T>)
             {
-                data[count++] = values[i];
+                memcpy(data + count, values, numItems * sizeof(T));
+                count += numItems;
+            }
+            else
+            {
+                for (SizeT i = 0; i < numItems; i++)
+                {
+                    data[count++] = values[i];
+                }
             }
         }
 
@@ -192,17 +183,19 @@ namespace Fusion
             if (count == 0 || index >= count)
                 return;
 
-            for (SizeT i = index; i < count - 1; ++i)
-            {
-                data[i] = data[i + 1];
-            }
+            if constexpr (std::is_trivially_copyable_v<T>)
+                memmove(data + index, data + index + 1, (count - index - 1) * sizeof(T));
+            else
+                for (SizeT i = index; i < count - 1; ++i)
+                    data[i] = std::move(data[i + 1]);
 
             count--;
         }
 
         void RemoveLast()
         {
-            RemoveAt(count - 1);
+            if (count > 0)
+                RemoveAt(count - 1);
         }
 
         bool IsEmpty() const
@@ -232,7 +225,31 @@ namespace Fusion
         
     private:
 
-        void CopyFrom(const FStableDynamicArray& copy)
+        void Reserve(SizeT totalElementCapacity)
+        {
+            ZoneScoped;
+
+            totalElementCapacity = ((totalElementCapacity + GrowthIncrement - 1) / GrowthIncrement) * GrowthIncrement;
+
+            if (capacity < totalElementCapacity)
+            {
+                T* newData = new T[totalElementCapacity];
+                if (data != nullptr)
+                {
+                    if constexpr (std::is_trivially_copyable_v<T>)
+                        memcpy(newData, data, sizeof(T) * count);
+                    else
+                        for (SizeT i = 0; i < count; ++i)
+                            newData[i] = std::move(data[i]);
+                    delete[] data;
+                }
+                data = newData;
+
+                capacity = totalElementCapacity;
+            }
+        }
+
+        void CopyFrom(const FStableGrowthArray& copy)
         {
             Free();
 
@@ -242,7 +259,11 @@ namespace Fusion
             
             if (count > 0)
             {
-                memcpy(data, copy.data, count * sizeof(T));
+                if constexpr (std::is_trivially_copyable_v<T>)
+                    memcpy(data, copy.data, count * sizeof(T));
+                else
+                    for (SizeT i = 0; i < count; ++i)
+                        data[i] = copy.data[i];
             }
         }
 

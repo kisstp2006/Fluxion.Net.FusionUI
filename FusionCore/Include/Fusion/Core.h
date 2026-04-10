@@ -30,7 +30,7 @@
 #include "Fusion/Containers/Name.h"
 #include "Fusion/Containers/Array.h"
 #include "Fusion/Containers/StaticArray.h"
-#include "Fusion/Containers/StableDynamicArray.h"
+#include "Fusion/Containers/StableGrowthArray.h"
 #include "Fusion/Containers/HashMap.h"
 
 #include "Fusion/Misc/Handle.h"

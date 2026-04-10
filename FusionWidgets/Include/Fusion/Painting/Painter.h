@@ -87,11 +87,11 @@ namespace Fusion
         bool PathStrokeInternal(bool closed);
         bool PathFillInternal();
 
-        using FPathArray = FStableDynamicArray<FVec2, 128>;
-        using FFloatArray = FStableDynamicArray<f32, 128>;
-        using FOpacityStack = FStableDynamicArray<f32, 32>;
-        using FTransformStack = FStableDynamicArray<FAffineTransform, 128>;
-        using FClipStack = FStableDynamicArray<int, 32>;
+        using FPathArray = FStableGrowthArray<FVec2, 128>;
+        using FFloatArray = FStableGrowthArray<f32, 128>;
+        using FOpacityStack = FStableGrowthArray<f32, 32>;
+        using FTransformStack = FStableGrowthArray<FAffineTransform, 128>;
+        using FClipStack = FStableGrowthArray<int, 32>;
 
         static constexpr u32 kArcFastTableSize = 48;
 

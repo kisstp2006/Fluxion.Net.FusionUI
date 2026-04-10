@@ -305,10 +305,38 @@ namespace Fusion::Vulkan
 		return handle;
 	}
 
-	void FVulkanRenderBackend::UploadAtlasRegionAsync(FAtlasHandle atlas, u32 layer, FVec2i pos, FVec2i size,
+	void FVulkanRenderBackend::UploadAtlasRegionAsync(FAtlasHandle handle, u32 layer, FVec2i pos, FVec2i size,
 		const u8* pixels, int pitch)
 	{
+		auto it = m_AtlasesByHandle.Find(handle);
+		if (it == m_AtlasesByHandle.End())
+			return;
 
+		IPtr<FTextureAtlas> atlas = it->second;
+		if (!atlas)
+			return;
+
+		u32 bytesPerPixel = GetFormatBytesPerTexel(atlas->m_Format);
+		if (bytesPerPixel == 0)
+			return;
+
+		u32 bytesPerRow = size.x * bytesPerPixel;
+		SizeT byteOffset = m_UploadArena.GetByteSize();
+		SizeT byteCount = (SizeT)size.y * bytesPerRow;
+
+		for (int row = 0; row < size.y; row++)
+		{
+			m_UploadArena.Insert(pixels + row * pitch, bytesPerRow);
+		}
+
+		m_PendingAtlasUploads.Add(handle, {
+			.Handle = handle,
+			.Layer = layer,
+			.Pos = pos,
+			.Size = size,
+			.DataOffset = byteOffset,
+			.DataSize = byteCount
+		});
 	}
 
 	void FVulkanRenderBackend::DestroyAtlas(FAtlasHandle atlas)
@@ -375,6 +403,8 @@ namespace Fusion::Vulkan
 
 		VkResult result = VK_SUCCESS;
 
+		SizeT curUploadOffset = 0;
+
 		constexpr uint64_t kSwapChainTimeOut = UINT64_MAX;
 		constexpr uint64_t kFenceTimeOut = UINT64_MAX;
 
@@ -391,15 +421,15 @@ namespace Fusion::Vulkan
 
 		vkResetFences(m_Device, 1, &m_RenderFinishedFences[m_FrameSlot]);
 
-		// - Reset Pool -
+		// - Reset Descriptor Pool -
 
 		m_PoolsPerFrame[m_FrameSlot]->Reset();
 		FDescriptorPool* pool = m_PoolsPerFrame[m_FrameSlot];
 
-		// - Prepare Buffer Offsets -
+		// - Prepare Draw Buffer Offsets -
 
 		m_OffsetDataPerSnapshot.Clear();
-		VkDeviceSize currentOffset = 0;
+		VkDeviceSize currentDrawBufferOffset = 0;
 		VkDeviceSize alignment = FMath::Max(m_PhysicalDeviceProperties.limits.minUniformBufferOffsetAlignment, m_PhysicalDeviceProperties.limits.minStorageBufferOffsetAlignment);
 
 		for (auto [renderTargetHandle, renderTarget] : m_RenderTargetsByHandle)
@@ -409,72 +439,72 @@ namespace Fusion::Vulkan
 
 			auto snapshot = renderTarget->m_Snapshot;
 
-			if (currentOffset > 0)
-				currentOffset = FMappedBuffer::AlignUp(currentOffset, alignment);
+			if (currentDrawBufferOffset > 0)
+				currentDrawBufferOffset = FMappedBuffer::AlignUp(currentDrawBufferOffset, alignment);
 			
 			FDrawDataBufferViews views{};
 
 			views.RenderTarget = renderTargetHandle;
 
-			views.VertexBuffer.StartOffset = currentOffset;
+			views.VertexBuffer.StartOffset = currentDrawBufferOffset;
 			views.VertexBuffer.ByteSize = snapshot->vertexArray.GetByteSize();
-			currentOffset += views.VertexBuffer.ByteSize;
+			currentDrawBufferOffset += views.VertexBuffer.ByteSize;
 
-			views.IndexBuffer.StartOffset = currentOffset;
+			views.IndexBuffer.StartOffset = currentDrawBufferOffset;
 			views.IndexBuffer.ByteSize = snapshot->indexArray.GetByteSize();
-			currentOffset += views.IndexBuffer.ByteSize;
+			currentDrawBufferOffset += views.IndexBuffer.ByteSize;
 
-			currentOffset = FMappedBuffer::AlignUp(currentOffset, alignment);
-			views.ViewData.StartOffset = currentOffset;
+			currentDrawBufferOffset = FMappedBuffer::AlignUp(currentDrawBufferOffset, alignment);
+			views.ViewData.StartOffset = currentDrawBufferOffset;
 			views.ViewData.ByteSize = sizeof(snapshot->viewData);
-			currentOffset += views.ViewData.ByteSize;
+			currentDrawBufferOffset += views.ViewData.ByteSize;
 
 			for (int i = 0; i < snapshot->transformMatricesPerLayer.GetCount(); i++)
 			{
-				currentOffset = FMappedBuffer::AlignUp(currentOffset, alignment);
+				currentDrawBufferOffset = FMappedBuffer::AlignUp(currentDrawBufferOffset, alignment);
 
 				views.LayerTransformBuffers.Add({
-					.StartOffset = currentOffset,
+					.StartOffset = currentDrawBufferOffset,
 					.ByteSize = sizeof(FMat4)
 				});
 
-				currentOffset += sizeof(FMat4);
+				currentDrawBufferOffset += sizeof(FMat4);
 			}
 
 			for (int i = 0; i < snapshot->drawItemSplits.GetCount(); i++)
 			{
-				currentOffset = FMappedBuffer::AlignUp(currentOffset, alignment);
+				currentDrawBufferOffset = FMappedBuffer::AlignUp(currentDrawBufferOffset, alignment);
 
 				views.DrawItemBuffers.Add({
-					.StartOffset = currentOffset,
+					.StartOffset = currentDrawBufferOffset,
 					.ByteSize = snapshot->drawItemSplits[i].ByteSize
 				});
 
-				currentOffset += snapshot->drawItemSplits[i].ByteSize;
+				currentDrawBufferOffset += snapshot->drawItemSplits[i].ByteSize;
 			}
 
 			for (int i = 0; i < snapshot->clipRectSplits.GetCount(); i++)
 			{
-				currentOffset = FMappedBuffer::AlignUp(currentOffset, alignment);
+				currentDrawBufferOffset = FMappedBuffer::AlignUp(currentDrawBufferOffset, alignment);
 
 				views.ClipRectsBuffers.Add({
-					.StartOffset = currentOffset,
+					.StartOffset = currentDrawBufferOffset,
 					.ByteSize = snapshot->clipRectSplits[i].ByteSize
 				});
 
-				currentOffset += snapshot->clipRectSplits[i].ByteSize;
+				currentDrawBufferOffset += snapshot->clipRectSplits[i].ByteSize;
 			}
 
 			for (int i = 0; i < snapshot->gradientStopSplits.GetCount(); i++)
 			{
-				currentOffset = FMappedBuffer::AlignUp(currentOffset, alignment);
+				currentDrawBufferOffset = FMappedBuffer::AlignUp(currentDrawBufferOffset, alignment);
 
 				views.GradientStopBuffers.Add({
-					.StartOffset = currentOffset,
+					.StartOffset = currentDrawBufferOffset,
 					.ByteSize = snapshot->gradientStopSplits[i].ByteSize
 				});
 
-				currentOffset += snapshot->gradientStopSplits[i].ByteSize;
+				currentDrawBufferOffset += snapshot->gradientStopSplits[i].ByteSize;
 			}
 
 			m_OffsetDataPerSnapshot.Add(views);
@@ -482,10 +512,10 @@ namespace Fusion::Vulkan
 
 		FMappedBuffer* drawBuffer = m_UIDrawDataBuffers[m_FrameSlot];
 
-		drawBuffer->EnsureCapacity(currentOffset);
+		drawBuffer->EnsureCapacity(currentDrawBufferOffset);
 		u8* dataPtr = drawBuffer->m_MappedData;
 
-		// - Upload Buffer Data -
+		// - Upload Draw Buffer Data -
 
 		for (SizeT i = 0; i < m_OffsetDataPerSnapshot.Size(); i++)
 		{
@@ -686,6 +716,24 @@ namespace Fusion::Vulkan
 			}
 		}
 
+		// - Upload Atlas Regions -
+
+		for (auto& [atlasHandle, atlasUploadRegion]: m_PendingAtlasUploads)
+		{
+			auto it = m_AtlasesByHandle.Find(atlasUploadRegion.Handle);
+			if (it == m_AtlasesByHandle.End())
+				continue;
+
+			u8* dstData = m_StagingBuffers[m_FrameSlot]->m_MappedData + curUploadOffset;
+			memcpy(dstData, m_UploadArena.GetData() + atlasUploadRegion.DataOffset, atlasUploadRegion.DataSize);
+
+			atlasUploadRegion.MappedDataOffset = curUploadOffset;
+
+			m_StagingBuffers[m_FrameSlot]->EnsureCapacity(curUploadOffset);
+
+			curUploadOffset += atlasUploadRegion.DataSize;
+		}
+
 		// - Acquire SwapChain -
 
 		for (auto [windowHandle, swapChain] : m_SwapChainsByWindowHandle)
@@ -728,6 +776,10 @@ namespace Fusion::Vulkan
 
 		vkBeginCommandBuffer(cmdBuffer, &beginInfo);
 		{
+			// - Uploads -
+
+			// - Render Passes -
+
 			for (SizeT snapshotIdx = 0; snapshotIdx < m_OffsetDataPerSnapshot.Size(); snapshotIdx++)
 			{
 				VkClearValue colorClear;
@@ -853,6 +905,8 @@ namespace Fusion::Vulkan
 			"Failed to Present SwapChains.");
 
 		m_FrameSlot = (m_FrameSlot + 1) % kImageCount;
+
+		m_PendingAtlasUploads.Clear();
 	}
 
 	// ------------------------------------------------------------------------------------------------------------
@@ -1497,11 +1551,17 @@ namespace Fusion::Vulkan
 			.offset = 0,
 			.range = m_NullBuffer->m_BufferSize
 		};
+
+		// - Upload Arena -
+
+		m_UploadArena.Grow();
 	}
 
 	void FVulkanRenderBackend::ShutdownVulkan()
 	{
 		vkDeviceWaitIdle(m_Device);
+
+		m_UploadArena.Free();
 
 		m_AtlasIndexAllocator = 0;
 		m_AtlasesByHandle.Clear();
