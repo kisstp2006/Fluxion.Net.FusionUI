@@ -9,7 +9,8 @@ namespace Fusion::Vulkan
 		: m_Backend(backend), m_Device(m_Backend->GetVkDevice()), m_BufferSize(initialSize), m_GrowSize(growSize)
 	{
 		m_BufferCI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		m_BufferCI.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+		m_BufferCI.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT 
+			| VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		m_BufferCI.size = m_BufferSize;
 		
 		m_AllocCI.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
@@ -46,7 +47,7 @@ namespace Fusion::Vulkan
 
 			DeferredDestroy();
 
-			m_BufferSize = capacity;
+			m_BufferSize = m_BufferCI.size;
 			m_MappedData = (u8*)alloc.pMappedData;
 			m_Buffer = buffer;
 			m_Allocation = allocation;
@@ -73,7 +74,8 @@ namespace Fusion::Vulkan
 	{
 		VkBufferCreateInfo bufferCI{};
 		bufferCI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferCI.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;;
+		bufferCI.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT 
+			| VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		bufferCI.size = bufferSize;
 		m_BufferSize = bufferSize;
 

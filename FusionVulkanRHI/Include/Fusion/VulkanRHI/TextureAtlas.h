@@ -71,6 +71,7 @@ namespace Fusion::Vulkan
         u32 m_Size = 0;
         u32 m_LayerCount = 0;
         VkFormat m_Format = VK_FORMAT_UNDEFINED;
+        VkImageLayout m_CurLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     };
     
 } // namespace Fusion::Vulkan

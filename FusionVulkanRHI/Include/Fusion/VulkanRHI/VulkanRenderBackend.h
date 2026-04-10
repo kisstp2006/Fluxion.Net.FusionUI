@@ -121,6 +121,8 @@ namespace Fusion::Vulkan
         static constexpr VkDeviceSize kStagingBufferInitialSize = 16_MB;
         static constexpr VkDeviceSize kStagingBufferGrowSize = 16_MB;
 
+        static constexpr SizeT kUploadArenaGrowSize = 16_MB;
+
         FVulkanRenderBackend(IFPlatformBackend* platformBackend) : IFRenderBackend(platformBackend)
         {
 	        
@@ -238,6 +240,8 @@ namespace Fusion::Vulkan
 
     private:
 
+        using FArena = FStableGrowthArray<u8, kUploadArenaGrowSize>;
+
         FHashMap<FInstanceHandle, IntrusivePtr<FRenderInstance>> instances;
 
         // - Vulkan Data -
@@ -301,13 +305,12 @@ namespace Fusion::Vulkan
 
         IPtr<FGraphicsPipeline> m_MainGraphicsPipeline;
 
-        // - Per Frame Resources -
+        // - Per Frame Rendering Resources -
 
         u32 m_FrameSlot = 0;
         
         FArray<FDescriptorPool*, kImageCount> m_PoolsPerFrame;
         FStaticArray<IPtr<FMappedBuffer>, kImageCount> m_UIDrawDataBuffers;
-        FStaticArray<IPtr<FMappedBuffer>, kImageCount> m_StagingBuffers;
 
         FArray<VkCommandBuffer, kImageCount> m_CommandBuffers;
         FArray<VkSemaphore, kImageCount> m_RenderFinishedSemaphores;
@@ -318,6 +321,11 @@ namespace Fusion::Vulkan
         // - Transient Resources -
 
         FArray<FDrawDataBufferViews> m_OffsetDataPerSnapshot;
+        FStaticArray<IPtr<FMappedBuffer>, kImageCount> m_StagingBuffers;
+
+        // - Upload Arena -
+
+        FArena m_UploadArena;
 
         // - Null Buffer -
 
@@ -326,8 +334,21 @@ namespace Fusion::Vulkan
 
         // - Atlas Resources -
 
+        struct FAtlasUploadRegion
+        {
+            FAtlasHandle Handle;
+            u32 Layer = 0;
+            FVec2i Pos, Size;
+            SizeT DataOffset = 0;
+            SizeT DataSize = 0;
+
+            // Upload Data
+            SizeT MappedDataOffset = 0;
+        };
+
         FAtlasHandle::IndexType m_AtlasIndexAllocator = 0;
         FHashMap<FAtlasHandle, IPtr<FTextureAtlas>> m_AtlasesByHandle;
+        FHashMap<FAtlasHandle, FAtlasUploadRegion> m_PendingAtlasUploads;
     };
 
 } // namespace Fusion

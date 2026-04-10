@@ -57,7 +57,7 @@ namespace Fusion::Vulkan
 		m_ImageCI.mipLevels = 1;
 		m_ImageCI.samples = VK_SAMPLE_COUNT_1_BIT;
 		m_ImageCI.arrayLayers = layerCount;
-		m_ImageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		m_ImageCI.initialLayout = m_CurLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		m_ImageCI.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		
 		// Image View CI

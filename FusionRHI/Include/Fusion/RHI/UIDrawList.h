@@ -5,13 +5,13 @@
 
 namespace Fusion
 {
-    using FUIVertexArray        = FStableDynamicArray<FUIVertex,        1024>;
-    using FUIIndexArray         = FStableDynamicArray<FUIIndex,         1024>;
-    using FUIDrawItemArray      = FStableDynamicArray<FUIDrawItem,      512>;
-    using FUIClipRectArray      = FStableDynamicArray<FUIClipRect,      64>;
-    using FUIGradientStopArray  = FStableDynamicArray<FUIGradientStop,  64>;
-    using FUIDrawCmdArray       = FStableDynamicArray<FUIDrawCmd,       64>;
-    using FUIMatrixArray	    = FStableDynamicArray<FMat4,            64>;
+    using FUIVertexArray        = FStableGrowthArray<FUIVertex,        1024>;
+    using FUIIndexArray         = FStableGrowthArray<FUIIndex,         1024>;
+    using FUIDrawItemArray      = FStableGrowthArray<FUIDrawItem,      512>;
+    using FUIClipRectArray      = FStableGrowthArray<FUIClipRect,      64>;
+    using FUIGradientStopArray  = FStableGrowthArray<FUIGradientStop,  64>;
+    using FUIDrawCmdArray       = FStableGrowthArray<FUIDrawCmd,       64>;
+    using FUIMatrixArray	    = FStableGrowthArray<FMat4,            64>;
 
 	class FUSIONRHI_API FUIDrawList final
 	{
@@ -41,7 +41,7 @@ namespace Fusion
 
         // - Types & Constants -
 
-        using FTempPointsArray = FStableDynamicArray<FVec2, 128>;
+        using FTempPointsArray = FStableGrowthArray<FVec2, 128>;
         static constexpr u32 ColorAlphaMask = 0xff000000;
 
         // - Data -

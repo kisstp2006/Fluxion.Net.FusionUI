@@ -16,8 +16,8 @@ namespace Fusion
 		SizeT DrawCmdCount = 0;
 	};
 
-	using FUISplitRangeArray = FStableDynamicArray<FSplitRange,   64>;
-	using FUIRenderPassArray = FStableDynamicArray<FUIRenderPass, 32>;
+	using FUISplitRangeArray = FStableGrowthArray<FSplitRange,   64>;
+	using FUIRenderPassArray = FStableGrowthArray<FUIRenderPass, 32>;
 
     class FUSIONRHI_API FRenderSnapshot : public FIntrusiveBase
     {
