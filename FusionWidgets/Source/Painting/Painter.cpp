@@ -886,6 +886,8 @@ namespace Fusion
 			f32 v1 = (f32)(glyph.Y + glyph.Height) / glyph.AtlasSize;
 
 			cursorX += (f32)glyph.Advance * scale;
+
+			m_DrawList->AddQuad()
 		}
 	}
 
