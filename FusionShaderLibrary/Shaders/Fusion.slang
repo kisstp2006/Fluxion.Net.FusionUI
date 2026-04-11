@@ -73,7 +73,7 @@ float4 PSMain(VSOutput input) : SV_Target
     else */if (item.shaderType == FUIShaderType::LinearGradient)
     {
         float angle = item.data[0];
-        uv = fmod(uv, 1.0f);
+        uv = fmod(uv, 1.00001f);
 
         float2 dir = float2(cos(angle), sin(angle));
         float range = abs(dir.x) + abs(dir.y);
