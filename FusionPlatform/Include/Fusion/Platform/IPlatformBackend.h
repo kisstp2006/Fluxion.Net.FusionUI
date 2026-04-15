@@ -71,6 +71,15 @@ namespace Fusion
 
         virtual bool IsKeyUp(EKeyCode key) = 0;
 
+        // Returns all keys that transitioned down this tick (excludes repeats).
+        virtual FArray<EKeyCode> GetKeysDownThisTick() { return {}; }
+
+        // Returns all keys that transitioned up this tick.
+        virtual FArray<EKeyCode> GetKeysUpThisTick() { return {}; }
+
+        // Returns UTF-8 text produced by SDL_EVENT_TEXT_INPUT this tick (may be empty).
+        virtual FString GetTextInputThisTick() { return {}; }
+
         virtual bool IsMouseButtonDown(EMouseButton mouseButton) = 0;
 
         virtual bool IsMouseButtonUp(EMouseButton mouseButton) = 0;

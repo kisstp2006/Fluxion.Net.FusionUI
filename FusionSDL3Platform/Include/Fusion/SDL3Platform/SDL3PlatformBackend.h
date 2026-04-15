@@ -31,6 +31,7 @@ namespace Fusion
         FHashMap<EMouseButton, int> mouseButtonStateChanges{};
 
         EKeyModifier modifierStates{};
+        FString textInput{};
     };
 
     class FUSIONSDL3PLATFORM_API FSDL3PlatformBackend : public IFPlatformBackend
@@ -70,6 +71,10 @@ namespace Fusion
         bool IsKeyDown(EKeyCode key) override;
         bool IsKeyUp(EKeyCode key) override;
         bool IsKeyHeld(EKeyCode key) override;
+
+        FArray<EKeyCode> GetKeysDownThisTick() override;
+        FArray<EKeyCode> GetKeysUpThisTick()   override;
+        FString          GetTextInputThisTick() override;
 
         bool IsMouseButtonDown(EMouseButton mouseButton) override;
         bool IsMouseButtonUp(EMouseButton mouseButton) override;
@@ -130,6 +135,7 @@ namespace Fusion
         FVec2 m_PrevGlobalMousePosition{};
         //Vec2i mouseDelta{};
         FVec2 m_WheelDelta{};
+        FString m_TextInput{};
 
         FArray<u64> m_FocusGainedWindows{};
         FArray<u64> m_FocusLostWindows{};

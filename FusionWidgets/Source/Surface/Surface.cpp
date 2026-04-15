@@ -445,7 +445,114 @@ namespace Fusion
 
 	void FSurface::DispatchKeyEvents()
 	{
+		ZoneScoped;
 
+		Ref<FApplicationInstance> application = GetApplication();
+		if (!application)
+			return;
+
+		Ref<FWidget> focusedWidget = curFocusedWidget.Lock();
+		if (!focusedWidget)
+			return;
+
+		IFPlatformBackend* platform = application->GetPlatformBackend();
+		EKeyModifier modifiers = application->GetKeyModifiers();
+
+		// KeyDown
+		for (EKeyCode key : platform->GetKeysDownThisTick())
+		{
+			FKeyEvent event{};
+			event.Type = EEventType::KeyDown;
+			event.Key = key;
+			event.Modifiers = modifiers;
+
+			FWidget* current = focusedWidget.Get();
+			while (current)
+			{
+				event.Sender = current;
+				FWidget* parent = current->GetParentWidget().Get();
+
+				FUSION_TRY
+				{
+					FEventReply reply = current->OnKeyDown(event);
+					ProcessReply(current, reply);
+					if (reply.IsHandled())
+						break;
+				}
+				FUSION_CATCH (const FException& e)
+				{
+					current->SetFaulted();
+					FUSION_LOG_ERROR("Widget", "FException in {}::OnKeyDown(): {}\n{}", current->GetClassName(), e.what(), e.GetStackTraceString(true));
+					break;
+				}
+
+				current = parent;
+			}
+		}
+
+		// KeyUp
+		for (EKeyCode key : platform->GetKeysUpThisTick())
+		{
+			FKeyEvent event{};
+			event.Type = EEventType::KeyUp;
+			event.Key = key;
+			event.Modifiers = modifiers;
+
+			FWidget* current = focusedWidget.Get();
+			while (current)
+			{
+				event.Sender = current;
+				FWidget* parent = current->GetParentWidget().Get();
+
+				FUSION_TRY
+				{
+					FEventReply reply = current->OnKeyUp(event);
+					ProcessReply(current, reply);
+					if (reply.IsHandled())
+						break;
+				}
+				FUSION_CATCH (const FException& e)
+				{
+					current->SetFaulted();
+					FUSION_LOG_ERROR("Widget", "FException in {}::OnKeyUp(): {}\n{}", current->GetClassName(), e.what(), e.GetStackTraceString(true));
+					break;
+				}
+
+				current = parent;
+			}
+		}
+
+		// TextInput
+		FString textInput = platform->GetTextInputThisTick();
+		if (!textInput.Empty())
+		{
+			FTextInputEvent event{};
+			event.Type = EEventType::TextInput;
+			event.Text = MoveTemp(textInput);
+
+			FWidget* current = focusedWidget.Get();
+			while (current)
+			{
+				event.Sender = current;
+				FWidget* parent = current->GetParentWidget().Get();
+
+				FUSION_TRY
+				{
+					FEventReply reply = current->OnTextInput(event);
+					ProcessReply(current, reply);
+					if (reply.IsHandled())
+						break;
+				}
+				FUSION_CATCH (const FException& e)
+				{
+					current->SetFaulted();
+					FUSION_LOG_ERROR("Widget", "FException in {}::OnTextInput(): {}\n{}", current->GetClassName(), e.what(), e.GetStackTraceString(true));
+					break;
+				}
+
+				current = parent;
+			}
+		}
 	}
 
 	void FSurface::ProcessReply(Ref<FWidget> sender, const FEventReply& reply)

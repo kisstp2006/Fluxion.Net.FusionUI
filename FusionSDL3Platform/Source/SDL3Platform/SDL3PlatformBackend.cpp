@@ -116,6 +116,9 @@ namespace Fusion
 		m_PrevGlobalMousePosition = m_GlobalMousePosition;
 		m_WheelDelta = FVec2();
 
+		m_InputState.textInput = MoveTemp(m_TextInput);
+		m_TextInput = {};
+
 		m_StateChangesThisTick.Clear();
 		m_MouseButtonStateChanges.Clear();
 		m_FocusGainedWindows.Clear();
@@ -176,7 +179,8 @@ namespace Fusion
 			}
 
 			if (sdlEvent.type == SDL_EVENT_KEY_DOWN || sdlEvent.type == SDL_EVENT_KEY_UP ||
-				sdlEvent.type == SDL_EVENT_MOUSE_MOTION || sdlEvent.type == SDL_EVENT_MOUSE_BUTTON_DOWN || sdlEvent.type == SDL_EVENT_MOUSE_BUTTON_UP || sdlEvent.type == SDL_EVENT_MOUSE_WHEEL)
+				sdlEvent.type == SDL_EVENT_MOUSE_MOTION || sdlEvent.type == SDL_EVENT_MOUSE_BUTTON_DOWN || sdlEvent.type == SDL_EVENT_MOUSE_BUTTON_UP || sdlEvent.type == SDL_EVENT_MOUSE_WHEEL ||
+				sdlEvent.type == SDL_EVENT_TEXT_INPUT)
 			{
 				ProcessInputEvents(sdlEvent);
 			}
@@ -389,6 +393,33 @@ namespace Fusion
 		}
 
 		return sdlWindow->GetDpiScale();
+	}
+
+	FArray<EKeyCode> FSDL3PlatformBackend::GetKeysDownThisTick()
+	{
+		FArray<EKeyCode> result;
+		for (const auto& [key, isDown] : m_InputState.stateChangesThisTick)
+		{
+			if (isDown)
+				result.Add(key);
+		}
+		return result;
+	}
+
+	FArray<EKeyCode> FSDL3PlatformBackend::GetKeysUpThisTick()
+	{
+		FArray<EKeyCode> result;
+		for (const auto& [key, isDown] : m_InputState.stateChangesThisTick)
+		{
+			if (!isDown)
+				result.Add(key);
+		}
+		return result;
+	}
+
+	FString FSDL3PlatformBackend::GetTextInputThisTick()
+	{
+		return m_InputState.textInput;
 	}
 
 	void FSDL3PlatformBackend::ProcessWindowEvents(SDL_Event& event)
@@ -632,6 +663,9 @@ namespace Fusion
 			break;
 		case SDL_EVENT_MOUSE_MOTION:
 			m_InputWindowHandle = event.motion.windowID;
+			break;
+		case SDL_EVENT_TEXT_INPUT:
+			m_TextInput += event.text.text;
 			break;
 		case SDL_EVENT_MOUSE_WHEEL:
 		{
