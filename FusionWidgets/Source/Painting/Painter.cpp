@@ -855,9 +855,9 @@ namespace Fusion
 
 		u32 color = m_CurrentPen.GetColor().ToU32();
 
-		FVec2 cursor = GetCurrentTransform().TransformPoint(pos);
-		f32 cursorX = cursor.x;
-		f32 cursorY = cursor.y;
+		FAffineTransform transform = GetCurrentTransform();
+		f32 cursorX = pos.x;
+		f32 cursorY = pos.y;
 
 		FUIDrawItem drawItem = {
 			.shaderType = EUIShaderType::SDFText,
@@ -884,8 +884,8 @@ namespace Fusion
 			f32 quadW = glyph.Width * scale;
 			f32 quadH = glyph.Height * scale;
 
-			f32 quadX = cursorX + glyph.BearingX * scale;
-			f32 quadY = cursorY - glyph.BearingY * scale;  // cursorY is the baseline
+			f32 localX = cursorX + glyph.BearingX * scale;
+			f32 localY = cursorY - glyph.BearingY * scale;  // cursorY is the baseline
 
 			f32 u0 = (f32)glyph.X / glyph.AtlasSize;
 			f32 v0 = (f32)glyph.Y / glyph.AtlasSize;
@@ -898,8 +898,13 @@ namespace Fusion
 				drawItemIndex = m_DrawList->AddDrawItem(drawItem);
 			}
 
-			m_DrawList->AddQuad(FRect::FromSize(quadX, quadY, quadW, quadH), FVec2(u0, v0), FVec2(u1, v1), color, drawItemIndex);
-			
+			FVec2 tl = transform.TransformPoint(FVec2(localX,         localY));
+			FVec2 tr = transform.TransformPoint(FVec2(localX + quadW, localY));
+			FVec2 br = transform.TransformPoint(FVec2(localX + quadW, localY + quadH));
+			FVec2 bl = transform.TransformPoint(FVec2(localX,         localY + quadH));
+
+			m_DrawList->AddQuadPoints(tl, tr, br, bl, FVec2(u0, v0), FVec2(u1, v1), color, drawItemIndex);
+
 			cursorX += (f32)glyph.Advance * scale;
 		}
 	}

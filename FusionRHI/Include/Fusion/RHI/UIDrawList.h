@@ -39,6 +39,8 @@ namespace Fusion
 
         void AddQuad(const FRect& rect, FVec2 uvMin, FVec2 uvMax, u32 color, u32 drawItemIndex = 0);
 
+        void AddQuadPoints(FVec2 tl, FVec2 tr, FVec2 br, FVec2 bl, FVec2 uvMin, FVec2 uvMax, u32 color, u32 drawItemIndex = 0);
+
         void PrimReserve(int vertexCount, int indexCount);
 
         // - Types & Constants -

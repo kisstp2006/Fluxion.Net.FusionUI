@@ -498,4 +498,40 @@ namespace Fusion
         drawCmd.IndexCount += indexCount;
     }
 
+    void FUIDrawList::AddQuadPoints(FVec2 tl, FVec2 tr, FVec2 br, FVec2 bl, FVec2 uvMin, FVec2 uvMax, u32 color, u32 drawItemIndex)
+    {
+        ZoneScoped;
+
+        const int indexCount = 6;
+        const int vertexCount = 4;
+
+        PrimReserve(vertexCount, indexCount);
+
+        FUIDrawCmd& drawCmd = AcquireDrawCmd();
+
+        FVec2 topLeftUV     = uvMin;
+        FVec2 topRightUV    = FVec2(uvMax.x, uvMin.y);
+        FVec2 bottomRightUV = uvMax;
+        FVec2 bottomLeftUV  = FVec2(uvMin.x, uvMax.y);
+
+        vertexWritePtr[0].pos = tl; vertexWritePtr[0].uv = topLeftUV;     vertexWritePtr[0].color = color; vertexWritePtr[0].drawItemIndex = drawItemIndex;
+        vertexWritePtr[1].pos = tr; vertexWritePtr[1].uv = topRightUV;    vertexWritePtr[1].color = color; vertexWritePtr[1].drawItemIndex = drawItemIndex;
+        vertexWritePtr[2].pos = br; vertexWritePtr[2].uv = bottomRightUV; vertexWritePtr[2].color = color; vertexWritePtr[2].drawItemIndex = drawItemIndex;
+        vertexWritePtr[3].pos = bl; vertexWritePtr[3].uv = bottomLeftUV;  vertexWritePtr[3].color = color; vertexWritePtr[3].drawItemIndex = drawItemIndex;
+
+        indexWritePtr[0] = (FUIIndex)(vertexCurrentIdx);
+        indexWritePtr[1] = (FUIIndex)(vertexCurrentIdx + 2);
+        indexWritePtr[2] = (FUIIndex)(vertexCurrentIdx + 3);
+
+        indexWritePtr[3] = (FUIIndex)(vertexCurrentIdx);
+        indexWritePtr[4] = (FUIIndex)(vertexCurrentIdx + 1);
+        indexWritePtr[5] = (FUIIndex)(vertexCurrentIdx + 2);
+
+        vertexWritePtr += vertexCount;
+        indexWritePtr += indexCount;
+
+        vertexCurrentIdx += vertexCount;
+        drawCmd.IndexCount += indexCount;
+    }
+
 }

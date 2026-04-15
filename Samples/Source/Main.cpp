@@ -96,7 +96,6 @@ public:
 						.Color(FColors::White)
 						.HAlign(EHAlign::Center)
 						.VAlign(EVAlign::Center)
-						//.Transform(FAffineTransform::Rotation(FMath::Deg2Rad(45)))
 					),
 
 					FNew(FButton)
