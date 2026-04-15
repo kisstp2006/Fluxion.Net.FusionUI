@@ -4,7 +4,6 @@ namespace Fusion
 {
 	FButton::FButton()
 	{
-		
 	}
 
 	void FButton::OnMouseEnter(FMouseEvent& event)
@@ -33,7 +32,8 @@ namespace Fusion
 		{
 			SetStyleStateFlag(EStyleState::Pressed, true);
 		}
-		return FEventReply::Handled();
+
+		return FEventReply::Handled().FocusSelf();
 	}
 
 	FEventReply FButton::OnMouseButtonUp(FMouseEvent& event)
@@ -55,6 +55,41 @@ namespace Fusion
 			}
 		}
 		return FEventReply::Handled();
+	}
+
+	FEventReply FButton::OnKeyDown(FKeyEvent& event)
+	{
+		if (Disabled())
+			return FEventReply::Unhandled();
+
+		if (event.Key == EKeyCode::Space || event.Key == EKeyCode::Return)
+		{
+			SetStyleStateFlag(EStyleState::Pressed, true);
+			return FEventReply::Handled();
+		}
+
+		return FEventReply::Unhandled();
+	}
+
+	FEventReply FButton::OnKeyUp(FKeyEvent& event)
+	{
+		if (Disabled())
+			return FEventReply::Unhandled();
+
+		if (event.Key == EKeyCode::Space || event.Key == EKeyCode::Return)
+		{
+			SetStyleStateFlag(EStyleState::Pressed, false);
+			m_OnClick.Broadcast(this);
+			return FEventReply::Handled();
+		}
+
+		return FEventReply::Unhandled();
+	}
+
+	void FButton::OnFocusChanged(FFocusEvent& event)
+	{
+		FUSION_LOG_INFO("Widget", "FButton:Focused: {}", event.GotFocus());
+		SetStyleStateFlag(EStyleState::Focused, event.GotFocus());
 	}
 
 } // namespace Fusion

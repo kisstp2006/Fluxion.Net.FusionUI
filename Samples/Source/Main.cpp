@@ -296,6 +296,11 @@ int main(int argc, char* argv[])
 		{
 			Shape = FRoundedRectangle(5.0f);
 
+			FUSION_ON(Focused)
+			{
+				Border = FPen::Solid(FColor(1.0f, 0.0f, 0.0f, 0.9f)).Thickness(2.0f);
+			}
+
 			FUSION_ON(Disabled)
 			{
 				Background = FColor(0.18f, 0.18f, 0.20f);

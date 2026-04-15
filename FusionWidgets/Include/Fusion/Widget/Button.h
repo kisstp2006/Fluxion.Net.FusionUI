@@ -24,13 +24,14 @@ namespace Fusion
         FEventReply OnMouseButtonDown(FMouseEvent& event) override;
         FEventReply OnMouseButtonUp(FMouseEvent& event) override;
 
+        FEventReply OnKeyDown(FKeyEvent& event) override;
+        FEventReply OnKeyUp(FKeyEvent& event) override;
+
+        void OnFocusChanged(FFocusEvent& event) override;
+
     public:
 
         FUSION_SIGNAL(FButtonSignal, OnClick);
-
-    private:
-
-        bool m_Pressed = false;
     };
     
 } // namespace Fusion
