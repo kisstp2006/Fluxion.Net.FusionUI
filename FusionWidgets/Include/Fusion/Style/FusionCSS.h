@@ -93,8 +93,8 @@ namespace Fusion::CSS
 #define FUSION_STYLE(WidgetClass, StyleName, ...)                                      \
     if (Fusion::CSS::FStyleContext _fusion_css_ctx{theme->Style(StyleName)};     \
         true)                                                                          \
-	if (auto Extends = [&](const FName& name) -> void {                                \
-			if (Ref<FStyle> parent = theme->FindStyle(name))                       \
+	if ([[maybe_unused]] auto Extends = [&](const FName& baseStyleName) -> void {      \
+			if (Ref<FStyle> parent = theme->FindStyle(baseStyleName))                       \
 				_fusion_css_ctx.Style.CopyFrom(*parent);                                \
 		}; true)                                                                        \
     if (auto [__VA_ARGS__] = std::tuple{                                               \

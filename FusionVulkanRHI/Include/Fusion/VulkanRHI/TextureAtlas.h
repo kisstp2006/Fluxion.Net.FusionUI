@@ -60,6 +60,8 @@ namespace Fusion::Vulkan
 
         FVulkanRenderBackend* m_Backend = nullptr;
         VkDevice m_Device = VK_NULL_HANDLE;
+        
+        bool m_HasBeenCleared = false;
 
         VkImageCreateInfo m_ImageCI{};
         VkImageViewCreateInfo m_ImageViewCI{};

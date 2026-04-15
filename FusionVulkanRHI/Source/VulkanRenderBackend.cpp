@@ -857,6 +857,22 @@ namespace Fusion::Vulkan
 						continue;
 
 					IPtr<FTextureAtlas> atlas = it->second;
+                    
+                    if (!atlas->m_HasBeenCleared)
+                    {
+                        atlas->m_HasBeenCleared = true;
+                        
+                        VkClearColorValue clearColor = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+                        
+                        VkImageSubresourceRange range{};
+                        range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                        range.baseArrayLayer = 0;
+                        range.layerCount = atlas->m_LayerCount;
+                        range.baseMipLevel = 0;
+                        range.levelCount = 1;
+                        
+                        vkCmdClearColorImage(cmdBuffer, atlas->m_Image, atlas->m_CurLayout, &clearColor, 1, &range);
+                    }
 
 					m_BufferImageCopies.RemoveAll();
 

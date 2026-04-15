@@ -218,16 +218,16 @@ public:
 		painter.PathStroke(false);
 
 		painter.SetFont(
-			FFont::Regular(FFont::kDefaultFamilyName, 12)
+			FFont::Regular(FFont::kDefaultFamilyName, 10)
 			.Style(EFontStyle::Normal)
 			.Weight(EFontWeight::Regular)
 		);
 
 		painter.SetPen(FPen::Solid(FColors::White));
 
-		FString text = "Hello World, Good bye!";
+		const FString text = "Hello World, Good bye!";
 
-		painter.DrawText(FVec2(100, 350), text);
+		painter.DrawText(FVec2(50, 300), text);
 
 		painter.SetFont(
 			FFont::Regular(FFont::kDefaultFamilyName, 20)
@@ -235,9 +235,15 @@ public:
 			.Weight(EFontWeight::Regular)
 		);
 
-		painter.SetPen(FPen::Solid(FColors::White));
-
-		painter.DrawText(FVec2(250, 350), text);
+		painter.DrawText(FVec2(120, 300), text);
+        
+        painter.SetFont(
+            FFont::Regular(FFont::kDefaultFamilyName, 48)
+            .Style(EFontStyle::Normal)
+            .Weight(EFontWeight::Regular)
+        );
+        
+        painter.DrawText(FVec2(300, 300), text);
 	}
 
 	FUSION_PROPERTY(f32, GradientOffset);
