@@ -152,6 +152,7 @@ namespace Fusion
         virtual FEventReply OnMouseWheel([[maybe_unused]] FMouseEvent& event) { return FEventReply::Unhandled(); }
         virtual FEventReply OnKeyDown([[maybe_unused]] FKeyEvent& event) { return FEventReply::Unhandled(); }
         virtual FEventReply OnKeyUp([[maybe_unused]] FKeyEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnTextInput([[maybe_unused]] FTextInputEvent& event) { return FEventReply::Unhandled(); }
         virtual void OnFocusChanged([[maybe_unused]] FFocusEvent& event) {}
 
         bool SelfHitTest(FVec2 localMousePos);

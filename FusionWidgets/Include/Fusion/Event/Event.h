@@ -18,6 +18,7 @@ namespace Fusion
 
         KeyDown,
         KeyUp,
+        TextInput,
 
         FocusChanged,
     };
@@ -96,6 +97,7 @@ namespace Fusion
             {
             case EEventType::KeyDown:
             case EEventType::KeyUp:
+            case EEventType::TextInput:
                 return true;
             default:
                 return false;
@@ -155,6 +157,17 @@ namespace Fusion
 
         EKeyCode     Key       = EKeyCode::Unknown;
         EKeyModifier Modifiers = EKeyModifier::None;
+    };
+
+    // ---------------------------------------------------------------------------
+
+    struct FUSIONWIDGETS_API FTextInputEvent : FEvent
+    {
+    public:
+
+        // UTF-8 encoded text produced by this input event.
+        // May be multiple codepoints (e.g. IME commit can produce a full word at once).
+        FString Text;
     };
 
     // ---------------------------------------------------------------------------

@@ -870,6 +870,9 @@ namespace Fusion::Vulkan
                         range.layerCount = atlas->m_LayerCount;
                         range.baseMipLevel = 0;
                         range.levelCount = 1;
+
+						TransitionImageLayout(cmdBuffer, atlas->m_Image, atlas->m_CurLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, range);
+						atlas->m_CurLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
                         
                         vkCmdClearColorImage(cmdBuffer, atlas->m_Image, atlas->m_CurLayout, &clearColor, 1, &range);
                     }

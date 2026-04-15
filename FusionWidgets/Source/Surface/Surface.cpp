@@ -146,7 +146,7 @@ namespace Fusion
 
         Ref<FWidget> hitWidget = mouseInSurface ? HitTestWidget(surfaceMousePos) : nullptr;
 
-        Ref<FWidget> hoveredWidget = captured.IsValid() ? captured.Get() : hitWidget;
+        Ref<FWidget> hoveredWidget = captured.IsValid() ? captured : hitWidget;
 
         FArray<Ref<FWidget>> newHoverStack;
         BuildHoverStack(hoveredWidget.Get(), newHoverStack);
@@ -155,7 +155,7 @@ namespace Fusion
         for (WeakRef<FWidget>& weakWidget : hoveredWidgetStack)
         {
             Ref<FWidget> widget = weakWidget.Lock();
-            if (!widget || newHoverStack.Contains(widget.Get()))
+            if (!widget || newHoverStack.Contains(widget))
                 continue;
 
             FMouseEvent event{};
@@ -267,7 +267,7 @@ namespace Fusion
                     FUSION_TRY
                     {
                         FEventReply reply = widget->OnMouseWheel(event);
-                        ProcessReply(widget.Get(), reply);
+                        ProcessReply(widget, reply);
                         if (reply.IsHandled())
                             break;
                     }
@@ -295,7 +295,7 @@ namespace Fusion
         {
             if (application->IsMouseButtonDown(kButtons[i]))
             {
-                Ref<FWidget> target = captured ? captured.Get() : hitWidget;
+                Ref<FWidget> target = captured ? captured : hitWidget;
                 if (target)
                 {
                     FMouseEvent downEvent{};
@@ -448,9 +448,23 @@ namespace Fusion
 
 	}
 
-	void FSurface::ProcessReply(Ref<FWidget> Sender, const FEventReply& reply)
+	void FSurface::ProcessReply(Ref<FWidget> sender, const FEventReply& reply)
 	{
+        if (reply.ShouldFocusSelf())
+            nextFocusWidget = sender;
 
+        switch (reply.GetMouseCaptureOp())
+        {
+        case FEventReply::MouseCaptureOp::Capture: 
+        	capturedWidget = sender; 
+        	break;
+        case FEventReply::MouseCaptureOp::Release: 
+            if (capturedWidget == sender)
+        		capturedWidget = nullptr; 
+        	break;
+        default: 
+        	break;
+        }
 	}
 
 	void FSurface::Initialize()
