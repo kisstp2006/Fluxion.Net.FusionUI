@@ -28,6 +28,19 @@ namespace Fusion
         FTimer& Interval(f32 seconds) { m_Interval = seconds; return *this; }
         FTimer& Loop(bool loop) { m_Loop = loop; return *this; }
 
+        
+        FTimer& Assign(FTimer*& out)
+        {
+            out = this;
+            return *out;
+        }
+
+        FTimer& Assign(Ref<FTimer>& out)
+        {
+            out = this;
+            return *out;
+        }
+
         // - Signal -
 
         FUSION_SIGNAL(FVoidSignal, OnTick);

@@ -16,6 +16,7 @@ public:
 	Ref<FDecoratedWidget> gradientWidget;
 
 	Ref<FButton> btn0;
+	Ref<FTimer> timer;
 
 	void Construct() override
 	{
