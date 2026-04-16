@@ -38,6 +38,8 @@ namespace Fusion
     {
     public:
 
+        FPlatformCapabilities GetCapabilities() override;
+
 		// - Lifecycle -
 
         bool IsInitialized(FInstanceHandle instance) override;

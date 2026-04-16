@@ -11,8 +11,7 @@ namespace Fusion
         FUSION_CLASS(FLayerTree, FObject)
     public:
 
-        FLayerTree() : Super("LayerTree")
-		{}
+        FLayerTree();
 
         bool IsSyncNeeded() const { return m_NeedsSync; }
 
@@ -31,6 +30,7 @@ namespace Fusion
         void SyncWidget(Ref<FWidget> widget, Ref<FLayer> parentLayer, FHashSet<FUuid>& visited);
 
         Ref<FLayer> m_RootLayer;
+        Ref<FLayer> m_OverlayLayer;
 
         FAffineTransform m_RootLayerTransform;
 

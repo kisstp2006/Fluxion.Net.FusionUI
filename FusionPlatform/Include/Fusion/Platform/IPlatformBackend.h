@@ -29,11 +29,18 @@ namespace Fusion
         FPlatformWindowFlags windowFlags = FPlatformWindowFlags::DestroyOnClose;
     };
 
+    struct FPlatformCapabilities
+    {
+        bool SupportsMultipleNativeSurface = true;
+    };
+
     class FUSIONPLATFORM_API IFPlatformBackend
 	{
     public:
 
         virtual ~IFPlatformBackend() = default;
+
+        virtual FPlatformCapabilities GetCapabilities() = 0;
 
 		// - Lifecycle -
 

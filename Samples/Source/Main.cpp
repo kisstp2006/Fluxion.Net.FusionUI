@@ -60,7 +60,7 @@ public:
 				.ContentHAlign(EHAlign::Center)
 				.ContentVAlign(EVAlign::Center)
 				.Spacing(10)
-				.ClipContent(true)
+				//.ClipContent(true)
 				.Name("hstack")
 				(
 					FAssignNew(FButton, btn0)

@@ -17,6 +17,9 @@ namespace Fusion
 			return;
 		}
 
+		if (m_Subobjects.Contains(subobject))
+			return;
+
 		m_Subobjects.Add(subobject);
 		subobject->m_Outer = Ref<FObject>(this);
 

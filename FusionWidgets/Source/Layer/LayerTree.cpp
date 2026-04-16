@@ -5,6 +5,10 @@
 
 namespace Fusion
 {
+	FLayerTree::FLayerTree() : Super("LayerTree")
+	{
+		m_OverlayLayer = NewObject<FLayer>(this, "OverlayLayer");
+	}
 
 	void FLayerTree::MarkSyncNeeded()
 	{
@@ -81,8 +85,7 @@ namespace Fusion
 			}
 			else
 			{
-				layer = new FLayer("Layer");
-				AttachSubobject(layer);
+				layer = NewObject<FLayer>(this, "Layer");
 
 				layer->m_OwningWidget = widget;
 				layer->m_OwnerTree = Ref(this);

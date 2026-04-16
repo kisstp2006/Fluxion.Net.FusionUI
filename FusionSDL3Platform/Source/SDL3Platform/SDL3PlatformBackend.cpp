@@ -5,6 +5,13 @@
 
 namespace Fusion
 {
+	FPlatformCapabilities FSDL3PlatformBackend::GetCapabilities()
+	{
+		return {
+			.SupportsMultipleNativeSurface = true
+		};
+	}
+
 	bool FSDL3PlatformBackend::IsInitialized(FInstanceHandle instance)
 	{
 		return m_Instances.KeyExists(instance);
