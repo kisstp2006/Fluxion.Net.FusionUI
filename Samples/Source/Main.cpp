@@ -60,7 +60,7 @@ public:
 				FAssignNew(FHorizontalStack, hstack)
 				.ContentHAlign(EHAlign::Center)
 				.ContentVAlign(EVAlign::Center)
-				//.Spacing(10)
+				.Spacing(10)
 				.ClipContent(true)
 				.Name("hstack")
 				(
@@ -151,12 +151,11 @@ public:
 						.VAlign(EVAlign::Center)
 					),
 
-					FNew(FButton)
-					.FillRatio(1.0f)
+					FNew(FTextInput)
+					.Style("TextInput/Base")
+					.Placeholder("Type here...")
 					.Height(32)
-					.Style("Button/Primary")
-					.Background(FColors::Gold)
-					.Border(FPen())
+					.FillRatio(1.0f)
 				),
 
 				FAssignNew(FDecoratedWidget, gradientBorder)
@@ -286,6 +285,7 @@ int main(int argc, char* argv[])
 	theme->MergeStyleSheet(FUSION_STYLE_SHEET
 	{
 		FColor WindowBackgroundColor = FColor(0.13f, 0.13f, 0.15f);
+		FPen   FocusOutline			 = FPen::Solid(FColor(0.47f, 0.73f, 1.0f, 0.85f)).Thickness(2.0f);
 
 		FUSION_STYLE(SampleWindow, "SampleWindow", Background, Padding)
 		{
@@ -299,7 +299,7 @@ int main(int argc, char* argv[])
 
 			FUSION_ON(Focused)
 			{
-				Outline = FPen::Solid(FColor(0.47f, 0.73f, 1.0f, 0.85f)).Thickness(2.0f);
+				Outline = FocusOutline;
 			}
 
 			FUSION_ON(Disabled)
@@ -360,6 +360,30 @@ int main(int argc, char* argv[])
 			{
 				Background = FColor(0.58f, 0.09f, 0.09f);
 				Border     = FColor(0.45f, 0.06f, 0.06f);
+			}
+		}
+
+		FUSION_STYLE(FTextInput, "TextInput/Base", Shape, Background, Border, Outline, Padding, Font, TextColor, PlaceholderColor, SelectionColor, CursorColor)
+		{
+			Shape            = FRoundedRectangle(5.0f);
+			Background       = FColor(0.10f, 0.10f, 0.12f);
+			Border           = FColor(0.30f, 0.30f, 0.34f);
+			Padding          = FMargin(8, 0, 8, 0);
+			Font             = FFont::Regular(FFont::kDefaultFamilyName, 14);
+			TextColor        = FColors::White;
+			PlaceholderColor = FColor(0.45f, 0.45f, 0.50f);
+			SelectionColor   = FColor(0.23f, 0.51f, 0.96f, 0.45f);
+			CursorColor      = FColors::White;
+
+			FUSION_ON(Focused)
+			{
+				Border  = FColor(0.47f, 0.73f, 1.0f, 0.85f);
+				Outline = FocusOutline;
+			}
+
+			FUSION_ON(Hovered)
+			{
+				Border = FColor(0.45f, 0.45f, 0.50f);
 			}
 		}
 	});
