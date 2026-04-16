@@ -28,6 +28,7 @@ namespace Fusion
 
         // Per-Tick changes
         FHashMap<EKeyCode, bool> stateChangesThisTick{};
+        FArray<EKeyCode> keyRepeatThisTick{};
         FHashMap<EMouseButton, int> mouseButtonStateChanges{};
 
         EKeyModifier modifierStates{};
@@ -151,6 +152,7 @@ namespace Fusion
 
         // Per-Tick changes
         FHashMap<EKeyCode, bool> m_StateChangesThisTick{};
+        FArray<EKeyCode> m_KeyRepeatThisTick{};
         FHashMap<EMouseButton, int> m_MouseButtonStateChanges{};
 
         EKeyModifier m_ModifierStates{};

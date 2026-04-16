@@ -108,6 +108,7 @@ namespace Fusion
 
 		m_InputState.windowHandle = m_InputWindowHandle;
 		m_InputState.stateChangesThisTick = m_StateChangesThisTick;
+		m_InputState.keyRepeatThisTick    = m_KeyRepeatThisTick;
 		m_InputState.keyStates = m_KeyStates;
 		m_InputState.modifierStates = m_ModifierStates;
 		//inputState.keyStatesDelayed = keyStatesDelayed;
@@ -127,6 +128,7 @@ namespace Fusion
 		m_TextInput = {};
 
 		m_StateChangesThisTick.Clear();
+		m_KeyRepeatThisTick.Clear();
 		m_MouseButtonStateChanges.Clear();
 		m_FocusGainedWindows.Clear();
 		m_FocusLostWindows.Clear();
@@ -430,6 +432,10 @@ namespace Fusion
 			if (isDown)
 				result.Add(key);
 		}
+		for (EKeyCode key : m_InputState.keyRepeatThisTick)
+		{
+			result.Add(key);
+		}
 		return result;
 	}
 
@@ -651,7 +657,11 @@ namespace Fusion
 		{
 		case SDL_EVENT_KEY_DOWN:
 			m_InputWindowHandle = event.key.windowID;
-			if (m_KeyStates[(EKeyCode)event.key.key])
+			if (event.key.repeat)
+			{
+				m_KeyRepeatThisTick.Add((EKeyCode)event.key.key);
+			}
+			else if (m_KeyStates[(EKeyCode)event.key.key])
 			{
 				//keyStatesDelayed[(FKeyCode)event.key.key] = { .state = true, .lastEnabledTime = curTime };
 			}
