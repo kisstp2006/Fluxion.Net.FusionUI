@@ -53,10 +53,6 @@ public:
 			.Spacing(10)
 			.Name("RootStack")
 			(
-				FNew(FWidget)
-				.Height(25)
-				.Name("Empty"),
-
 				FAssignNew(FHorizontalStack, hstack)
 				.ContentHAlign(EHAlign::Center)
 				.ContentVAlign(EVAlign::Center)

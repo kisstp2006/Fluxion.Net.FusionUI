@@ -210,6 +210,7 @@ namespace Fusion
 
         EnsureCursorVisible();
         MarkPaintDirty();
+        m_OnTextChanged.Broadcast(m_Text);
     }
 
     void FTextInput::DeleteSelection()
@@ -231,6 +232,7 @@ namespace Fusion
 
         EnsureCursorVisible();
         MarkPaintDirty();
+        m_OnTextChanged.Broadcast(m_Text);
     }
 
     void FTextInput::DeleteBackward()
@@ -254,6 +256,7 @@ namespace Fusion
 
         EnsureCursorVisible();
         MarkPaintDirty();
+        m_OnTextChanged.Broadcast(m_Text);
     }
 
     void FTextInput::DeleteForward()
@@ -277,6 +280,7 @@ namespace Fusion
 
         EnsureCursorVisible();
         MarkPaintDirty();
+        m_OnTextChanged.Broadcast(m_Text);
     }
 
     // -----------------------------------------------------------------------
@@ -315,7 +319,7 @@ namespace Fusion
                   + (contentRect.GetHeight() - metrics.LineHeight) * 0.5f
                   + metrics.Ascender;
 
-        bool focused = TestStyleState(EStyleState::Focused);
+        bool editing = TestStyleState(EStyleState::Editing);
 
         // --- Placeholder or text ---
 
@@ -333,7 +337,7 @@ namespace Fusion
             FString display = GetDisplayText();
 
             // Selection background
-            if (HasSelection() && focused)
+            if (HasSelection() && editing)
             {
                 f32 selX0 = CursorPixelX(SelectionMin()) - m_ScrollOffset;
                 f32 selX1 = CursorPixelX(SelectionMax()) - m_ScrollOffset;
@@ -355,7 +359,7 @@ namespace Fusion
         }
 
         // Cursor — drawn last so it's on top of selection and text
-        if (focused && m_CursorVisible)
+        if (editing && m_CursorVisible)
         {
             f32 cursorX      = CursorPixelX(m_CursorPos) - m_ScrollOffset;
             f32 cursorHeight = metrics.Ascender - metrics.Descender;
@@ -393,6 +397,7 @@ namespace Fusion
         m_SelectionAnchor = m_CursorPos; // will become selection if mouse moves
         m_IsDragging      = true;
 
+        EnterEditing();
         ResetBlink();
         MarkPaintDirty();
 
@@ -436,9 +441,50 @@ namespace Fusion
 
     FEventReply FTextInput::OnKeyDown(FKeyEvent& event)
     {
-        bool shift = FEnumHasFlag(event.Modifiers, EKeyModifier::Shift);
-        bool ctrl  = FEnumHasFlag(event.Modifiers, EKeyModifier::Ctrl)
-                  || FEnumHasFlag(event.Modifiers, EKeyModifier::Gui); // Cmd on Mac
+        bool shift   = FEnumHasFlag(event.Modifiers, EKeyModifier::Shift);
+        bool ctrl    = FEnumHasFlag(event.Modifiers, EKeyModifier::Ctrl)
+                    || FEnumHasFlag(event.Modifiers, EKeyModifier::Gui); // Cmd on Mac
+        bool editing = TestStyleState(EStyleState::Editing);
+
+        // --- Focus-mode transitions (handled regardless of editing state) ---
+
+        switch (event.Key)
+        {
+        case EKeyCode::Tab:
+            // Exit editing first (if active), then let the focus system handle Tab
+            if (editing)
+                ExitEditing();
+            return FEventReply::Unhandled();
+
+        case EKeyCode::Escape:
+            if (editing)
+            {
+                m_Text      = m_TextBeforeEdit;
+                m_CursorPos = FMath::Min(m_CursorPos, CpCount(m_Text));
+                ExitEditing();
+                m_OnTextCanceled.Broadcast(m_Text);
+                return FEventReply::Handled();
+            }
+            return FEventReply::Unhandled();
+
+        case EKeyCode::Return:
+            if (editing)
+            {
+                ExitEditing();
+                m_OnTextSubmitted.Broadcast(m_Text);
+                return FEventReply::Handled();
+            }
+            EnterEditing();
+            return FEventReply::Handled();
+
+        default:
+            break;
+        }
+
+        // --- All keys below require editing mode ---
+
+        if (!editing)
+            return FEventReply::Unhandled();
 
         int totalCp = CpCount(m_Text);
 
@@ -556,48 +602,79 @@ namespace Fusion
 
     FEventReply FTextInput::OnTextInput(FTextInputEvent& event)
     {
+        if (!TestStyleState(EStyleState::Editing))
+            return FEventReply::Unhandled();
+
         InsertAtCursor(event.Text);
         ResetBlink();
         return FEventReply::Handled();
+    }
+
+    void FTextInput::EnterEditing()
+    {
+        if (TestStyleState(EStyleState::Editing))
+            return;
+
+        m_TextBeforeEdit = m_Text;
+        SetStyleStateFlag(EStyleState::Editing, true);
+
+        if (Ref<FSurface> surface = GetParentSurface())
+            surface->RequestTextInput();
+
+        // Lazy-create the blink timer once
+        if (!m_BlinkTimer)
+        {
+            FAssignNew(FTimer, m_BlinkTimer)
+                .Interval(0.53f)
+                .Loop(true)
+                .OnTick([this]
+                {
+                    m_CursorVisible = !m_CursorVisible;
+                    MarkPaintDirty();
+                });
+        }
+
+        m_CursorVisible = true;
+        m_BlinkTimer->Reset();
+        m_BlinkTimer->Start();
+
+        MarkPaintDirty();
+    }
+
+    void FTextInput::ExitEditing()
+    {
+        if (!TestStyleState(EStyleState::Editing))
+            return;
+
+        SetStyleStateFlag(EStyleState::Editing, false);
+
+        if (Ref<FSurface> surface = GetParentSurface())
+            surface->ReleaseTextInput();
+
+        if (m_BlinkTimer)
+            m_BlinkTimer->Stop();
+
+        m_CursorVisible   = false;
+        m_SelectionAnchor = -1;
+        m_IsDragging      = false;
+
+        MarkPaintDirty();
     }
 
     void FTextInput::OnFocusChanged(FFocusEvent& event)
     {
         SetStyleStateFlag(EStyleState::Focused, event.GotFocus());
 
-        if (event.GotFocus())
+        if (!event.GotFocus())
         {
-            if (Ref<FSurface> surface = GetParentSurface())
-                surface->RequestTextInput();
-
-            // Lazy-create the blink timer once
-            if (!m_BlinkTimer)
-            {
-                FAssignNew(FTimer, m_BlinkTimer)
-                    .Interval(0.53f)
-                    .Loop(true)
-                    .OnTick([this]
-                    {
-                        m_CursorVisible = !m_CursorVisible;
-                        MarkPaintDirty();
-                    });
-            }
-
-            m_CursorVisible = true;
-            m_BlinkTimer->Reset();
-            m_BlinkTimer->Start();
+            bool wasEditing = TestStyleState(EStyleState::Editing);
+            bool textChanged = (m_Text != m_TextBeforeEdit);
+            ExitEditing();
+            if (wasEditing && textChanged)
+                m_OnTextSubmitted.Broadcast(m_Text);
         }
         else
         {
-            if (Ref<FSurface> surface = GetParentSurface())
-                surface->ReleaseTextInput();
-
-            if (m_BlinkTimer)
-                m_BlinkTimer->Stop();
-
-            m_CursorVisible   = false;
-            m_SelectionAnchor = -1;
-            m_IsDragging      = false;
             MarkPaintDirty();
         }
     }

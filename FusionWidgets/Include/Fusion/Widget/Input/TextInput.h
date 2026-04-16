@@ -2,6 +2,7 @@
 
 namespace Fusion
 {
+    FUSION_SIGNAL_TYPE(FTextSignal, const FString& text);
 
     class FUSIONWIDGETS_API FTextInput : public FDecoratedWidget
     {
@@ -61,16 +62,20 @@ namespace Fusion
         int  SelectionMax() const { return FMath::Max(m_CursorPos, m_SelectionAnchor); }
         void ClearSelection()     { m_SelectionAnchor = -1; }
 
+        void EnterEditing();
+        void ExitEditing();
+
         void EnsureCursorVisible();
         void ResetBlink();
 
         // - State -
 
-        int  m_CursorPos       = 0;    // codepoint index in m_Text
-        int  m_SelectionAnchor = -1;   // codepoint index; -1 = no selection
-        f32  m_ScrollOffset    = 0.0f;
-        bool m_CursorVisible   = false;
-        bool m_IsDragging      = false;
+        int     m_CursorPos       = 0;    // codepoint index in m_Text
+        int     m_SelectionAnchor = -1;   // codepoint index; -1 = no selection
+        f32     m_ScrollOffset    = 0.0f;
+        bool    m_CursorVisible   = false;
+        bool    m_IsDragging      = false;
+        FString m_TextBeforeEdit;         // snapshot taken when editing starts; restored on cancel
 
         Ref<FTimer> m_BlinkTimer;
 
@@ -82,6 +87,12 @@ namespace Fusion
         FUSION_PROPERTY(FString, Placeholder);
         FUSION_PROPERTY(bool,    IsPassword);
         FUSION_PROPERTY(int,     MaxLength);
+
+        // - Signals -
+
+        FUSION_SIGNAL(FTextSignal, OnTextChanged);   // fired on every edit
+        FUSION_SIGNAL(FTextSignal, OnTextSubmitted); // fired on Enter / Tab-out / click-away
+        FUSION_SIGNAL(FTextSignal, OnTextCanceled);  // fired on Escape; text has been reverted
 
         FUSION_STYLE_PROPERTIES(
             (FFont,  Font,             LayoutAndPaint),
