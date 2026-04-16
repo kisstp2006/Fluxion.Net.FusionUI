@@ -64,7 +64,7 @@ namespace Fusion
 
 		if (event.Key == EKeyCode::Space || event.Key == EKeyCode::Return)
 		{
-			SetStyleStateFlag(EStyleState::Pressed, true);
+			SetStyleStateFlag(EStyleState::Pressed | EStyleState::Hovered, true);
 			return FEventReply::Handled();
 		}
 
@@ -78,7 +78,7 @@ namespace Fusion
 
 		if (event.Key == EKeyCode::Space || event.Key == EKeyCode::Return)
 		{
-			SetStyleStateFlag(EStyleState::Pressed, false);
+			SetStyleStateFlag(EStyleState::Pressed | EStyleState::Hovered, false);
 			m_OnClick.Broadcast(this);
 			return FEventReply::Handled();
 		}
