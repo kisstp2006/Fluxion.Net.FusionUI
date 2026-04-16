@@ -357,14 +357,17 @@ namespace Fusion
         // Cursor — drawn last so it's on top of selection and text
         if (focused && m_CursorVisible)
         {
-            f32 cursorX = CursorPixelX(m_CursorPos) - m_ScrollOffset;
+            f32 cursorX      = CursorPixelX(m_CursorPos) - m_ScrollOffset;
+            f32 cursorHeight = metrics.Ascender - metrics.Descender;
+            f32 cursorY      = textY - metrics.Ascender;
+
             painter.SetBrush(FBrush(CursorColor()));
             painter.SetPen(FPen());
             painter.FillRect(FRect::FromSize(
                 contentRect.left + cursorX,
-                contentRect.top + 2.0f,
+                cursorY,
                 1.5f,
-                contentRect.GetHeight() - 2.0f
+                cursorHeight
             ));
         }
 
