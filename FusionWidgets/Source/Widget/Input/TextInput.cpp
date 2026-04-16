@@ -50,6 +50,7 @@ namespace Fusion
 
     FVec2 FTextInput::MeasureContent(FVec2 availableSize)
     {
+        ZoneScoped;
         f32 height = 32.0f; // fallback
 
         if (Ref<FApplicationInstance> app = GetApplication())
@@ -74,6 +75,7 @@ namespace Fusion
 
     FString FTextInput::GetDisplayText() const
     {
+        ZoneScoped;
         if (!IsPassword() || m_Text.Empty())
             return m_Text;
 
@@ -87,6 +89,7 @@ namespace Fusion
 
     f32 FTextInput::MeasureTextWidth(const char* start, const char* end) const
     {
+        ZoneScoped;
         if (start >= end)
             return 0.0f;
 
@@ -115,6 +118,7 @@ namespace Fusion
 
     f32 FTextInput::CursorPixelX(int cpIndex) const
     {
+        ZoneScoped;
         FString display = GetDisplayText();
         const char* start = display.CStr();
 
@@ -128,6 +132,7 @@ namespace Fusion
 
     int FTextInput::HitTestCursorIndex(f32 localX) const
     {
+        ZoneScoped;
         Ref<FApplicationInstance> app = GetApplication();
         if (!app)
             return 0;
@@ -166,6 +171,7 @@ namespace Fusion
 
     void FTextInput::EnsureCursorVisible()
     {
+        ZoneScoped;
         FMargin pad = Padding();
         FVec2   sz  = GetLayoutSize();
         f32 contentWidth = FMath::Max(0.0f, sz.x - pad.left - pad.right);
@@ -193,6 +199,7 @@ namespace Fusion
 
     void FTextInput::InsertAtCursor(const FString& text)
     {
+        ZoneScoped;
         if (HasSelection())
             DeleteSelection();
 
@@ -213,8 +220,29 @@ namespace Fusion
         m_OnTextChanged.Broadcast(m_Text);
     }
 
+    void FTextInput::DeleteRange(int cpFrom, int cpTo)
+    {
+        ZoneScoped;
+        if (cpFrom >= cpTo)
+            return;
+
+        std::string s = m_Text.ToStdString();
+        int byteFrom = CpToByteOffset(s.c_str(), cpFrom);
+        int byteTo   = CpToByteOffset(s.c_str(), cpTo);
+        s.erase(byteFrom, byteTo - byteFrom);
+
+        m_Text             = FString(s);
+        m_CursorPos        = cpFrom;
+        m_SelectionAnchor  = -1;
+
+        EnsureCursorVisible();
+        MarkPaintDirty();
+        m_OnTextChanged.Broadcast(m_Text);
+    }
+
     void FTextInput::DeleteSelection()
     {
+        ZoneScoped;
         if (!HasSelection())
             return;
 
@@ -237,6 +265,7 @@ namespace Fusion
 
     void FTextInput::DeleteBackward()
     {
+        ZoneScoped;
         if (HasSelection())
         {
             DeleteSelection();
@@ -261,6 +290,7 @@ namespace Fusion
 
     void FTextInput::DeleteForward()
     {
+        ZoneScoped;
         if (HasSelection())
         {
             DeleteSelection();
@@ -289,6 +319,7 @@ namespace Fusion
 
     void FTextInput::Paint(FPainter& painter)
     {
+        ZoneScoped;
         Super::Paint(painter); // Background + Border
 
         Ref<FApplicationInstance> app = GetApplication();
@@ -384,6 +415,7 @@ namespace Fusion
 
     FEventReply FTextInput::OnMouseButtonDown(FMouseEvent& event)
     {
+        ZoneScoped;
         if (!event.IsLeftButton())
             return FEventReply::Unhandled();
 
@@ -406,6 +438,7 @@ namespace Fusion
 
     FEventReply FTextInput::OnMouseMove(FMouseEvent& event)
     {
+        ZoneScoped;
         if (!m_IsDragging)
             return FEventReply::Unhandled();
 
@@ -427,6 +460,7 @@ namespace Fusion
 
     FEventReply FTextInput::OnMouseButtonUp(FMouseEvent& event)
     {
+        ZoneScoped;
         if (!event.IsLeftButton())
             return FEventReply::Unhandled();
 
@@ -441,6 +475,7 @@ namespace Fusion
 
     FEventReply FTextInput::OnKeyDown(FKeyEvent& event)
     {
+        ZoneScoped;
         bool shift   = FEnumHasFlag(event.Modifiers, EKeyModifier::Shift);
         bool ctrl    = FEnumHasFlag(event.Modifiers, EKeyModifier::Ctrl);
         bool alt     = FEnumHasFlag(event.Modifiers, EKeyModifier::Alt);
@@ -498,8 +533,8 @@ namespace Fusion
 
         int totalCp = CpCount(m_Text);
 
-        // Moves cursor to newPos. If shift is held, extends selection; otherwise
-        // collapses any existing selection to the appropriate end.
+        // Moves cursor to newPos. If shift is held, extends/reduces the selection.
+        // Does NOT handle selection collapse — callers do that before calling this.
         auto MoveCursor = [&](int newPos)
         {
             newPos = FMath::Clamp(newPos, 0, totalCp);
@@ -510,15 +545,10 @@ namespace Fusion
                     m_SelectionAnchor = m_CursorPos;
                 m_CursorPos = newPos;
             }
-            else if (HasSelection())
-            {
-                // Collapse: Left-ish → SelectionMin, Right-ish → SelectionMax
-                m_CursorPos       = (newPos <= m_CursorPos) ? SelectionMin() : SelectionMax();
-                m_SelectionAnchor = -1;
-            }
             else
             {
-                m_CursorPos = newPos;
+                m_CursorPos       = newPos;
+                m_SelectionAnchor = -1;
             }
 
             EnsureCursorVisible();
@@ -526,13 +556,23 @@ namespace Fusion
             MarkPaintDirty();
         };
 
+        // Collapses an active selection to one of its ends without moving further.
+        // Must be called before MoveCursor when !shift and a selection exists.
+        auto CollapseLeft  = [&]() { m_CursorPos = SelectionMin(); m_SelectionAnchor = -1; EnsureCursorVisible(); ResetBlink(); MarkPaintDirty(); };
+        auto CollapseRight = [&]() { m_CursorPos = SelectionMax(); m_SelectionAnchor = -1; EnsureCursorVisible(); ResetBlink(); MarkPaintDirty(); };
+
         switch (event.Key)
         {
         // --- Navigation ---
 
         case EKeyCode::Left:
         {
-            if (lineMod)
+            if (!shift && HasSelection())
+            {
+                // Collapse to left end — no further movement (standard behaviour)
+                CollapseLeft();
+            }
+            else if (lineMod)
             {
                 MoveCursor(0);
             }
@@ -556,7 +596,12 @@ namespace Fusion
 
         case EKeyCode::Right:
         {
-            if (lineMod)
+            if (!shift && HasSelection())
+            {
+                // Collapse to right end — no further movement (standard behaviour)
+                CollapseRight();
+            }
+            else if (lineMod)
             {
                 MoveCursor(totalCp);
             }
@@ -589,14 +634,64 @@ namespace Fusion
         // --- Deletion ---
 
         case EKeyCode::Backspace:
-            DeleteBackward();
+        {
+            if (HasSelection())
+            {
+                DeleteSelection();
+            }
+            else if (lineMod)
+            {
+                // Delete to line start
+                DeleteRange(0, m_CursorPos);
+            }
+            else if (wordMod)
+            {
+                // Delete word backward
+                int pos = m_CursorPos;
+                std::string s = m_Text.ToStdString();
+                while (pos > 0 && isspace((uint8_t)s[CpToByteOffset(s.c_str(), pos - 1)]))
+                    pos--;
+                while (pos > 0 && !isspace((uint8_t)s[CpToByteOffset(s.c_str(), pos - 1)]))
+                    pos--;
+                DeleteRange(pos, m_CursorPos);
+            }
+            else
+            {
+                DeleteBackward();
+            }
             ResetBlink();
             return FEventReply::Handled();
+        }
 
         case EKeyCode::Delete:
-            DeleteForward();
+        {
+            if (HasSelection())
+            {
+                DeleteSelection();
+            }
+            else if (lineMod)
+            {
+                // Delete to line end
+                DeleteRange(m_CursorPos, totalCp);
+            }
+            else if (wordMod)
+            {
+                // Delete word forward
+                int pos = m_CursorPos;
+                std::string s = m_Text.ToStdString();
+                while (pos < totalCp && !isspace((uint8_t)s[CpToByteOffset(s.c_str(), pos)]))
+                    pos++;
+                while (pos < totalCp && isspace((uint8_t)s[CpToByteOffset(s.c_str(), pos)]))
+                    pos++;
+                DeleteRange(m_CursorPos, pos);
+            }
+            else
+            {
+                DeleteForward();
+            }
             ResetBlink();
             return FEventReply::Handled();
+        }
 
         // --- Select all ---
 
@@ -620,6 +715,7 @@ namespace Fusion
 
     FEventReply FTextInput::OnTextInput(FTextInputEvent& event)
     {
+        ZoneScoped;
         if (!TestStyleState(EStyleState::Editing))
             return FEventReply::Unhandled();
 
@@ -630,6 +726,7 @@ namespace Fusion
 
     void FTextInput::EnterEditing()
     {
+        ZoneScoped;
         if (TestStyleState(EStyleState::Editing))
             return;
 
@@ -661,6 +758,7 @@ namespace Fusion
 
     void FTextInput::ExitEditing()
     {
+        ZoneScoped;
         if (!TestStyleState(EStyleState::Editing))
             return;
 
@@ -681,6 +779,7 @@ namespace Fusion
 
     void FTextInput::OnFocusChanged(FFocusEvent& event)
     {
+        ZoneScoped;
         SetStyleStateFlag(EStyleState::Focused, event.GotFocus());
 
         if (!event.GotFocus())

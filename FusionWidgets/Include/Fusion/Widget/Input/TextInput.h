@@ -51,6 +51,7 @@ namespace Fusion
         // - Editing -
 
         void InsertAtCursor(const FString& text);
+        void DeleteRange(int cpFrom, int cpTo); // erases [cpFrom, cpTo), moves cursor to cpFrom
         void DeleteSelection();
         void DeleteBackward();
         void DeleteForward();
