@@ -47,6 +47,9 @@
 // Text Rendering
 #include "Font/FontAtlas.h"
 
+// Timer
+#include "Timer/Timer.h"
+
 // Animation
 #include "Animation/Animatable.h"
 #include "Animation/EasingCurve.h"
@@ -70,4 +73,6 @@
 #include "Widget/Layout/StackBox.h"
 #include "Widget/Label.h"
 #include "Widget/Input/Button.h"
-#include "Widget/TextButton.h"
+#include "Widget/Input/TextButton.h"
+#include "Widget/Input/TextInput.h"
+

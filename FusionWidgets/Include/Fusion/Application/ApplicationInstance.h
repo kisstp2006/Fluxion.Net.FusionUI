@@ -12,6 +12,7 @@ namespace Fusion
 	class FSurface;
 	class FNativeSurface;
 	class FTheme;
+	class FTimer;
 
 	FUSION_SIGNAL_TYPE(FVoidSignal);
 
@@ -97,6 +98,11 @@ namespace Fusion
 
 		Ref<FFontAtlas> GetFontAtlas() { return m_FontAtlas; }
 
+		// - Timer -
+
+		void RegisterTimer(Ref<FTimer> timer);
+		void DeregisterTimer(Ref<FTimer> timer);
+
 	protected:
 
 		void OnWindowDestroyed(FWindowHandle window) override;
@@ -136,6 +142,8 @@ namespace Fusion
 		FArray<FPair<FUuid, FName>> m_AnimationsToDestroy;
 
 		Ref<FFontAtlas> m_FontAtlas;
+
+		FArray<WeakRef<FTimer>> m_Timers;
 
 	private:
 

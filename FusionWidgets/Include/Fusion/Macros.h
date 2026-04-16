@@ -4,7 +4,7 @@
 #include <optional>
 
 #define FNew(WidgetClass, ...) \
-    (* ::Fusion::NewObject<WidgetClass>(this))
+    (* ::Fusion::NewObject<WidgetClass>(this, ##__VA_ARGS__))
 
 #define FAssignNew(WidgetClass, VariableName) FNew(WidgetClass).Assign(VariableName)
 
@@ -175,7 +175,7 @@
         FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_APPLY, __VA_ARGS__)) \
     }
 
-// Declares every (Type, Name) style property AND generates the ApplyStyle override.
+// Declares every (Type, Name, DirtyKind) style property AND generates the ApplyStyle override.
 // Replaces individual FUSION_STYLE_PROPERTY calls + the hand-written ApplyStyle body.
 #define FUSION_STYLE_PROPERTIES(...) \
     FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_DECL, __VA_ARGS__)) \

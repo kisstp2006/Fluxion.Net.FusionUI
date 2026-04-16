@@ -130,6 +130,21 @@ namespace Fusion
 			}
 		}
 
+		// - Timers -
+
+		for (int i = (int)m_Timers.Size() - 1; i >= 0; --i)
+		{
+			if (Ref<FTimer> timer = m_Timers[i].Lock())
+			{
+				timer->Tick(m_DeltaTime);
+				continue;
+			}
+
+			m_Timers.RemoveAt(i);
+		}
+
+		// - Events -
+
 		m_PrevScreenMousePos = m_ScreenMousePos;
 		m_ScreenMousePos = m_PlatformBackend->GetGlobalMousePosition();
 		m_WheelDelta = m_PlatformBackend->GetMouseWheelDelta();
@@ -158,6 +173,8 @@ namespace Fusion
 		}
 
 		m_CurFocusSurface = m_FocusSurface;
+
+		// - Tick Surface -
 
 		for (Ref<FSurface> surface : m_Surfaces)
 		{
@@ -302,6 +319,16 @@ namespace Fusion
 			animation->Stop();
 			m_AnimationsToDestroy.Add({ ownerUuid, slot });
 		}
+	}
+
+	void FApplicationInstance::RegisterTimer(Ref<FTimer> timer)
+	{
+		m_Timers.Add(timer);
+	}
+
+	void FApplicationInstance::DeregisterTimer(Ref<FTimer> timer)
+	{
+		m_Timers.Remove(timer);
 	}
 
 	void FApplicationInstance::OnWindowDestroyed(FWindowHandle window)

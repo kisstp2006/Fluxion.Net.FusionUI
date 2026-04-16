@@ -33,6 +33,7 @@ namespace Fusion
         enum class MouseCaptureOp { None, Capture, Release };
         enum class InputLockOp    { None, Lock, Unlock };
         enum class CursorOp       { None, Hide, Show };
+        enum class FocusOp        { None, Self, Next, Prev };
 
         static FEventReply Handled()   { FEventReply r; r.m_Handled = true; return r; }
         static FEventReply Unhandled() { return {}; }
@@ -48,17 +49,21 @@ namespace Fusion
         FEventReply& UnlockInput() { m_InputLockOp = InputLockOp::Unlock; return *this; }
 
         // Keyboard focus
-        FEventReply& FocusSelf() { m_FocusSelf = true; return *this; }
+        FEventReply& FocusSelf() { m_FocusOp = FocusOp::Self; return *this; }
+        FEventReply& FocusNext() { m_FocusOp = FocusOp::Next; return *this; }
+        FEventReply& FocusPrev() { m_FocusOp = FocusOp::Prev; return *this; }
 
         bool           IsHandled()         const { return m_Handled; }
-        bool           ShouldFocusSelf()   const { return m_FocusSelf; }
+        bool           ShouldFocusSelf()   const { return m_FocusOp == FocusOp::Self; }
+        bool           ShouldFocusNext()   const { return m_FocusOp == FocusOp::Next; }
+        bool           ShouldFocusPrev()   const { return m_FocusOp == FocusOp::Prev; }
         MouseCaptureOp GetMouseCaptureOp() const { return m_MouseCaptureOp; }
         InputLockOp    GetInputLockOp()    const { return m_InputLockOp; }
         CursorOp       GetCursorOp()       const { return m_CursorOp; }
 
     private:
         bool           m_Handled        = false;
-        bool           m_FocusSelf      = false;
+        FocusOp        m_FocusOp        = FocusOp::None;
         MouseCaptureOp m_MouseCaptureOp = MouseCaptureOp::None;
         InputLockOp    m_InputLockOp    = InputLockOp::None;
         CursorOp       m_CursorOp       = CursorOp::None;

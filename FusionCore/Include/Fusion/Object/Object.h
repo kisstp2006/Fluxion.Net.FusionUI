@@ -13,13 +13,18 @@
 #define FUSION_CLASS_BODY(SelfClass) typedef SelfClass Self;\
     public:\
 		static FName StaticClassName() { thread_local const Fusion::FName className = #SelfClass; return className; }\
+		static FTypeID StaticClassTypeID() { thread_local const FTypeID typeId = ::Fusion::GetTypeID<Self>(); return typeId; }\
 	    virtual FTypeID GetClassTypeID() const { thread_local const FTypeID typeId = ::Fusion::GetTypeID<Self>(); return typeId; }\
 	    virtual FName GetClassName() const { thread_local const Fusion::FName className = #SelfClass; return className; }
 
 #define FUSION_CLASS(SelfClass, SuperClass) typedef SuperClass Super; \
     FUSION_CLASS_BODY(SelfClass)\
     template<FObjectType TObject, typename... TArgs>\
-	friend Ref<TObject> NewObject(FObject* outer, TArgs&&... args);
+	friend Ref<TObject> NewObject(FObject* outer, TArgs&&... args);\
+    bool IsOfType(FTypeID typeId) const override\
+	{\
+		return typeId == ::Fusion::GetTypeID<SelfClass>() || Super::IsOfType(typeId);\
+    }
 
 namespace Fusion
 {
@@ -101,6 +106,28 @@ namespace Fusion
 		void SetName(const FName& name) { m_Name = name; }
 
 		FUuid GetUuid() const { return m_Uuid; }
+
+        virtual bool IsOfType(FTypeID typeId) const
+        {
+            return typeId == ::Fusion::GetTypeID<FObject>();
+        }
+
+        template<typename TObject>
+        bool IsOfType() const
+		{
+            return IsOfType(TObject::StaticClassTypeID());
+		}
+
+        template<typename TTo, typename TFrom> requires TFIsDerivedClass<FObject, TTo>::Value and TFIsDerivedClass<FObject, TFrom>::Value
+        static Ref<TTo> CastTo(Ref<TFrom> object)
+		{
+			if (object->IsOfType<TTo>())
+			{
+                return (TTo*)object.Get();
+			}
+
+            return nullptr;
+		}
 
         void BeginDestroy();
 
