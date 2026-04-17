@@ -180,6 +180,7 @@ namespace Fusion
     public:
 
         bool         bGotFocus     = false;
+        bool         bFromKeyboard = false;
         Ref<FWidget> FocusedWidget = nullptr;
 
         bool GotFocus()  const { return bGotFocus; }

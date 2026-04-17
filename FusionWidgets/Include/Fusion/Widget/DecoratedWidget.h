@@ -21,10 +21,11 @@ namespace Fusion
         // - Fusion Properties -
 
         FUSION_STYLE_PROPERTIES(
-            (FBrush, Background, Paint),
-            (FPen,   Border,     Paint),
-            (FPen,   Outline,    Paint),
-            (FShape, Shape,      Paint)
+            (FBrush, Background,      Paint),
+            (FPen,   Border,          Paint),
+            (FPen,   Outline,         Paint),
+            (f32,    OutlineOffset,   Paint),
+            (FShape, Shape,           Paint)
         );
 
     };

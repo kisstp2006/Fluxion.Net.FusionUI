@@ -27,6 +27,9 @@ namespace Fusion
         // Activation
         Active   = FUSION_BIT(11), // current item among peers (active tab, active tool)
 
+        // Focus ring visibility (keyboard nav only, mirrors CSS :focus-visible)
+        FocusVisible = FUSION_BIT(13),
+
         // Structural states
         Expanded = FUSION_BIT(12), // tree nodes, accordions, dropdowns (collapsed = !Expanded)
     };

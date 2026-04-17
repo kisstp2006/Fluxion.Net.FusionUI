@@ -856,7 +856,9 @@ namespace Fusion
     void FTextInput::OnFocusChanged(FFocusEvent& event)
     {
         ZoneScoped;
-        SetStyleStateFlag(EStyleState::Focused, event.GotFocus());
+
+        SetStyleStateFlag(EStyleState::Focused,      event.GotFocus());
+        SetStyleStateFlag(EStyleState::FocusVisible, event.GotFocus() && event.bFromKeyboard);
 
         if (!event.GotFocus())
         {

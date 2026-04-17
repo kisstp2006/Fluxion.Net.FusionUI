@@ -4,7 +4,8 @@ namespace Fusion
 {
 	FDecoratedWidget::FDecoratedWidget()
 	{
-		m_Shape = FRectangle();
+		m_Shape         = FRectangle();
+		m_OutlineOffset = 2.0f;
 	}
 
 	void FDecoratedWidget::Paint(FPainter& painter)
@@ -27,13 +28,11 @@ namespace Fusion
 		FRect widgetRect(0, 0, layoutSize.width, layoutSize.height);
 
 		FPen outline = Outline();
-		if (outline.IsValid())
+		if (Outline().IsValid())
 		{
 			painter.SetClipEnabled(false);
 
-			// Expand outward by half the stroke thickness + 2px gap so the
-			// outline sits cleanly outside the border without overlapping it.
-			FRect outlineRect = widgetRect.Expand(outline.GetThickness() * 0.5f + 2.0f);
+			FRect outlineRect = widgetRect.Expand(outline.GetThickness() * 0.5f + OutlineOffset());
 			painter.SetBrush(FBrush());
 			painter.SetPen(outline);
 			painter.StrokeShape(outlineRect, Shape());

@@ -135,6 +135,7 @@ namespace Fusion
         FArray<WeakRef<FWidget>> m_HoveredWidgetStack;
         std::array<WeakRef<FWidget>, 5> m_PressedWidgetPerButton;
         WeakRef<FWidget> m_CurFocusedWidget, m_NextFocusWidget;
+        bool             m_bNextFocusFromKeyboard = false;
         WeakRef<FWidget> m_CapturedWidget;
 
         friend class FApplicationInstance;

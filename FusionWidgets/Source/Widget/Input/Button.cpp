@@ -95,7 +95,8 @@ namespace Fusion
 
 	void FButton::OnFocusChanged(FFocusEvent& event)
 	{
-		SetStyleStateFlag(EStyleState::Focused, event.GotFocus());
+		SetStyleStateFlag(EStyleState::Focused,      event.GotFocus());
+		SetStyleStateFlag(EStyleState::FocusVisible, event.GotFocus() && event.bFromKeyboard);
 	}
 
 } // namespace Fusion

@@ -292,7 +292,7 @@ int main(int argc, char* argv[])
 		{
 			Shape = FRoundedRectangle(5.0f);
 
-			FUSION_ON(Focused)
+			FUSION_ON(FocusVisible)
 			{
 				Outline = FocusOutline;
 			}
@@ -358,7 +358,9 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		FUSION_STYLE(FTextInput, "TextInput/Base", Shape, Background, Border, Outline, Padding, Font, TextColor, PlaceholderColor, SelectionColor, CursorColor)
+		FUSION_STYLE(FTextInput, "TextInput/Base", Shape,
+			Background, Border, Outline, Padding, Font,
+			TextColor, PlaceholderColor, SelectionColor, CursorColor)
 		{
 			Shape            = FRoundedRectangle(5.0f);
 			Background       = FColor(0.10f, 0.10f, 0.12f);
@@ -372,7 +374,11 @@ int main(int argc, char* argv[])
 
 			FUSION_ON(Focused)
 			{
-				Border  = FColor(0.47f, 0.73f, 1.0f, 0.85f);
+				Border = FColor(0.47f, 0.73f, 1.0f, 0.85f);
+			}
+
+			FUSION_ON(FocusVisible)
+			{
 				Outline = FocusOutline;
 			}
 

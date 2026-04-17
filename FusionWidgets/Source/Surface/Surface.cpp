@@ -520,12 +520,15 @@ namespace Fusion
         {
         case FEventReply::FocusOp::Self:
             m_NextFocusWidget = sender;
+            m_bNextFocusFromKeyboard = false;
             break;
         case FEventReply::FocusOp::Next:
             m_NextFocusWidget = FindNextFocusable(m_CurFocusedWidget.Lock(), false);
+            m_bNextFocusFromKeyboard = true;
             break;
         case FEventReply::FocusOp::Prev:
             m_NextFocusWidget = FindNextFocusable(m_CurFocusedWidget.Lock(), true);
+            m_bNextFocusFromKeyboard = true;
             break;
         default:
             break;
@@ -621,6 +624,7 @@ namespace Fusion
             FFocusEvent gotEvent{};
             gotEvent.Type          = EEventType::FocusChanged;
             gotEvent.bGotFocus     = true;
+            gotEvent.bFromKeyboard = m_bNextFocusFromKeyboard;
             gotEvent.FocusedWidget = nextFocus;
             gotEvent.Sender        = nextFocus;
 
