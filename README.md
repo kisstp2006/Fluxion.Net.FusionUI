@@ -10,9 +10,10 @@ A C++23 retained-mode UI library with declarative widgets, a type-safe styleshee
 
 ## Quick start
 
+This is how you create a basic Fusion UI application:
+
 ```cpp
 #include <Fusion/Core.h>
-#include <Fusion/SDL3Platform.h>
 #include <Fusion/Widgets.h>
 
 using namespace Fusion;
@@ -78,6 +79,10 @@ int main(int argc, char* argv[])
     return app.Run();
 }
 ```
+
+This is what it looks like:
+
+![](./Screenshots/Quickstart.png)
 
 ---
 

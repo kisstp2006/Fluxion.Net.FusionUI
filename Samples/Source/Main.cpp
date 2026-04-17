@@ -1,6 +1,4 @@
-
 #include <Fusion/Core.h>
-#include <Fusion/SDL3Platform.h>
 #include <Fusion/Widgets.h>
 
 using namespace Fusion;
