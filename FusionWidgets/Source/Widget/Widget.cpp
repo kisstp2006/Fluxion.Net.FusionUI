@@ -227,8 +227,6 @@ namespace Fusion
 		m_WidgetFlags &= ~EWidgetFlags::LayoutDirty;
 
 		FVec2 newLayoutSize = ApplyLayoutConstraints(finalSize);
-		//if (m_LayoutSize == newLayoutSize)
-		//	return;
 
 		m_LayoutSize = newLayoutSize;
 
@@ -242,6 +240,18 @@ namespace Fusion
 
 		if (m_CachedStyle)
 			ApplyStyle(*m_CachedStyle);
+	}
+
+	void FWidget::ApplyStyle()
+	{
+		if (!m_StyleCached)
+		{
+			RefreshStyle();
+		}
+		else if (m_CachedStyle)
+		{
+			ApplyStyle(*m_CachedStyle);
+		}
 	}
 
 	void FWidget::RefreshStyleRecursively()

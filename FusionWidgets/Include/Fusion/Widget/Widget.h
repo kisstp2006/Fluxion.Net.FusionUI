@@ -109,7 +109,11 @@ namespace Fusion
 
         // - Style -
 
+        //! @brief Clears the cached style, resolves the style again, and then applies it. Use sparingly, and prefer using ApplyStyle() over this.
         void RefreshStyle();
+
+        //! @brief Applied the already cached style if it exists, otherwise it resolves and then applies it.
+        void ApplyStyle();
 
         void RefreshStyleRecursively();
 

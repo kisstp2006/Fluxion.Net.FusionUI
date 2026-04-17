@@ -64,6 +64,21 @@
 			}\
 		}
 
+#define FUSION_PROPERTY_FORWARD(PropertyType, PropertyName, m_WrappingVariable)\
+	PropertyType PropertyName() const { return m_WrappingVariable->PropertyName(); }\
+	template<typename TSelf>\
+	TSelf& PropertyName(this TSelf& self, PropertyType const& value) {\
+		static_assert(std::is_same_v<std::remove_cvref_t<decltype(std::declval<TPtrType<decltype(m_WrappingVariable)>::Type>().PropertyName())>, PropertyType>, "Property Type mismatch with the wrapped property.");\
+		self.m_WrappingVariable->PropertyName(value);\
+		return self;\
+	}\
+	void __StyleBypassSetter_##PropertyName(PropertyType const& value) {\
+		m_WrappingVariable->__StyleBypassSetter_##PropertyName(value);\
+	}\
+	void __AnimBypassSetter_##PropertyName(PropertyType const& value) {\
+		m_WrappingVariable->__AnimBypassSetter_##PropertyName(value);\
+	}\
+
 #define __FUSION_STYLE_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
     protected:\
 		std::optional<PropertyType> m_Inline##PropertyName;\
@@ -109,6 +124,7 @@
 
 #define FUSION_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty())
 #define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkLayoutDirty())
+
 
 #define FUSION_PROPERTY_GET(PropertyType, PropertyName) \
 	PropertyType PropertyName()

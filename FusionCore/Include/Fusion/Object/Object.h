@@ -149,7 +149,7 @@ namespace Fusion
 
     private:
 
-		FArray<Ref<FObject>> m_Subobjects;
+		FArray<Ref<FObject>, 4> m_Subobjects;
 
         FName m_Name;
 		WeakRef<FObject> m_Outer;

@@ -13,7 +13,7 @@ public:
 	Ref<FDecoratedWidget> gradientBorder;
 	Ref<FDecoratedWidget> gradientWidget;
 
-	Ref<FButton> btn0;
+	Ref<FTextButton> btn0;
 	Ref<FTimer> timer;
 
 	void Construct() override
@@ -51,20 +51,14 @@ public:
 			.Spacing(10)
 			.Name("RootStack")
 			(
-				FNew(FButton)
+				FNew(FTextButton)
 				.Height(32)
 				.Style("Button/Primary")
+				.Text("Toggle Enable/Disable")
 				.OnClick([this]
 				{
 					hstack->Enabled(!hstack->Enabled());
-				})
-				.Child(
-					FNew(FLabel)
-					.Text("Toggle Enable/Disable")
-					.Color(FColors::White)
-					.HAlign(EHAlign::Center)
-					.VAlign(EVAlign::Center)
-				),
+				}),
 
 				FAssignNew(FDecoratedWidget, gradientBorder)
 				.Border(gradientPen)
@@ -80,10 +74,11 @@ public:
 				.ClipContent(true)
 				.Name("hstack")
 				(
-					FAssignNew(FButton, btn0)
+					FAssignNew(FTextButton, btn0)
 					.FillRatio(1.0f)
 					.Height(32)
 					.Style("Button/Primary")
+					.Text("Primary")
 					.OnClick([this, gradientPen]
 					{
 						FUSION_LOG_INFO("Debug", "Primary clicked!");
@@ -106,18 +101,12 @@ public:
 						.From(0.0f)
 						.To(1.0f)
 						.Play();
-					})
-					.Child(
-						FNew(FLabel)
-						.Text("Primary")
-						.Color(FColors::White)
-						.HAlign(EHAlign::Center)
-						.VAlign(EVAlign::Center)
-					),
+					}),
 
-					FNew(FButton)
+					FNew(FTextButton)
 					.FillRatio(1.0f)
 					.Height(32)
+					.Text("Secondary")
 					.Style("Button/Secondary")
 					.OnClick([this]
 					{
@@ -128,18 +117,12 @@ public:
 						.Play();
 
 						rotated = !rotated;
-					})
-					.Child(
-						FNew(FLabel)
-						.Text("Secondary")
-						.Color(FColors::White)
-						.HAlign(EHAlign::Center)
-						.VAlign(EVAlign::Center)
-					),
+					}),
 
-					FNew(FButton)
+					FNew(FTextButton)
 					.FillRatio(1.0f)
 					.Height(32)
+					.Text("Destructive")
 					.Style("Button/Destructive")
 					.OnClick([this, gradient]
 					{
@@ -158,14 +141,7 @@ public:
 						.Play();
 
 						gradientToggled = !gradientToggled;
-					})
-					.Child(
-						FNew(FLabel)
-						.Text("Destructive")
-						.Color(FColors::White)
-						.HAlign(EHAlign::Center)
-						.VAlign(EVAlign::Center)
-					),
+					}),
 
 					FNew(FTextInput)
 					.Style("TextInput/Base")
