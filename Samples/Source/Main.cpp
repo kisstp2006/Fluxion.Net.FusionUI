@@ -178,7 +178,7 @@ public:
 		m_DashGap = 5.0f;
 		m_DashPhase = 0.0f;
 	}
-	
+
 	void PaintOverContent(FPainter& painter) override
 	{
 		f32 go = GradientOffset();
@@ -215,7 +215,7 @@ public:
 		{
 			return FVec2(orig.x + x * drawW, orig.y + y * drawH);
 		};
-		
+
 		// Segment 1: straight horizontal line from left
 		painter.PathInsert(P(0.00f, 0.50f));
 		painter.PathInsert(P(0.20f, 0.50f));
@@ -252,13 +252,13 @@ public:
 		);
 
 		painter.DrawText(FVec2(120, 300), text);
-        
+
         painter.SetFont(
             FFont::Regular(FFont::kDefaultFamilyName, 48)
             .Style(EFontStyle::Normal)
             .Weight(EFontWeight::Regular)
         );
-        
+
         painter.DrawText(FVec2(300, 300), text);
 	}
 
@@ -287,7 +287,7 @@ int main(int argc, char* argv[])
 			Background = WindowBackgroundColor;
 			Padding	   = FMargin(1, 1, 1, 1) * 5;
 		}
-		
+
 		FUSION_STYLE(FButton, "Button/Base", Shape, Background, Border, Outline, OutlineOffset)
 		{
 			Shape = FRoundedRectangle(5.0f);
