@@ -2,7 +2,9 @@
 
 A C++23 retained-mode UI library with declarative widgets, a type-safe stylesheet system, animations, transitions, and pluggable platform and rendering backends.
 
-[Quick Start](#quick-start) | [Building](#building) | [Features](#features) | [License](#license)
+### ⭐ Feel free to star the project to show your support!
+
+[Quick Start](#quick-start) | [Building](#building) | [Features](#features)
 
 ![](./Screenshots/Sample.png)
 
