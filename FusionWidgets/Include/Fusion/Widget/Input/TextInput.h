@@ -32,6 +32,8 @@ namespace Fusion
         FEventReply OnKeyDown(FKeyEvent& event) override;
         FEventReply OnTextInput(FTextInputEvent& event) override;
         void        OnFocusChanged(FFocusEvent& event) override;
+        void        OnEnabled() override;
+        void        OnDisabled() override;
 
     private:
 

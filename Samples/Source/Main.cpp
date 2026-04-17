@@ -51,6 +51,21 @@ public:
 			.Spacing(10)
 			.Name("RootStack")
 			(
+				FNew(FButton)
+				.Height(32)
+				.Style("Button/Primary")
+				.OnClick([this]
+				{
+					hstack->Enabled(!hstack->Enabled());
+				})
+				.Child(
+					FNew(FLabel)
+					.Text("Toggle Enable/Disable")
+					.Color(FColors::White)
+					.HAlign(EHAlign::Center)
+					.VAlign(EVAlign::Center)
+				),
+
 				FAssignNew(FDecoratedWidget, gradientBorder)
 				.Border(gradientPen)
 				.Background(FColors::White)
@@ -156,6 +171,13 @@ public:
 					.Style("TextInput/Base")
 					.Placeholder("Type here...")
 					.FillRatio(1.0f)
+					.OnTextChanged([this](const FString& text)
+					{
+						if (text == "disable")
+						{
+							hstack->Enabled(false);
+						}
+					})
 				),
 
 				FAssignNew(FDecoratedWidget, gradientWidget)
@@ -397,6 +419,15 @@ int main(int argc, char* argv[])
 			FUSION_ON(Hovered)
 			{
 				Border = FColor(0.45f, 0.45f, 0.50f);
+			}
+
+			FUSION_ON(Disabled)
+			{
+				Background       = FColor(0.08f, 0.08f, 0.10f);
+				Border           = FColor(0.20f, 0.20f, 0.23f);
+				TextColor        = FColor(0.35f, 0.35f, 0.38f);
+				PlaceholderColor = FColor(0.25f, 0.25f, 0.28f);
+				CursorColor      = FColor(0.35f, 0.35f, 0.38f);
 			}
 		}
 	});

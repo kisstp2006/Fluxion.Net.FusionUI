@@ -170,6 +170,11 @@ namespace Fusion
 			FAffineTransform::Translation(-m_Pivot);
 	}
 
+	EStyleState FWidget::GetStyleState()
+	{
+		return m_StyleState;
+	}
+
 	bool FWidget::IsLayoutBoundary()
 	{
 		ZoneScoped;
@@ -372,6 +377,14 @@ namespace Fusion
 		else
 			m_StyleState &= ~state;
 
+		if (FEnumHasFlag(state, EStyleState::Disabled))
+		{
+			if (set)
+				OnDisabled();
+			else
+				OnEnabled();
+		}
+
 		if (m_StyleState != prev)
 		{
 			if (m_StyleCached)
@@ -386,4 +399,47 @@ namespace Fusion
 		}
 	}
 
+	void FWidget::SetEnabledRecursive(bool enabled, Ref<FWidget> parent)
+	{
+		if (TestStyleState(EStyleState::Disabled) == !enabled)
+			return;
+
+		ZoneScoped;
+
+		if (parent && !parent->Enabled())
+		{
+			enabled = false;
+		}
+
+		SetStyleStateFlag(EStyleState::Disabled, !enabled);
+		
+		for (int i = 0; i < GetChildCount(); i++)
+		{
+			GetChildAt(i)->SetEnabledRecursive(enabled, this);
+		}
+	}
+
+	bool FWidget::IsAncestorDisabled()
+	{
+		if (TestStyleState(EStyleState::Disabled))
+			return true;
+		Ref<FWidget> parent = GetParentWidget();
+		return parent.IsValid() && parent->IsAncestorDisabled();
+	}
+
+	bool FWidget::IsAncestorExcluded()
+	{
+		if (IsExcluded())
+			return true;
+		Ref<FWidget> parent = GetParentWidget();
+		return parent.IsValid() && parent->IsAncestorExcluded();
+	}
+
+	bool FWidget::IsAncestorHidden()
+	{
+		if (IsHidden())
+			return true;
+		Ref<FWidget> parent = GetParentWidget();
+		return parent.IsValid() && parent->IsAncestorHidden();
+	}
 } // namespace Fusion

@@ -803,6 +803,8 @@ namespace Fusion
     void FTextInput::EnterEditing()
     {
         ZoneScoped;
+        if (!Enabled())
+            return;
         if (TestStyleState(EStyleState::Editing))
             return;
 
@@ -872,6 +874,23 @@ namespace Fusion
         {
             MarkPaintDirty();
         }
+    }
+
+    void FTextInput::OnEnabled()
+    {
+	    Super::OnEnabled();
+
+    }
+
+    void FTextInput::OnDisabled()
+    {
+	    Super::OnDisabled();
+
+        bool wasEditing = TestStyleState(EStyleState::Editing);
+        bool textChanged = (m_Text != m_TextBeforeEdit);
+        ExitEditing();
+        if (wasEditing && textChanged)
+            m_OnTextSubmitted.Broadcast(m_Text);
     }
 
 } // namespace Fusion

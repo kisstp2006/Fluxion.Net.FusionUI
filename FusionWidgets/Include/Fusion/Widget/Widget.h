@@ -85,7 +85,7 @@ namespace Fusion
 
         virtual Ref<FWidget> GetChildAt(u32 index) { return nullptr; }
 
-        EStyleState GetStyleState() const { return m_StyleState; }
+        EStyleState GetStyleState();
 
         // - Layout -
 
@@ -115,7 +115,7 @@ namespace Fusion
 
         Ref<FStyle> ResolveStyle();
 
-        bool TestStyleState(EStyleState state) const { return FEnumHasAllFlags(m_StyleState, state); }
+        inline bool TestStyleState(EStyleState state) const { return FEnumHasAllFlags(m_StyleState, state); }
 
         // Hierarchy
 
@@ -156,6 +156,9 @@ namespace Fusion
         virtual FEventReply OnKeyUp([[maybe_unused]] FKeyEvent& event) { return FEventReply::Unhandled(); }
         virtual FEventReply OnTextInput([[maybe_unused]] FTextInputEvent& event) { return FEventReply::Unhandled(); }
         virtual void OnFocusChanged([[maybe_unused]] FFocusEvent& event) {}
+
+        virtual void OnEnabled() {}
+        virtual void OnDisabled() {}
 
         bool SelfHitTest(FVec2 localMousePos);
 
@@ -233,19 +236,22 @@ namespace Fusion
             return !IsHidden();
         }
 
-        FUSION_PROPERTY_GET(bool, Disabled)
+        FUSION_PROPERTY_GET(bool, Enabled)
         {
-            return TestStyleState(EStyleState::Disabled);
+            return !TestStyleState(EStyleState::Disabled);
         }
 
-        FUSION_PROPERTY_SET(bool, Disabled)
+        FUSION_PROPERTY_SET(bool, Enabled)
         {
-            if (self.Disabled() != value)
-            {
-                static_cast<FWidget&>(self).SetStyleStateFlag(EStyleState::Disabled, value);
-            }
+            static_cast<FWidget&>(self).SetEnabledRecursive(value, self.GetParentWidget());
             return self;
         }
+
+        void SetEnabledRecursive(bool enabled, Ref<FWidget> parent = nullptr);
+
+        bool IsAncestorDisabled();
+        bool IsAncestorExcluded();
+        bool IsAncestorHidden();
 
         template<typename TWidget> requires TFIsDerivedClass<FWidget, TWidget>::Value
         TWidget& Assign(TWidget*& out)

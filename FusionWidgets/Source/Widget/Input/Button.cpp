@@ -11,7 +11,7 @@ namespace Fusion
 	{
 		Super::OnMouseEnter(event);
 
-		if (!Disabled())
+		if (Enabled())
 		{
 			SetStyleStateFlag(EStyleState::Hovered, true);
 		}
@@ -26,7 +26,7 @@ namespace Fusion
 
 	FEventReply FButton::OnMouseButtonDown(FMouseEvent& event)
 	{
-		if (Disabled())
+		if (!Enabled())
 			return FEventReply::Unhandled();
 
 		if (event.IsLeftButton() || event.IsRightButton())
@@ -39,7 +39,7 @@ namespace Fusion
 
 	FEventReply FButton::OnMouseButtonUp(FMouseEvent& event)
 	{
-		if (Disabled())
+		if (!Enabled())
 		{
 			SetStyleStateFlag(EStyleState::Pressed | EStyleState::Hovered, false);
 
@@ -60,7 +60,7 @@ namespace Fusion
 
 	FEventReply FButton::OnKeyDown(FKeyEvent& event)
 	{
-		if (Disabled())
+		if (!Enabled())
 			return FEventReply::Unhandled();
 
 		if (event.Key == EKeyCode::Space || event.Key == EKeyCode::Return)
@@ -80,7 +80,7 @@ namespace Fusion
 
 	FEventReply FButton::OnKeyUp(FKeyEvent& event)
 	{
-		if (Disabled())
+		if (!Enabled())
 			return FEventReply::Unhandled();
 
 		if (event.Key == EKeyCode::Space || event.Key == EKeyCode::Return)

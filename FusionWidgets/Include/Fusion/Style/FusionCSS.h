@@ -2,10 +2,6 @@
 
 namespace Fusion::CSS
 {
-    // -------------------------------------------------------------------------
-    // FStyleContext — stack-allocated, owns the active style ref + current state.
-    // Shared by all FStyleProp instances in a FUSION_STYLE block via pointer.
-    // -------------------------------------------------------------------------
 
     struct FStyleContext
     {
@@ -14,11 +10,6 @@ namespace Fusion::CSS
 
         FStyleContext(FStyle& style) : Style(style) {}
     };
-
-    // -------------------------------------------------------------------------
-    // FStateScope — RAII, temporarily changes the state on the shared context.
-    // Restored on destruction so nested FUSION_ON blocks compose correctly.
-    // -------------------------------------------------------------------------
 
     struct FStateScope
     {
@@ -57,12 +48,6 @@ namespace Fusion::CSS
 
 } // namespace Fusion::CSS
 
-// -----------------------------------------------------------------------------
-// __FUSION_CSS_MAKE_PROP(WidgetClass, PropName)
-//   Produces one FStyleProp<T> where T is deduced from the widget getter.
-//   Uses std::remove_cvref_t so const& return types reduce to plain T.
-//   Trailing comma is valid in a braced-init-list (C++11).
-// -----------------------------------------------------------------------------
 
 #define __FUSION_CSS_MAKE_PROP(WidgetClass, PropName)                                  \
     Fusion::CSS::FStyleProp<                                                           \
@@ -108,13 +93,14 @@ namespace Fusion::CSS
 
 
 
-#define __FUSION_FOLD_STATES_1(a)                   EStyleState::a
-#define __FUSION_FOLD_STATES_2(a, b)                EStyleState::a | EStyleState::b
-#define __FUSION_FOLD_STATES_3(a, b, c)             EStyleState::a | EStyleState::b | EStyleState::c
-#define __FUSION_FOLD_STATES_4(a, b, c, d)          EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d
-#define __FUSION_FOLD_STATES_5(a, b, c, d, e)       EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d | EStyleState::e
-#define __FUSION_FOLD_STATES_6(a, b, c, d, e, f)    EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d | EStyleState::e | EStyleState::f
-#define __FUSION_FOLD_STATES_7(a, b, c, d, e, f, g) EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d | EStyleState::e | EStyleState::f | EStyleState::g
+#define __FUSION_FOLD_STATES_1(a)                       EStyleState::a
+#define __FUSION_FOLD_STATES_2(a, b)                    EStyleState::a | EStyleState::b
+#define __FUSION_FOLD_STATES_3(a, b, c)                 EStyleState::a | EStyleState::b | EStyleState::c
+#define __FUSION_FOLD_STATES_4(a, b, c, d)              EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d
+#define __FUSION_FOLD_STATES_5(a, b, c, d, e)           EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d | EStyleState::e
+#define __FUSION_FOLD_STATES_6(a, b, c, d, e, f)        EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d | EStyleState::e | EStyleState::f
+#define __FUSION_FOLD_STATES_7(a, b, c, d, e, f, g)     EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d | EStyleState::e | EStyleState::f | EStyleState::g
+#define __FUSION_FOLD_STATES_7(a, b, c, d, e, f, g, h)  EStyleState::a | EStyleState::b | EStyleState::c | EStyleState::d | EStyleState::e | EStyleState::f | EStyleState::g | EStyleState::h
 
 // For internal use only!
 #define __FUSION_FOLD_STATES(...) \
@@ -123,11 +109,6 @@ namespace Fusion::CSS
 
 
 /// @brief Opens a state-override block inside a FUSION_STYLE body.
-///
-/// Assignments to property variables inside this block are stored under the combined
-/// state mask formed by @p ... rather than the Default state. The previous state is
-/// restored on scope exit, so blocks can be freely ordered without interfering.
-/// More specific masks (more bits) win over less specific ones at resolve time.
 ///
 /// @param ...  One or more bare EStyleState names without the `EStyleState::` prefix
 ///             (e.g. Hovered, Pressed). Multiple names are combined with | — all listed

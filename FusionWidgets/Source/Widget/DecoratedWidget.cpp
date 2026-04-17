@@ -24,6 +24,9 @@ namespace Fusion
 	{
 		Super::PaintOverContent(painter);
 
+		if (!Enabled())
+			return;
+
 		FVec2 layoutSize = GetLayoutSize();
 		FRect widgetRect(0, 0, layoutSize.width, layoutSize.height);
 
