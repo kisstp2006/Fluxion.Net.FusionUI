@@ -162,7 +162,7 @@ public:
 				.Height(100),
 
 				FNew(FDecoratedBox)
-				.Background(FBrush::Image("embed:/Icons/TransparentPattern.png").BrushTiling(EBrushTiling::TileXY).ImageFit(EImageFit::Fill).BrushSize(FVec2(1, 1) * 32))
+				.Background(FBrush::Image("embed:/Icons/TransparentPattern.png").BrushTiling(EBrushTiling::TileXY).ImageFit(EImageFit::Fill).BrushSize(FVec2(1, 1) * 48))
 				.Shape(FRoundedRectangle(5.0f))
 				.Height(100),
 
