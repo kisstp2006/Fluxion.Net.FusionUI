@@ -820,22 +820,22 @@ namespace Fusion
 		FUIDrawList* drawList = layer->GetDrawList();
 
 		snapshot->vertexSplits.Insert({ .StartOffset = snapshot->vertexArray.GetByteSize(), .ByteSize = drawList->vertexArray.GetByteSize() });
-		snapshot->vertexArray.Insert(drawList->vertexArray.GetData(), (int)drawList->vertexArray.GetCount());
+		snapshot->vertexArray.InsertRange(drawList->vertexArray.GetData(), (int)drawList->vertexArray.GetCount());
 
 		snapshot->indexSplits.Insert({ .StartOffset = snapshot->indexArray.GetByteSize(), .ByteSize = drawList->indexArray.GetByteSize() });
-		snapshot->indexArray.Insert(drawList->indexArray.GetData(), (int)drawList->indexArray.GetCount());
+		snapshot->indexArray.InsertRange(drawList->indexArray.GetData(), (int)drawList->indexArray.GetCount());
 
 		snapshot->drawItemSplits.Insert({ .StartOffset = snapshot->drawItemArray.GetByteSize(), .ByteSize = drawList->drawItemArray.GetByteSize() });
-		snapshot->drawItemArray.Insert(drawList->drawItemArray.GetData(), (int)drawList->drawItemArray.GetCount());
+		snapshot->drawItemArray.InsertRange(drawList->drawItemArray.GetData(), (int)drawList->drawItemArray.GetCount());
 
 		snapshot->drawCmdSplits.Insert({ .StartOffset = snapshot->drawCmdArray.GetByteSize(), .ByteSize = drawList->drawCmdArray.GetByteSize() });
-		snapshot->drawCmdArray.Insert(drawList->drawCmdArray.GetData(), (int)drawList->drawCmdArray.GetCount());
+		snapshot->drawCmdArray.InsertRange(drawList->drawCmdArray.GetData(), (int)drawList->drawCmdArray.GetCount());
 
 		snapshot->clipRectSplits.Insert({ .StartOffset = snapshot->clipRectArray.GetByteSize(), .ByteSize = drawList->clipRectArray.GetByteSize() });
-		snapshot->clipRectArray.Insert(drawList->clipRectArray.GetData(), (int)drawList->clipRectArray.GetCount());
+		snapshot->clipRectArray.InsertRange(drawList->clipRectArray.GetData(), (int)drawList->clipRectArray.GetCount());
 
 		snapshot->gradientStopSplits.Insert({ .StartOffset = snapshot->gradientStopArray.GetByteSize(), .ByteSize = drawList->gradientStopArray.GetByteSize() });
-		snapshot->gradientStopArray.Insert(drawList->gradientStopArray.GetData(), (int)drawList->gradientStopArray.GetCount());
+		snapshot->gradientStopArray.InsertRange(drawList->gradientStopArray.GetData(), (int)drawList->gradientStopArray.GetCount());
 		
 
 		u32 drawCmdSplitCount = layer->GetSplitPointCount();

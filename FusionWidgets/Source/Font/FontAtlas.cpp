@@ -1,5 +1,8 @@
 #include "Fusion/Widgets.h"
-#include "Fusion/Resources/EmbeddedResources.h"
+#include "Fusion/Resources.h"
+
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
 
 namespace Fusion
 {

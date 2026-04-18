@@ -1,4 +1,5 @@
 #pragma once
+#include <Fusion/Misc/CoreTypes.h>
 
 namespace Fusion
 {
@@ -58,7 +59,13 @@ namespace Fusion
 
         static IPtr<FImage> Create(FName name, EImageFormat format, int width, int height);
 
+        static IPtr<FImage> CreateExternal(FName name, EImageFormat format, int width, int height, u8* data);
+
         bool IsValid() const;
+
+        u8* Data() const { return m_Data; }
+
+        u32 Pitch() const { return Width * GetBitsPerPixel(Format) / 8; }
 
     private:
 

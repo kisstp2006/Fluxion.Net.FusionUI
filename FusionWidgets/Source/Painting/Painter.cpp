@@ -477,7 +477,7 @@ namespace Fusion
 			}
 		}
 
-		m_Path.InsertRange(samples, FVec2());
+		m_Path.Insert(samples, FVec2());
 
 		FVec2* outPtr = m_Path.GetData() + (m_Path.GetCount() - samples);
 
@@ -599,7 +599,7 @@ namespace Fusion
 
 			const f32 gradientOffset = m_CurrentPen.GetGradientOffset();
 
-			m_TempPoints.InsertRange(numPoints, 0.0f);
+			m_TempPoints.Insert(numPoints, 0.0f);
 			m_TempPoints[0] = gradientOffset;
 			f32 acc = 0;
 

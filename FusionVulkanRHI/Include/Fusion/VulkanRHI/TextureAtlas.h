@@ -52,6 +52,8 @@ namespace Fusion::Vulkan
     {
     public:
 
+        // TODO: Add support for adding new array layers on the fly
+
         FTextureAtlas(FVulkanRenderBackend* backend, u32 size, u32 layerCount, VkFormat format);
 
         ~FTextureAtlas();

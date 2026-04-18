@@ -1173,7 +1173,7 @@ TEST(FStableDynamicArrayTest, RemoveLast)
 TEST(FStableDynamicArrayTest, InsertRange)
 {
     FStableGrowthArray<int> arr;
-    arr.InsertRange(3, 42);
+    arr.Insert(3, 42);
     EXPECT_EQ(arr.GetCount(), 3);
     EXPECT_EQ(arr[0], 42);
     EXPECT_EQ(arr[1], 42);
@@ -1184,7 +1184,7 @@ TEST(FStableDynamicArrayTest, InsertMultipleValues)
 {
     FStableGrowthArray<int> arr;
     int values[] = { 5, 10, 15 };
-    arr.Insert(values, 3);
+    arr.InsertRange(values, 3);
     EXPECT_EQ(arr.GetCount(), 3);
     EXPECT_EQ(arr[0], 5);
     EXPECT_EQ(arr[1], 10);

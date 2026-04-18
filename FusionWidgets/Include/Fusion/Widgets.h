@@ -49,6 +49,9 @@
 // Text Rendering
 #include "Font/FontAtlas.h"
 
+// Image Rendering
+#include "Image/ImageAtlas.h"
+
 // Timer
 #include "Timer/Timer.h"
 

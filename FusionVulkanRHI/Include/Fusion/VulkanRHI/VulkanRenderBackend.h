@@ -101,6 +101,7 @@ namespace Fusion::Vulkan
         // Per ApplicationInstance data goes here
 
         FAtlasHandle FontAtlas;
+        FAtlasHandle ImageAtlas;
 
         VkDescriptorSet GlobalSet = VK_NULL_HANDLE;
     };
@@ -206,13 +207,15 @@ namespace Fusion::Vulkan
 
         // - Atlas -
 
-        FAtlasHandle CreateLayeredAtlas(bool grayscale, u32 resolution, u32 maxLayers) override;
+        FAtlasHandle CreateLayeredAtlas(bool grayscale, u32 resolution, u32 numLayers) override;
 
         void UploadAtlasRegionAsync(FAtlasHandle atlas, u32 layer,
             FVec2i pos, FVec2i size,
             const u8* pixels, int pitch) override;
 
         void SetFontAtlas(FInstanceHandle instance, FAtlasHandle atlas) override;
+
+        void SetImageAtlas(FInstanceHandle instance, FAtlasHandle atlas) override;
 
         void DestroyAtlas(FAtlasHandle atlas) override;
 

@@ -100,12 +100,12 @@ namespace Fusion
 
         SizeT curVertexCount = vertexArray.GetCount();
 
-        vertexArray.InsertRange(vertexCount);
+        vertexArray.Insert(vertexCount, {});
         vertexWritePtr = vertexArray.GetData() + curVertexCount;
 
         SizeT curIndexCount = indexArray.GetCount();
 
-        indexArray.InsertRange(indexCount);
+        indexArray.Insert(indexCount, {});
         indexWritePtr = indexArray.GetData() + curIndexCount;
     }
 
@@ -146,7 +146,7 @@ namespace Fusion
             // Temporary buffer
             // The first <numPoints> items are normals at each line point, then after that there are either 2 or 4 temp points for each line point
             temporaryPoints.RemoveAll();
-            temporaryPoints.InsertRange(numPoints * (thickLine ? 5 : 3));
+            temporaryPoints.Insert(numPoints * (thickLine ? 5 : 3));
             FVec2* tempNormals = temporaryPoints.GetData();
             FVec2* tempPoints = tempNormals + numPoints;
 
@@ -361,7 +361,7 @@ namespace Fusion
 
             // Compute per-edge outward normals
             temporaryPoints.RemoveAll();
-            temporaryPoints.InsertRange(numPoints, FVec2());
+            temporaryPoints.Insert(numPoints, FVec2());
             FVec2* tempNormals = temporaryPoints.GetData();
 
             for (int i0 = numPoints - 1, i1 = 0; i1 < numPoints; i0 = i1++)

@@ -43,12 +43,13 @@ namespace Fusion
         // Properties
         // ----------------------------------------------------------------
 
-        constexpr FVec2 GetSize()   const { return max - min; }
-        constexpr float GetWidth()  const { return right - left; }
-        constexpr float GetHeight() const { return bottom - top; }
-        constexpr FVec2 GetCenter() const { return (min + max) * 0.5f; }
-        constexpr float GetArea()   const { return GetWidth() * GetHeight(); }
-        constexpr bool  IsEmpty()   const { return left >= right || top >= bottom; }
+        constexpr FVec2 GetSize()    const { return max - min; }
+        constexpr float GetWidth()   const { return right - left; }
+        constexpr float GetHeight()  const { return bottom - top; }
+        constexpr FVec2 GetCenter()  const { return (min + max) * 0.5f; }
+        constexpr float GetArea()    const { return GetWidth() * GetHeight(); }
+        constexpr i32   GetAreaInt() const { return (i32)(GetWidth() * GetHeight()); }
+        constexpr bool  IsEmpty()    const { return left >= right || top >= bottom; }
 
         // ----------------------------------------------------------------
         // Containment / overlap

@@ -26,6 +26,7 @@ namespace Fusion
         image->m_UsesStbImage = false;
         image->Width = width;
         image->Height = height;
+        image->Format = format;
         image->Channels = GetNumChannels(format);
         image->BitsPerPixel = GetBitsPerPixel(format);
 
@@ -34,10 +35,26 @@ namespace Fusion
         return image;
     }
 
+    IPtr<FImage> FImage::CreateExternal(FName name, EImageFormat format, int width, int height, u8* data)
+    {
+        IPtr<FImage> image = new FImage();
+        image->Format = format;
+        image->m_Name = MoveTemp(name);
+        image->m_UsesMalloc = false;
+        image->m_UsesStbImage = false;
+        image->Width = width;
+        image->Height = height;
+        image->Channels = GetNumChannels(format);
+        image->BitsPerPixel = GetBitsPerPixel(format);
+
+        image->m_Data = data;
+
+        return image;
+    }
+
     bool FImage::IsValid() const
     {
         return m_Data != nullptr && Width > 0 && Height > 0 && Channels > 0;
     }
-
     
 } // namespace Fusion

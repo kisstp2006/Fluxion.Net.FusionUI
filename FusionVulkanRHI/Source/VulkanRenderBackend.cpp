@@ -299,16 +299,27 @@ namespace Fusion::Vulkan
 		it->second->Snapshot = snapshot;
 	}
 
-	FAtlasHandle FVulkanRenderBackend::CreateLayeredAtlas(bool grayscale, u32 resolution, u32 maxLayers)
+	FAtlasHandle FVulkanRenderBackend::CreateLayeredAtlas(bool grayscale, u32 resolution, u32 numLayers)
 	{
 		m_AtlasIndexAllocator += 1;
 		FAtlasHandle handle = FAtlasHandle(m_AtlasIndexAllocator);
 
-		IPtr<FTextureAtlas> atlas = new FTextureAtlas(this, resolution, maxLayers, grayscale ? VK_FORMAT_R8_UNORM : VK_FORMAT_R8G8B8A8_UNORM);
+		IPtr<FTextureAtlas> atlas = new FTextureAtlas(this, resolution, numLayers, grayscale ? VK_FORMAT_R8_UNORM : VK_FORMAT_R8G8B8A8_UNORM);
 
 		m_AtlasesByHandle[handle] = atlas;
 
 		return handle;
+	}
+
+	static SizeT GetTexelBlockSize(VkFormat format)
+	{
+		switch (format)
+		{
+		case VK_FORMAT_R8G8B8A8_UNORM:
+		case VK_FORMAT_B8G8R8A8_UNORM:
+			return 4;
+		}
+		return 1;
 	}
 
 	void FVulkanRenderBackend::UploadAtlasRegionAsync(FAtlasHandle handle, u32 layer, FVec2i pos, FVec2i size,
@@ -332,7 +343,7 @@ namespace Fusion::Vulkan
 
 		for (int row = 0; row < size.y; row++)
 		{
-			m_UploadArena.Insert(pixels + row * pitch, bytesPerRow);
+			m_UploadArena.InsertRange(pixels + row * pitch, bytesPerRow);
 		}
 
 		m_PendingAtlasUploads[handle].Add({
@@ -351,6 +362,14 @@ namespace Fusion::Vulkan
 			return;
 
 		m_Instances[instance]->FontAtlas = atlas;
+	}
+
+	void FVulkanRenderBackend::SetImageAtlas(FInstanceHandle instance, FAtlasHandle atlas)
+	{
+		if (!IsInitialized(instance))
+			return;
+
+		m_Instances[instance]->ImageAtlas = atlas;
 	}
 
 	void FVulkanRenderBackend::DestroyAtlas(FAtlasHandle atlas)
@@ -757,6 +776,12 @@ namespace Fusion::Vulkan
 
 			for (auto& atlasUploadRegion : atlasUploadRegions)
 			{
+				SizeT blockSize = GetTexelBlockSize(it->second->m_Format);
+				if (blockSize > 1)
+				{
+					curUploadOffset = FMemoryUtils::AlignUp(curUploadOffset, blockSize);
+				}
+
 				m_StagingBuffers[m_FrameSlot]->EnsureCapacity(curUploadOffset + atlasUploadRegion.DataSize);
 
 				u8* dstData = m_StagingBuffers[m_FrameSlot]->m_MappedData + curUploadOffset;

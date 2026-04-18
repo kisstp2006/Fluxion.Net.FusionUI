@@ -131,7 +131,7 @@ namespace Fusion
             data[count++] = std::move(copy);
         }
 
-        void InsertRange(SizeT numItems, const T& value = {})
+        void Insert(SizeT numItems, const T& value = {})
         {
             ZoneScoped;
 
@@ -146,7 +146,7 @@ namespace Fusion
             }
         }
 
-        void Insert(const T* values, SizeT numItems)
+        void InsertRange(const T* values, SizeT numItems)
         {
             ZoneScoped;
 
