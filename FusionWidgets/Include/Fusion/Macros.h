@@ -151,59 +151,54 @@
 			return self;\
 		}
 
-#define __FUSION_APPLY_STYLE_WRITE(PropertyName, CurrentValue) \
-    { \
-        bool areEqual = false; \
-        if constexpr (TFEquitable<decltype(value)>::Value) \
-        { \
-            areEqual = TFEquitable<decltype(value)>::AreEqual(CurrentValue, value); \
-        } \
-        if constexpr (FAnimatable<decltype(value)>::Supported) \
-        { \
-            FTransition transition; \
-            if (!areEqual && style.TryGetTransition(#PropertyName, transition)) \
-            { \
-                if (transition.Type == ETransitionType::Tween) \
-                { \
-                    __FAnimate_Tween(this, PropertyName, __StyleBypassSetter_) \
-                    .To(value) \
-                    .Duration(transition.Tween.Duration) \
-                    .Easing(transition.Tween.Easing) \
-                    .Delay(transition.Tween.Delay) \
-                    .Play(); \
-                } \
-                else if (transition.Type == ETransitionType::Spring) \
-                { \
-                    __FAnimate_Spring(this, PropertyName, __StyleBypassSetter_) \
-                    .Target(value) \
-                    .Damping(transition.Spring.Damping) \
-                    .Stiffness(transition.Spring.Stiffness) \
-                    .Delay(transition.Spring.Delay) \
-                    .Play(); \
-                } \
-                else \
-                { \
-                    __StyleBypassSetter_##PropertyName(value); \
-                } \
-            } \
-            else if (!areEqual) \
-            { \
-                __StyleBypassSetter_##PropertyName(value); \
-            } \
-        } \
-        else if (!areEqual) \
-        { \
-            __StyleBypassSetter_##PropertyName(value); \
-        } \
-    }
-
 #define __FUSION_APPLY_STYLE(PropertyName)\
 	if (!m_Inline##PropertyName.has_value())\
 	{\
 		decltype(m_##PropertyName) value;\
 		if (style.TryGet(#PropertyName, value, GetStyleState()))\
 		{\
-			__FUSION_APPLY_STYLE_WRITE(PropertyName, value)\
+			bool areEqual = false;\
+			if constexpr (TFEquitable<decltype(m_##PropertyName)>::Value)\
+			{\
+				areEqual = TFEquitable<decltype(m_##PropertyName)>::AreEqual(m_##PropertyName, value);\
+			}\
+			if constexpr (FAnimatable<decltype(m_##PropertyName)>::Supported)\
+			{\
+				FTransition transition;\
+				if (!areEqual && style.TryGetTransition(#PropertyName, transition))\
+				{\
+					if (transition.Type == ETransitionType::Tween)\
+					{\
+						__FAnimate_Tween(this, PropertyName, __StyleBypassSetter_)\
+						.To(value)\
+						.Duration(transition.Tween.Duration)\
+						.Easing(transition.Tween.Easing)\
+						.Delay(transition.Tween.Delay)\
+						.Play();\
+					}\
+					else if (transition.Type == ETransitionType::Spring)\
+					{\
+						__FAnimate_Spring(this, PropertyName, __StyleBypassSetter_)\
+						.Target(value)\
+						.Damping(transition.Spring.Damping)\
+						.Stiffness(transition.Spring.Stiffness)\
+						.Delay(transition.Spring.Delay)\
+						.Play();\
+					}\
+					else\
+					{\
+						__StyleBypassSetter_##PropertyName(value);\
+					}\
+				}\
+				else if (!areEqual)\
+				{\
+					__StyleBypassSetter_##PropertyName(value);\
+				}\
+			}\
+			else if (!areEqual)\
+			{\
+				__StyleBypassSetter_##PropertyName(value);\
+			}\
 		}\
 	}
 
