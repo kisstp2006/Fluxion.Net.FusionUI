@@ -177,8 +177,30 @@ public:
 				.Height(100)
 				.Transform(FAffineTransform::Rotation(FMath::Deg2Rad(0))),
 
-				FNew(FWidget)
+				FNew(FScrollBox)
+				.Style("ScrollBox/Base")
 				.FillRatio(1.0f)
+				.CanScrollVertical(true)
+				.Child(
+					FNew(FVerticalStack)
+					.ContentHAlign(EHAlign::Fill)
+					.HAlign(EHAlign::Fill)
+					.Spacing(6)
+					(
+						FNew(FTextButton).Height(30).Style("Button/Secondary").Text("Item 1"),
+						FNew(FTextButton).Height(30).Style("Button/Secondary").Text("Item 2"),
+						FNew(FTextButton).Height(30).Style("Button/Secondary").Text("Item 3"),
+						FNew(FTextButton).Height(30).Style("Button/Secondary").Text("Item 4"),
+						FNew(FTextButton).Height(30).Style("Button/Secondary").Text("Item 5"),
+						FNew(FTextButton).Height(30).Style("Button/Secondary").Text("Item 6"),
+						FNew(FTextButton).Height(30).Style("Button/Secondary").Text("Item 7"),
+						FNew(FTextButton).Height(30).Style("Button/Secondary").Text("Item 8"),
+						FNew(FTextButton).Height(30).Style("Button/Secondary").Text("Item 9"),
+						FNew(FTextButton).Height(30).Style("Button/Secondary").Text("Item 10"),
+						FNew(FTextButton).Height(30).Style("Button/Secondary").Text("Item 11"),
+						FNew(FTextButton).Height(30).Style("Button/Secondary").Text("Item 12")
+					)
+				)
 			)
 		);
 	}
@@ -321,8 +343,6 @@ int main(int argc, char* argv[])
 			Extends("Base/FocusRing");
 			Shape = FRoundedRectangle(5.0f);
 
-			Transition(Background, FTransition::MakeTween(0.1f));
-
 			FUSION_ON(Disabled)
 			{
 				Background = FColor(0.18f, 0.18f, 0.20f);
@@ -382,6 +402,29 @@ int main(int argc, char* argv[])
 				Background = FColor(0.58f, 0.09f, 0.09f);
 				Border     = FColor(0.45f, 0.06f, 0.06f);
 			}
+		}
+
+		FUSION_STYLE(FScrollBox, "ScrollBox/Base",
+			Background, Border, Shape,
+			TrackBackground, TrackShape,
+			ThumbBackground, ThumbHoverBackground, ThumbPressedBackground, ThumbShape,
+			ScrollbarThickness, ScrollbarPadding, Padding)
+		{
+			Background             = FColor(0.10f, 0.10f, 0.12f);
+			Border                 = FColor(0.22f, 0.22f, 0.26f);
+			Shape                  = FRoundedRectangle(5.0f);
+
+			TrackBackground        = FColor(0.08f, 0.08f, 0.10f);
+			TrackShape             = FRoundedRectangle(3.0f);
+
+			ThumbBackground        = FColor(0.28f, 0.28f, 0.33f);
+			ThumbHoverBackground   = FColor(0.42f, 0.42f, 0.48f);
+			ThumbPressedBackground = FColor(0.58f, 0.58f, 0.65f);
+			ThumbShape             = FRoundedRectangle(3.0f);
+
+			Padding			   = FMargin(1, 1, 1, 1) * 5;
+			ScrollbarThickness = 8.0f;
+			ScrollbarPadding   = 2.0f;
 		}
 
 		FUSION_STYLE(FTextInput, "TextInput/Base", Shape,

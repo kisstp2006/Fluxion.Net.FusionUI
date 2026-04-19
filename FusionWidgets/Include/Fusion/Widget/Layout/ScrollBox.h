@@ -1,5 +1,8 @@
 #pragma once
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
     class FScrollBox;
@@ -22,9 +25,21 @@ namespace Fusion
 
         // - Layout -
 
-        FVec2 MeasureContent(FVec2 availableSize) override;
+        
 
-        void ArrangeContent(FVec2 finalSize) override;
+        // - Paint -
+
+        // - Hit Testing -
+
+        bool ShouldHitTestChildren(FVec2 localMousePos) override;
+
+        // - Events -
+
+        FEventReply OnMouseButtonDown(FMouseEvent& event) override;
+        FEventReply OnMouseButtonUp(FMouseEvent& event) override;
+        FEventReply OnMouseMove(FMouseEvent& event) override;
+        void OnMouseLeave(FMouseEvent& event) override;
+        FEventReply OnMouseWheel(FMouseEvent& event) override;
 
     protected:
 
@@ -39,12 +54,42 @@ namespace Fusion
             (f32,    ScrollbarPadding,       Layout)
         );
 
-        FUSION_LAYOUT_PROPERTY(FVec2, ScrollOffset);
-        FUSION_LAYOUT_PROPERTY(bool, CanScrollVertical);
-        FUSION_LAYOUT_PROPERTY(bool, CanScrollHorizontal);
+        FUSION_LAYOUT_PROPERTY(FVec2,               ScrollOffset);
+        FUSION_LAYOUT_PROPERTY(bool,                CanScrollVertical);
+        FUSION_LAYOUT_PROPERTY(bool,                CanScrollHorizontal);
+        FUSION_LAYOUT_PROPERTY(f32,                 ScrollSpeed);
         FUSION_LAYOUT_PROPERTY(EScrollbarVisibility, HorizontalScrollVisibility);
         FUSION_LAYOUT_PROPERTY(EScrollbarVisibility, VerticalScrollVisibility);
 
+        FUSION_PROPERTY(FDelegate<void(FVec2)>, OnScrollOffsetChanged);
+
+    private:
+
+        // Computed during layout
+        FVec2 m_ContentSize  = FVec2(0, 0);
+        FVec2 m_ViewportSize = FVec2(0, 0);
+
+        // Scrollbar visibility (resolved during ArrangeContent)
+        bool m_bShowVertScrollbar = false;
+        bool m_bShowHorzScrollbar = false;
+
+        // Cached scrollbar rects in local widget space (resolved during ArrangeContent)
+        FRect m_VertTrackRect;
+        FRect m_VertThumbRect;
+        FRect m_HorzTrackRect;
+        FRect m_HorzThumbRect;
+
+        // Per-bar interaction state
+        bool m_bVertThumbHovered = false;
+        bool m_bVertThumbPressed = false;
+        bool m_bHorzThumbHovered = false;
+        bool m_bHorzThumbPressed = false;
+
+        // Drag state
+        bool  m_bDraggingVert     = false;
+        bool  m_bDraggingHorz     = false;
+        FVec2 m_DragStartOffset   = FVec2(0, 0);
+        FVec2 m_DragStartMousePos = FVec2(0, 0);
     };
-    
+
 } // namespace Fusion

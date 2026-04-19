@@ -69,6 +69,8 @@ namespace Fusion
 
         // - Clipping -
 
+        bool IsRectClipped(const FRect& localRect);
+
         void SetClipEnabled(bool enabled) { m_ClipEnabled = enabled; }
         void PushClip(const FRect& rect, const FShape& shape);
         void PopClip();
@@ -83,9 +85,9 @@ namespace Fusion
 
         int GetCurrentClipIndex() const
         {
-            if (!m_ClipEnabled)
+            if (!m_ClipEnabled || m_ClipStack.IsEmpty())
                 return -1;
-	        return m_ClipStack.GetCount() - 1;
+            return m_ClipStack.Last();
         }
 
         // - Path Internals -

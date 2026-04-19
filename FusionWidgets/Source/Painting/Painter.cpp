@@ -377,6 +377,40 @@ namespace Fusion
 		}
 	}
 
+	bool FPainter::IsRectClipped(const FRect& localRect)
+	{
+		if (!m_ClipEnabled || m_ClipStack.IsEmpty())
+			return false;
+
+		const FUIClipRect& clip = m_DrawList->clipRectArray[m_ClipStack.Last()];
+
+		// Compose: local space → layer space → clip-local space in one matrix
+		// This avoids the lossy intermediate layer-space AABB step
+		FMat4 localToClip = GetCurrentTransform().ToMatrix4x4() * clip.clipInverseTransform;
+
+		FVec2 corners[4] = {
+			{ localRect.left,  localRect.top    },
+			{ localRect.right, localRect.top    },
+			{ localRect.right, localRect.bottom },
+			{ localRect.left,  localRect.bottom }
+		};
+
+		FVec2 localMin = FVec2(1e9f, 1e9f);
+		FVec2 localMax = FVec2(-1e9f, -1e9f);
+
+		for (int i = 0; i < 4; i++)
+		{
+			FVec4 p = localToClip * FVec4(corners[i].x, corners[i].y, 0.0f, 1.0f);
+			localMin.x = FMath::Min(localMin.x, p.x);
+			localMin.y = FMath::Min(localMin.y, p.y);
+			localMax.x = FMath::Max(localMax.x, p.x);
+			localMax.y = FMath::Max(localMax.y, p.y);
+		}
+
+		return localMax.x < -clip.clipHalfSize.x || localMin.x > clip.clipHalfSize.x ||
+			localMax.y < -clip.clipHalfSize.y || localMin.y > clip.clipHalfSize.y;
+	}
+
 	void FPainter::PushClip(const FRect& rect, const FShape& shape)
 	{
 		int index = (int)m_DrawList->clipRectArray.GetCount();
@@ -403,7 +437,7 @@ namespace Fusion
 			.clipInverseTransform = (GetCurrentTransform() * FAffineTransform::Translation(clipCenter)).ToMatrix4x4().GetInverse(),
 			.cornerRadii = radii,
 			.clipHalfSize = halfSize
-			});
+		});
 	}
 
 	void FPainter::PopClip()
@@ -792,6 +826,9 @@ namespace Fusion
 			m_LocalPathMax.x - m_LocalPathMin.x,
 			m_LocalPathMax.y - m_LocalPathMin.y
 		);
+
+		if (IsRectClipped(FRect::FromSize(m_LocalPathMin, localRectSize)))
+			return false;
 
 		if (localRectSize.width <= 0 || localRectSize.height <= 0)
 			return true;

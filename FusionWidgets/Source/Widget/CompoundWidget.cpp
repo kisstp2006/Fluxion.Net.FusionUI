@@ -96,15 +96,15 @@ namespace Fusion
 		FMargin childMargin = m_Child->Margin();
 
 		FVec2 childAvailableSize = FVec2(
-			FMath::Max(0.0f, availableSize.x - (childMargin.left + childMargin.right + Padding().left + Padding().right)),
-			FMath::Max(0.0f, availableSize.y - (childMargin.top + childMargin.bottom + Padding().top + Padding().bottom))
+			FMath::Max(0.0f, availableSize.x - (childMargin.left + childMargin.right + Padding().left + Padding().right + m_InternalPadding.left + m_InternalPadding.right)),
+			FMath::Max(0.0f, availableSize.y - (childMargin.top + childMargin.bottom + Padding().top + Padding().bottom + m_InternalPadding.top + m_InternalPadding.bottom))
 		);
 
 		FVec2 childSize = m_Child->MeasureContent(childAvailableSize);
 
 		return m_DesiredSize = ApplyLayoutConstraints(FVec2(
-			childSize.x + childMargin.left + childMargin.right + Padding().left + Padding().right,
-			childSize.y + childMargin.top + childMargin.bottom + Padding().top + Padding().bottom
+			childSize.x + childMargin.left + childMargin.right + Padding().left + Padding().right + m_InternalPadding.left + m_InternalPadding.right,
+			childSize.y + childMargin.top + childMargin.bottom + Padding().top + Padding().bottom + m_InternalPadding.top + m_InternalPadding.bottom
 		));
 	}
 
@@ -118,10 +118,10 @@ namespace Fusion
 
 		FMargin childMargin = m_Child->Margin();
 
-		f32 childAreaWidth = FMath::Max(0.0f, GetLayoutSize().x - Padding().left - Padding().right - childMargin.left - childMargin.right);
-		f32 childAreaHeight = FMath::Max(0.0f, GetLayoutSize().y - Padding().top - Padding().bottom - childMargin.top - childMargin.bottom);
+		f32 childAreaWidth = FMath::Max(0.0f, GetLayoutSize().x - Padding().left - Padding().right - childMargin.left - childMargin.right - m_InternalPadding.left - m_InternalPadding.right);
+		f32 childAreaHeight = FMath::Max(0.0f, GetLayoutSize().y - Padding().top - Padding().bottom - childMargin.top - childMargin.bottom - m_InternalPadding.top - m_InternalPadding.bottom);
 
-		FVec2 childPos = FVec2(Padding().left + childMargin.left, Padding().top + childMargin.top);
+		FVec2 childPos = FVec2(Padding().left + childMargin.left + m_InternalPadding.left, Padding().top + childMargin.top + m_InternalPadding.top);
 		FVec2 childSize;
 
 		switch (m_Child->HAlign())

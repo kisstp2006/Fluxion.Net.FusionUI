@@ -155,10 +155,6 @@ namespace Fusion
         Ref<FWidget> captured = m_CapturedWidget.Lock();
 
         Ref<FWidget> hitWidget = mouseInSurface ? HitTestWidget(surfaceMousePos) : nullptr;
-        if (hitWidget)
-        {
-            FUSION_LOG_INFO("Debug", "Hit: {} {}", hitWidget->GetClassName(), hitWidget->GetName());
-        }
 
         Ref<FWidget> hoveredWidget = captured.IsValid() ? captured : hitWidget;
 

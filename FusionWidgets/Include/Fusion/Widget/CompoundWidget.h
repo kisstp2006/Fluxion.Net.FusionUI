@@ -27,6 +27,14 @@ namespace Fusion
 
         void SetChild(Ref<FWidget> child);
 
+        void SetInternalPadding(FMargin padding)
+        {
+            if (m_InternalPadding == padding)
+                return;
+	        m_InternalPadding = padding; 
+        	MarkLayoutDirty();
+        }
+
         // - Layout -
 
         FVec2 MeasureContent(FVec2 availableSize) override;
@@ -41,6 +49,7 @@ namespace Fusion
         void SetWidgetFlagInternal(EWidgetFlags flag, bool set);
 
         Ref<FWidget> m_Child;
+        FMargin m_InternalPadding;
 
     public: // - Fusion Properties - 
 
@@ -59,6 +68,7 @@ namespace Fusion
             self.UpdateBoundaryFlags();
             return self;
         }
+        
     };
     
 } // namespace Fusion
