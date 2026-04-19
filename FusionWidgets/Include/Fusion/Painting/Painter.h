@@ -90,7 +90,7 @@ namespace Fusion
 
         // - Path Internals -
 
-        void PathMinMax(FVec2 point);
+        void PathMinMax(FVec2 point, FVec2 localPoint);
         void PathArcTo(const FVec2& center, float radius, float startAngleRadians, float endAngleRadians, int numSegments);
         void PathArcToFastInternal(const FVec2& center, float radius, int sampleMin, int sampleMax, int step);
 
@@ -116,6 +116,7 @@ namespace Fusion
 
         FPathArray m_Path;
         FVec2 m_PathMin, m_PathMax;
+        FVec2 m_LocalPathMin, m_LocalPathMax;
 
         FFloatArray m_TempPoints;
 

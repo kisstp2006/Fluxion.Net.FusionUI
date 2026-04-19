@@ -12,6 +12,8 @@ public:
 	Ref<FHorizontalStack> hstack;
 	Ref<FDecoratedBox> gradientBorder;
 	Ref<FDecoratedBox> gradientWidget;
+	Ref<FDecoratedBox> imageBox;
+	bool imageBoxRotated = false;
 
 	Ref<FTextButton> btn0;
 	Ref<FTimer> timer;
@@ -101,6 +103,10 @@ public:
 						.From(0.0f)
 						.To(1.0f)
 						.Play();
+
+						imageBoxRotated = !imageBoxRotated;
+
+						imageBox->Transform(FAffineTransform::Rotation(imageBoxRotated ? FMath::Deg2Rad(15) : 0));
 					}),
 
 					FNew(FTextButton)
@@ -161,10 +167,15 @@ public:
 				.Shape(FRoundedRectangle(5.0f))
 				.Height(100),
 
-				FNew(FDecoratedBox)
-				.Background(FBrush::Image("embed:/Icons/TransparentPattern.png").BrushTiling(EBrushTiling::TileXY).ImageFit(EImageFit::Fill).BrushSize(FVec2(1, 1) * 48))
+				FAssignNew(FDecoratedBox, imageBox)
+				.Background(FBrush::Image("embed:/Icons/TransparentPattern.png")
+					.BrushTiling(EBrushTiling::TileXY)
+					.ImageFit(EImageFit::Fill)
+					.BrushSize(FVec2(1, 1) * 24)
+				)
 				.Shape(FRoundedRectangle(5.0f))
-				.Height(100),
+				.Height(100)
+				.Transform(FAffineTransform::Rotation(FMath::Deg2Rad(0))),
 
 				FNew(FWidget)
 				.FillRatio(1.0f)

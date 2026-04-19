@@ -35,7 +35,7 @@ namespace Fusion
 
         void AddPolyLine(const FVec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased, u32 drawItemIndex = 0, const f32* uvXValues = nullptr, const FRect* minMaxPos = nullptr, f32 gradientOffset = 0.0f);
 
-        void AddConvexPolyFilled(const FVec2* points, int numPoints, u32 color, bool antiAliased, FRect* minMaxPos, u32 drawItemIndex = 0);
+        void AddConvexPolyFilled(const FVec2* points, int numPoints, u32 color, bool antiAliased, u32 drawItemIndex = 0, const FDelegate<FVec2(FVec2 point)>& pointToUV = {});
 
         void AddQuad(const FRect& rect, FVec2 uvMin, FVec2 uvMax, u32 color, u32 drawItemIndex = 0);
 

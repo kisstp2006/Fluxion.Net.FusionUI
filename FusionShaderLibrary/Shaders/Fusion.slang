@@ -55,8 +55,12 @@ float4 PSMain(VSOutput input) : SV_Target
         const bool noTile = !tileX && !tileY;
 
         float2 imgUV = (input.uv - fitOffset) / fitSize;
+        float2 dx = ddx(imgUV);
+        float2 dy = ddy(imgUV);
         if (tileX) imgUV.x = frac(imgUV.x);
         if (tileY) imgUV.y = frac(imgUV.y);
+
+        float2 uvScale = sampleUVMax - sampleUVMin;
 
         float2 sampleUV = lerp(sampleUVMin, sampleUVMax, imgUV);
         float4 sampleColor;
@@ -64,7 +68,7 @@ float4 PSMain(VSOutput input) : SV_Target
         if ((!tileX && (imgUV.x < 0 || imgUV.x > 1)) || (!tileY && (imgUV.y < 0 || imgUV.y > 1)))
             sampleColor = float4(0, 0, 0, 0);
         else
-            sampleColor = _TextureArray.Sample(_FontAtlasSampler, float3(sampleUV, item.textureIndex));
+            sampleColor = _TextureArray.SampleGrad(_FontAtlasSampler, float3(sampleUV, item.textureIndex), dx * uvScale, dy * uvScale);
 
         color *= sampleColor;
     }

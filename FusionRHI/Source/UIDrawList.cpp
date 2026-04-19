@@ -336,7 +336,7 @@ namespace Fusion
         }
     }
 
-    void FUIDrawList::AddConvexPolyFilled(const FVec2* points, int numPoints, u32 color, bool antiAliased, FRect* minMaxPos, u32 drawItemIndex)
+    void FUIDrawList::AddConvexPolyFilled(const FVec2* points, int numPoints, u32 color, bool antiAliased, u32 drawItemIndex, const FDelegate<FVec2(FVec2 point)>& pointToUV)
     {
         ZoneScoped;
 
@@ -347,8 +347,8 @@ namespace Fusion
 
         FUIDrawCmd& drawCmd = AcquireDrawCmd();
 
-        const FVec2 rectMin = minMaxPos ? minMaxPos->min : FVec2(0, 0);
-        const FVec2 rectSize = minMaxPos ? minMaxPos->GetSize() : FVec2(1, 1);
+        //const FVec2 rectMin = minMaxPos ? minMaxPos->min : FVec2(0, 0);
+        //const FVec2 rectSize = minMaxPos ? minMaxPos->GetSize() : FVec2(1, 1);
 
         if (antiAliased)
         {
@@ -408,9 +408,7 @@ namespace Fusion
                 dm_x *= AA_SIZE * 0.5f;
                 dm_y *= AA_SIZE * 0.5f;
 
-                const FVec2 uv = minMaxPos ? FVec2((points[i1].x - rectMin.x) / rectSize.x,
-                    (points[i1].y - rectMin.y) / rectSize.y)
-                    : FVec2(0, 0);
+                const FVec2 uv = pointToUV.IsBound() ? pointToUV(points[i1]) : FVec2(0, 0);
 
                 vertexWritePtr[0].pos = FVec2(points[i1].x - dm_x, points[i1].y - dm_y);
                 vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = color;
@@ -434,9 +432,7 @@ namespace Fusion
 
             for (int i = 0; i < numPoints; i++)
             {
-                const FVec2 uv = minMaxPos ? FVec2((points[i].x - rectMin.x) / rectSize.x,
-                    (points[i].y - rectMin.y) / rectSize.y)
-                    : FVec2(0, 0);
+                const FVec2 uv = pointToUV.IsBound() ? pointToUV(points[i]) : FVec2(0, 0);
                 vertexWritePtr[i].pos = points[i];
                 vertexWritePtr[i].uv = uv;
                 vertexWritePtr[i].color = color;

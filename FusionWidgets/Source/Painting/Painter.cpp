@@ -128,19 +128,21 @@ namespace Fusion
 
 		m_Path.RemoveAll();
 
-		m_PathMin = FVec2(FNumericLimits<f32>::Max(), FNumericLimits<f32>::Max());
-		m_PathMax = FVec2(FNumericLimits<f32>::Min(), FNumericLimits<f32>::Min());
+		m_LocalPathMin = m_PathMin = FVec2(FNumericLimits<f32>::Max(), FNumericLimits<f32>::Max());
+		m_LocalPathMax = m_PathMax = FVec2(FNumericLimits<f32>::Min(), FNumericLimits<f32>::Min());
 	}
 
 	void FPainter::PathInsert(FVec2 point)
 	{
 		ZoneScoped;
 
+		FVec2 local = point;
+
 		point = GetCurrentTransform().TransformPoint(point);
 
 		m_Path.Insert(point);
 
-		PathMinMax(point);
+		PathMinMax(point, local);
 	}
 
 	void FPainter::PathArcTo(const FVec2& center, float radius, float startAngle, float endAngle)
@@ -415,7 +417,7 @@ namespace Fusion
 		return FMath::Clamp((((((int)ceilf(FMath::PI / acosf(1 - FMath::Min((m_CircleSegmentMaxError), (radius)) / (radius)))) + 1) / 2) * 2), 4, 512);
 	}
 
-	void FPainter::PathMinMax(FVec2 point)
+	void FPainter::PathMinMax(FVec2 point, FVec2 localPoint)
 	{
 		ZoneScoped;
 
@@ -424,6 +426,12 @@ namespace Fusion
 
 		m_PathMax.x = FMath::Max(point.x, m_PathMax.x);
 		m_PathMax.y = FMath::Max(point.y, m_PathMax.y);
+
+		m_LocalPathMin.x = FMath::Min(localPoint.x, m_LocalPathMin.x);
+		m_LocalPathMin.y = FMath::Min(localPoint.y, m_LocalPathMin.y);
+
+		m_LocalPathMax.x = FMath::Max(localPoint.x, m_LocalPathMax.x);
+		m_LocalPathMax.y = FMath::Max(localPoint.y, m_LocalPathMax.y);
 	}
 
 	void FPainter::PathArcTo(const FVec2& center, float radius, float startAngle, float endAngle,
@@ -501,8 +509,9 @@ namespace Fusion
 				const FVec2 s = m_ArcFastVertex[sampleIndex];
 				outPtr->x = center.x + s.x * radius;
 				outPtr->y = center.y + s.y * radius;
+				FVec2 local = *outPtr;
 				*outPtr = GetCurrentTransform().TransformPoint(*outPtr);
-				PathMinMax(*outPtr);
+				PathMinMax(*outPtr, local);
 				outPtr++;
 			}
 		}
@@ -516,8 +525,9 @@ namespace Fusion
 				const FVec2 s = m_ArcFastVertex[sampleIndex];
 				outPtr->x = center.x + s.x * radius;
 				outPtr->y = center.y + s.y * radius;
+				FVec2 local = *outPtr;
 				*outPtr = GetCurrentTransform().TransformPoint(*outPtr);
-				PathMinMax(*outPtr);
+				PathMinMax(*outPtr, local);
 				outPtr++;
 			}
 		}
@@ -531,8 +541,9 @@ namespace Fusion
 			const FVec2 s = m_ArcFastVertex[normalizedMaxSample];
 			outPtr->x = center.x + s.x * radius;
 			outPtr->y = center.y + s.y * radius;
+			FVec2 local = *outPtr;
 			*outPtr = GetCurrentTransform().TransformPoint(*outPtr);
-			PathMinMax(*outPtr);
+			PathMinMax(*outPtr, local);
 			outPtr++;
 		}
 	}
@@ -777,11 +788,13 @@ namespace Fusion
 
 		ZoneScoped;
 
-		FRect minMax = FRect(m_PathMin, m_PathMax);
-		if (minMax.GetWidth() <= 0 || minMax.GetHeight() <= 0)
-			return true;
+		FVec2 localRectSize = FVec2(
+			m_LocalPathMax.x - m_LocalPathMin.x,
+			m_LocalPathMax.y - m_LocalPathMin.y
+		);
 
-		FVec2 rectSize = minMax.GetSize();
+		if (localRectSize.width <= 0 || localRectSize.height <= 0)
+			return true;
 
 		FColor brushColor = m_CurrentBrush.GetColor();
 		brushColor.a *= GetCurrentOpacity();
@@ -790,6 +803,13 @@ namespace Fusion
 
 		// First item will always be a SolidFill shader.
 		u32 drawItemIndex = 0;
+
+		FAffineTransform inverseTransform = GetCurrentTransform().Inverse();
+
+		FDelegate<FVec2(FVec2)> uvDelegate = [this, inverseTransform](FVec2 point)
+			{
+				return (inverseTransform.TransformPoint(point) - m_LocalPathMin) / (m_LocalPathMax - m_LocalPathMin);
+			};
 
 		switch (m_CurrentBrush.GetBrushStyle())
 		{
@@ -849,16 +869,16 @@ namespace Fusion
 
 				if (imageFit == EImageFit::Fill)
 				{
-					fitSize.x = tileX ? brushSize.x / rectSize.x : 1.0f;
-					fitSize.y = tileY ? brushSize.y / rectSize.y : 1.0f;
+					fitSize.x = tileX ? brushSize.x / localRectSize.x : 1.0f;
+					fitSize.y = tileY ? brushSize.y / localRectSize.y : 1.0f;
 
 					fitOffset.x = (1.0f - fitSize.x) * brushPos.x;
 					fitOffset.y = (1.0f - fitSize.y) * brushPos.y;
 				}
 				else if (imageFit == EImageFit::Auto)
 				{
-					fitSize.x = (brushSize.x > 0 && rectSize.x > 0) ? (brushSize.x / rectSize.x) : 1.0f;
-					fitSize.y = (brushSize.y > 0 && rectSize.y > 0) ? (brushSize.y / rectSize.y) : 1.0f;
+					fitSize.x = (brushSize.x > 0 && localRectSize.x > 0) ? (brushSize.x / localRectSize.x) : 1.0f;
+					fitSize.y = (brushSize.y > 0 && localRectSize.y > 0) ? (brushSize.y / localRectSize.y) : 1.0f;
 
 					fitOffset.x = (1.0f - fitSize.x) * brushPos.x;
 					fitOffset.y = (1.0f - fitSize.y) * brushPos.y;
@@ -866,11 +886,11 @@ namespace Fusion
 				else if (imageFit == EImageFit::Contain || imageFit == EImageFit::Cover)
 				{
 					const f32 scale = imageFit == EImageFit::Contain
-						? FMath::Min(rectSize.x / brushSize.x, rectSize.y / brushSize.y)
-						: FMath::Max(rectSize.x / brushSize.x, rectSize.y / brushSize.y);
+						? FMath::Min(localRectSize.x / brushSize.x, localRectSize.y / brushSize.y)
+						: FMath::Max(localRectSize.x / brushSize.x, localRectSize.y / brushSize.y);
 
-					fitSize.x = (brushSize.x * scale) / rectSize.x;
-					fitSize.y = (brushSize.y * scale) / rectSize.y;
+					fitSize.x = (brushSize.x * scale) / localRectSize.x;
+					fitSize.y = (brushSize.y * scale) / localRectSize.y;
 					fitOffset.x = (1.0f - fitSize.x) * brushPos.x;
 					fitOffset.y = (1.0f - fitSize.y) * brushPos.y;
 
@@ -927,7 +947,7 @@ namespace Fusion
 			return true;
 		}
 		
-		m_DrawList->AddConvexPolyFilled(m_Path.GetData(), (int)m_Path.GetCount(), color, m_AntiAliased, &minMax, drawItemIndex);
+		m_DrawList->AddConvexPolyFilled(m_Path.GetData(), (int)m_Path.GetCount(), color, m_AntiAliased, drawItemIndex, uvDelegate);
 
 		return true;
 	}
