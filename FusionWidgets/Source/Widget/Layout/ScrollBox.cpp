@@ -241,6 +241,9 @@ namespace Fusion
             FBrush thumbBrush = m_bVertThumbPressed ? ThumbPressedBackground()
                               : m_bVertThumbHovered  ? ThumbHoverBackground()
                               : ThumbBackground();
+            if (!Enabled())
+                thumbBrush = ThumbDisabledBackground();
+
             painter.SetBrush(thumbBrush);
             painter.FillShape(m_VertThumbRect, ThumbShape());
         }
@@ -254,6 +257,9 @@ namespace Fusion
             FBrush thumbBrush = m_bHorzThumbPressed ? ThumbPressedBackground()
                               : m_bHorzThumbHovered  ? ThumbHoverBackground()
                               : ThumbBackground();
+            if (!Enabled())
+                thumbBrush = ThumbDisabledBackground();
+
             painter.SetBrush(thumbBrush);
             painter.FillShape(m_HorzThumbRect, ThumbShape());
         }
@@ -275,7 +281,7 @@ namespace Fusion
 
     FEventReply FScrollBox::OnMouseButtonDown(FMouseEvent& event)
     {
-        if (!event.IsLeftButton())
+        if (!event.IsLeftButton() || !Enabled())
             return FEventReply::Unhandled();
 
         // Convert surface space → local widget space
@@ -340,7 +346,7 @@ namespace Fusion
 
     FEventReply FScrollBox::OnMouseButtonUp(FMouseEvent& event)
     {
-        if (!event.IsLeftButton())
+        if (!event.IsLeftButton() || !Enabled())
             return FEventReply::Unhandled();
 
         if (m_bDraggingVert || m_bDraggingHorz)
@@ -358,6 +364,9 @@ namespace Fusion
 
     FEventReply FScrollBox::OnMouseMove(FMouseEvent& event)
     {
+        if (!Enabled())
+            return FEventReply::Unhandled();
+
         FVec2 localPos = GetCachedLayerSpaceTransform().Inverse().TransformPoint(event.MousePosition);
 
         if (m_bDraggingVert)
@@ -412,6 +421,9 @@ namespace Fusion
 
     void FScrollBox::OnMouseLeave(FMouseEvent& event)
     {
+        if (!Enabled())
+            return;
+
         // Keep drag state active — user may have moved outside widget bounds while dragging.
         // Only clear hover when not dragging.
         if (!m_bDraggingVert && !m_bDraggingHorz)
@@ -427,6 +439,9 @@ namespace Fusion
 
     FEventReply FScrollBox::OnMouseWheel(FMouseEvent& event)
     {
+        if (!Enabled())
+            return FEventReply::Unhandled();
+
         // Use m_MaxScroll which is correctly computed in ArrangeContent
         // (accounts for ContentPadding on both axes).
         const FVec2& maxScroll = m_MaxScroll;

@@ -16,6 +16,7 @@ public:
 	Ref<FDecoratedBox> gradientBorder;
 	Ref<FDecoratedBox> gradientWidget;
 	Ref<FDecoratedBox> imageBox;
+	Ref<FScrollBox> scrollBox;
 	bool imageBoxRotated = false;
 
 	Ref<FTextButton> btn0;
@@ -63,6 +64,7 @@ public:
 				.OnClick([this]
 				{
 					hstack->Enabled(!hstack->Enabled());
+					scrollBox->Enabled(!scrollBox->Enabled());
 				}),
 
 				FAssignNew(FDecoratedBox, gradientBorder)
@@ -194,15 +196,23 @@ public:
 					FNew(FDecoratedBox)
 					.Background(FColors::Cyan)
 					.Height(25)
-					.FillRatio(1.0f),
+					.FillRatio(1.0f)
+					.MinWidth(10),
 
 					FNew(FDecoratedBox)
 					.Background(FColors::Green)
 					.Height(20)
 					.FillRatio(1.0f)
+					.MinWidth(10),
+
+					FNew(FDecoratedBox)
+					.Background(FColors::Gold)
+					.Height(25)
+					.FillRatio(1.0f)
+					.MinWidth(10)
 				),
 
-				FNew(FScrollBox)
+				FAssignNew(FScrollBox, scrollBox)
 				.Style("ScrollBox/Base")
 				.FillRatio(1.0f)
 				.CanScrollVertical(true)
@@ -433,24 +443,25 @@ int main(int argc, char* argv[])
 		FUSION_STYLE(FScrollBox, "ScrollBox/Base",
 			Background, Border, Shape,
 			TrackBackground, TrackShape,
-			ThumbBackground, ThumbHoverBackground, ThumbPressedBackground, ThumbShape,
+			ThumbBackground, ThumbHoverBackground, ThumbPressedBackground, ThumbDisabledBackground, ThumbShape,
 			ScrollbarThickness, ScrollbarPadding, ContentPadding)
 		{
-			Background             = FColor(0.10f, 0.10f, 0.12f);
-			Border                 = FColor(0.22f, 0.22f, 0.26f);
-			Shape                  = FRoundedRectangle(5.0f);
+			Background              = FColor(0.10f, 0.10f, 0.12f);
+			Border                  = FColor(0.22f, 0.22f, 0.26f);
+			Shape                   = FRoundedRectangle(5.0f);
 
-			TrackBackground        = FColor(0.08f, 0.08f, 0.10f);
-			TrackShape             = FRoundedRectangle(3.0f);
+			TrackBackground         = FColor(0.08f, 0.08f, 0.10f);
+			TrackShape              = FRoundedRectangle(4.0f);
 
-			ThumbBackground        = FColor(0.28f, 0.28f, 0.33f);
-			ThumbHoverBackground   = FColor(0.42f, 0.42f, 0.48f);
-			ThumbPressedBackground = FColor(0.58f, 0.58f, 0.65f);
-			ThumbShape             = FRoundedRectangle(3.0f);
+			ThumbBackground         = FColor(0.28f, 0.28f, 0.33f);
+			ThumbHoverBackground    = FColor(0.42f, 0.42f, 0.48f);
+			ThumbPressedBackground  = FColor(0.58f, 0.58f, 0.65f);
+			ThumbDisabledBackground = FColor(0.18f, 0.18f, 0.20f);
+			ThumbShape              = FRoundedRectangle(4.0f);
 
-			ContentPadding		   = FMargin(1, 1, 1, 1) * 10;
-			ScrollbarThickness	   = 15.0f;
-			ScrollbarPadding	   = 3.0f;
+			ContentPadding		    = FMargin(1, 1, 1, 1) * 10;
+			ScrollbarThickness	    = 15.0f;
+			ScrollbarPadding	    = 3.0f;
 		}
 
 		FUSION_STYLE(FTextInput, "TextInput/Base", Shape,

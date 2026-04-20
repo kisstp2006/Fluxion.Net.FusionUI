@@ -1,5 +1,8 @@
 #include "Fusion/Widgets.h"
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
+
 namespace Fusion
 {
 	FSplitBox::FSplitBox()
@@ -188,8 +191,16 @@ namespace Fusion
 					? localPos.x - m_DragStartLocalPos.x
 					: localPos.y - m_DragStartLocalPos.y;
 
-				f32 fraction = FMath::Clamp(
-					(m_DragStartLeftSize + delta) / m_DragStartTotalSize, 0.0f, 1.0f);
+				f32 minLeft  = Direction() == EStackDirection::Horizontal ? left->MinWidth()  : left->MinHeight();
+				f32 minRight = Direction() == EStackDirection::Horizontal ? right->MinWidth() : right->MinHeight();
+
+				// Clamp so neither child goes below its minimum size.
+				// If the two minimums exceed the total (infeasible), left's minimum wins.
+				f32 clampMin = minLeft;
+				f32 clampMax = FMath::Max(minLeft, m_DragStartTotalSize - minRight);
+
+				f32 newLeftSize = FMath::Clamp(m_DragStartLeftSize + delta, clampMin, clampMax);
+				f32 fraction    = newLeftSize / m_DragStartTotalSize;
 
 				left->FillRatio(m_DragStartTotalRatio * fraction);
 				right->FillRatio(m_DragStartTotalRatio * (1.0f - fraction));
@@ -230,6 +241,7 @@ namespace Fusion
 
 		if (m_bIsDragHovered && m_DraggedRect >= 0 && m_DraggedRect < (int)m_HandleRects.Size())
 		{
+			painter.SetAntiAliasing(true);
 			painter.SetBrush(SplitterHoverColor());
 			painter.SetPen(FPen());
 
@@ -237,7 +249,7 @@ namespace Fusion
 				? FVec2(-m_HandleRects[m_DraggedRect].GetWidth() * SplitterSizeRatio() / 2, 0)
 				: FVec2(0, -m_HandleRects[m_DraggedRect].GetHeight() * SplitterSizeRatio() / 2);
 
-			painter.FillShape(m_HandleRects[m_DraggedRect].Expand(expansion), FRectangle());
+			painter.FillRect(m_HandleRects[m_DraggedRect].Expand(expansion));
 		}
 	}
 

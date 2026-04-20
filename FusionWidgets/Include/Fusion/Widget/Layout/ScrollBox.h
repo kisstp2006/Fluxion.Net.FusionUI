@@ -52,12 +52,13 @@ namespace Fusion
     protected:
 
         FUSION_STYLE_PROPERTIES(
-            (FBrush, TrackBackground,        Paint),
-            (FShape, TrackShape,             Paint),
-            (FBrush, ThumbBackground,        Paint),
-            (FBrush, ThumbHoverBackground,   Paint),
-            (FBrush, ThumbPressedBackground, Paint),
-            (FShape, ThumbShape,             Paint),
+            (FBrush, TrackBackground,         Paint),
+            (FShape, TrackShape,              Paint),
+            (FBrush, ThumbBackground,         Paint),
+            (FBrush, ThumbHoverBackground,    Paint),
+            (FBrush, ThumbPressedBackground,  Paint),
+            (FBrush, ThumbDisabledBackground, Paint),
+            (FShape, ThumbShape,              Paint),
             (f32,     ScrollbarThickness,     Layout),
             (f32,     ScrollbarPadding,       Layout),
             (FMargin, ContentPadding,         Layout)
