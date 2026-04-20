@@ -353,6 +353,7 @@ int main(int argc, char* argv[])
 	{
 		FColor WindowBackgroundColor = FColor(0.13f, 0.13f, 0.15f);
 		FPen   FocusOutline			 = FPen::Solid(FColor(0.47f, 0.73f, 1.0f, 0.85f)).Thickness(2.0f);
+		f32    FocusOutlineOffset	 = 2.5f;
 
 		FColor DisabledBtnTextColor = FColor(0.35f, 0.35f, 0.38f);
 
@@ -372,7 +373,7 @@ int main(int argc, char* argv[])
 			FUSION_ON(FocusVisible)
 			{
 				Outline = FocusOutline;
-				OutlineOffset = 2.5f;
+				OutlineOffset = FocusOutlineOffset;
 			}
 		}
 
@@ -487,7 +488,7 @@ int main(int argc, char* argv[])
 		}
 
 		FUSION_STYLE(FTextInput, "TextInput/Base", Shape,
-			Background, Border, Outline, Padding, Font,
+			Background, Border, Outline, OutlineOffset, Padding, Font,
 			TextColor, PlaceholderColor, SelectionColor, CursorColor)
 		{
 			Extends("Base/FocusRing");
@@ -509,7 +510,8 @@ int main(int argc, char* argv[])
 
 			FUSION_ON(FocusVisible)
 			{
-				Outline = FocusOutline;
+				Outline		  = FocusOutline;
+				OutlineOffset = FocusOutlineOffset;
 			}
 
 			FUSION_ON(Hovered)
