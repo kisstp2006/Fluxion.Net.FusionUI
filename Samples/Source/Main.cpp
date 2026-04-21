@@ -213,7 +213,7 @@ public:
 				),
 
 				FNew(FExpanderBox)
-				.Content(
+				.Child(
 					FNew(FLabel)
 					.Text("This is the content")
 				),
@@ -565,7 +565,7 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		FUSION_STYLE(FDecoratedBox, "FExpanderBox/ContentBox", Padding)
+		FUSION_STYLE(FDecoratedBox, "FExpanderBox/Content", Padding)
 		{
 			Padding = FMargin(1, 1, 1, 1) * 10.0f;
 		}

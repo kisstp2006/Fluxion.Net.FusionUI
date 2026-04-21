@@ -14,7 +14,11 @@ namespace Fusion
 
         void Construct() override;
 
+        virtual void OnSlotSet(const FName& slotName) {}
+
     public:
+
+        void SetParentSurfaceRecursive(Ref<FSurface> surface) override;
 
         virtual u32 GetSlotCount() = 0;
 

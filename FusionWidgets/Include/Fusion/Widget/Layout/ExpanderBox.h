@@ -3,9 +3,9 @@
 namespace Fusion
 {
     
-    class FUSIONWIDGETS_API FExpanderBox : public FContainerWidget
+    class FUSIONWIDGETS_API FExpanderBox : public FSlottedWidget
     {
-        FUSION_WIDGET(FExpanderBox, FContainerWidget)
+        FUSION_WIDGET(FExpanderBox, FSlottedWidget)
     protected:
         
         FExpanderBox();
@@ -33,35 +33,29 @@ namespace Fusion
 
     protected:
 
-        Ref<FButton> m_Header;
-        Ref<FDecoratedBox> m_ContentBox;
-        Ref<FWidget> m_Content;
+        Ref<FWidget> m_Child;
         Ref<FLabel> m_TitleLabel;
 
         void SetupHeader();
         void SetupContent();
 
+        void OnSlotSet(const FName& slotName) override;
+
     public:
 
         // - Fusion Properties -
 
-        FUSION_PROPERTY_SET(FButton&, Header)
-        {
-            if (self.m_Header == &value)
-                return self;
-            self.RemoveChildWidget(self.m_Header);
-            self.m_Header = &value;
-            self.AddChildWidget(&value);
-            static_cast<FExpanderBox&>(self).SetupHeader();
-            return self;
-        }
+        FUSION_SLOTS(
+			(FButton, Header),
+			(FDecoratedBox, Content)
+        );
 
-        FUSION_PROPERTY_SET(FWidget&, Content)
+        FUSION_PROPERTY_SET(FWidget&, Child)
         {
-            if (self.m_Content == &value)
+            if (self.m_Child == &value)
                 return self;
-            self.m_Content = &value;
-            self.m_ContentBox->Child(value);
+            self.m_Child = &value;
+            self.m_Content->Child(value);
             static_cast<FExpanderBox&>(self).SetupContent();
             return self;
         }

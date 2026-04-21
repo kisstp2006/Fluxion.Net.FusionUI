@@ -268,8 +268,11 @@
 	    Ref<Type> Name() const { return m_##Name; }\
 	    auto& Name(this auto& self, Type& widget)\
 	    {\
+			if (self.m_##Name == &widget) return self;\
 	        self.m_##Name = &widget;\
 			self.SetSlotWidget(i, self.m_##Name);\
+			thread_local const FName slotName = #Name;\
+			static_cast<Self&>(self).OnSlotSet(slotName);\
 	        return self;\
 	    }
 

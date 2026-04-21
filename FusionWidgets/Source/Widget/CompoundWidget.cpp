@@ -10,18 +10,6 @@ namespace Fusion
 		m_ClipShape = FRectangle();
 	}
 
-	void FCompoundWidget::SetParentSurfaceRecursive(Ref<FSurface> surface)
-	{
-		ZoneScoped;
-
-		Super::SetParentSurfaceRecursive(surface);
-
-		if (m_Child)
-		{
-			m_Child->SetParentSurfaceRecursive(surface);
-		}
-	}
-
 	FVec2 FCompoundWidget::MeasureContent(FVec2 availableSize)
 	{
 		FVec2 baseSize = GetMinimumContentSize();
@@ -38,7 +26,19 @@ namespace Fusion
 			FMath::Max(0.0f, availableSize.y - (childMargin.top + childMargin.bottom + Padding().top + Padding().bottom + m_InternalPadding.top + m_InternalPadding.bottom))
 		);
 
-		FVec2 childSize = m_Child->MeasureContent(childAvailableSize);
+		FVec2 childSize;
+
+		FUSION_TRY
+		{
+			childSize = m_Child->MeasureContent(childAvailableSize);
+		}
+		FUSION_CATCH(const FException& exception)
+		{
+			FUSION_LOG_ERROR("Widget", "Exception: {}. Exception thrown by a Widget [{}] in FCompoundWidget::MeasureContent.\n{}",
+				exception.what(), m_Child->GetClassName(), exception.GetStackTraceString(true));
+
+			m_Child->SetFaulted();
+		}
 
 		return m_DesiredSize = ApplyLayoutConstraints(FVec2(
 			childSize.x + childMargin.left + childMargin.right + Padding().left + Padding().right + m_InternalPadding.left + m_InternalPadding.right,

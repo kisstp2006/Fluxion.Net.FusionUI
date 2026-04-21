@@ -39,8 +39,8 @@ namespace Fusion
 			)
 		);
 
-		AddChild(
-			FAssignNew(FDecoratedBox, m_ContentBox)
+		Content(
+			FNew(FDecoratedBox)
 			.SubStyle("ContentBox")
 			.HAlign(EHAlign::Fill)
 			.FillRatio(0.0f)
@@ -316,8 +316,6 @@ namespace Fusion
 		if (!m_Header)
 			return;
 
-		SetChildIndex(m_Header, 0);
-
 		(*m_Header)
 		.PropagatedStyleStates(EStyleState::Expanded)
 		.SubStyle("Header")
@@ -329,10 +327,21 @@ namespace Fusion
 
 	void FExpanderBox::SetupContent()
 	{
-		if (!m_Content)
-			return;
-
-		
+		if (m_Content)
+		{
+            (*m_Content)
+            .SubStyle("Content");
+		}
 	}
 
+	void FExpanderBox::OnSlotSet(const FName& slotName)
+	{
+		Super::OnSlotSet(slotName);
+
+        thread_local const FName headerSlot = "Header";
+        if (slotName == headerSlot)
+        {
+            SetupHeader();
+        }
+	}
 } // namespace Fusion

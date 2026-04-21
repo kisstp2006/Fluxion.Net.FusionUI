@@ -19,8 +19,6 @@ namespace Fusion
 
         FShape GetClipShape() const override { return ClipContent() ? ClipShape() : EShapeType::None; }
 
-        void SetParentSurfaceRecursive(Ref<FSurface> surface) override;
-
         void SetInternalPadding(FMargin padding)
         {
             if (m_InternalPadding == padding)

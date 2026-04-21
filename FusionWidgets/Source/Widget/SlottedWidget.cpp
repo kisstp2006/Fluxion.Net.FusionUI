@@ -20,6 +20,19 @@ namespace Fusion
 		m_Slots.Resize(GetSlotCount());
 	}
 
+	void FSlottedWidget::SetParentSurfaceRecursive(Ref<FSurface> surface)
+	{
+		Super::SetParentSurfaceRecursive(surface);
+
+		for (auto slot : m_Slots)
+		{
+			if (slot.IsValid())
+			{
+				slot->SetParentSurfaceRecursive(surface);
+			}
+		}
+	}
+
 	bool FSlottedWidget::SetSlotWidget(u32 slot, Ref<FWidget> widget)
 	{
 		if (slot >= GetSlotCount() || !widget || !IsValidSlotWidget(slot, widget))
