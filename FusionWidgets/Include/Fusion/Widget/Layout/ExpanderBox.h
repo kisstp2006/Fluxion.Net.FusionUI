@@ -73,7 +73,7 @@ namespace Fusion
 
         FUSION_PROPERTY_SET(bool, Expanded)
         {
-            SetExpanded(value);
+            self.SetExpanded(value);
             return self;
         }
 

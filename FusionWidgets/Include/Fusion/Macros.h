@@ -245,7 +245,7 @@
 #define __FUSION_STYLE_PROPERTIES_FWIDGET(...) \
     FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_DECL, __VA_ARGS__)) \
     virtual void ApplyStyle(FStyle& style) \
-    { \
+    {\
         FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_APPLY, __VA_ARGS__)) \
     }
 
@@ -255,6 +255,7 @@
     FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_DECL, __VA_ARGS__)) \
     void ApplyStyle(FStyle& style) override \
     { \
+		ZoneScoped;\
         Super::ApplyStyle(style); \
         FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_APPLY, __VA_ARGS__)) \
     }
