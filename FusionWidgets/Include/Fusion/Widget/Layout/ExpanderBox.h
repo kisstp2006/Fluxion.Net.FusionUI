@@ -28,7 +28,7 @@ namespace Fusion
 
         FUSION_PROPERTY_SET(FButton&, Header)
         {
-            if (self.m_Header == value)
+            if (self.m_Header == &value)
                 return self;
             self.RemoveChildWidget(self.m_Header);
             self.m_Header = &value;
@@ -39,7 +39,7 @@ namespace Fusion
 
         FUSION_PROPERTY_SET(FDecoratedBox&, Content)
         {
-            if (self.m_Content == value)
+            if (self.m_Content == &value)
                 return self;
             self.RemoveChildWidget(self.m_Content);
             self.m_Content = &value;
