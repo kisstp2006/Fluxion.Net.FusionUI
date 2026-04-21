@@ -258,9 +258,7 @@ namespace Fusion
 
 		m_WidgetFlags &= ~EWidgetFlags::LayoutDirty;
 
-		FVec2 newLayoutSize = ApplyLayoutConstraints(finalSize);
-
-		m_LayoutSize = newLayoutSize;
+		m_LayoutSize = ApplyLayoutConstraints(finalSize);
 
 		MarkPaintDirty();
 	}
