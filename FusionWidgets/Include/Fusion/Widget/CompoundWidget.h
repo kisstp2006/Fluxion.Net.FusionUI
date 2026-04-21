@@ -6,28 +6,20 @@
 namespace Fusion
 {
 
-    class FUSIONWIDGETS_API FCompoundWidget : public FWidget
+    class FUSIONWIDGETS_API FCompoundWidget : public FSlottedWidget
     {
-        FUSION_CLASS(FCompoundWidget, FWidget)
+        FUSION_CLASS(FCompoundWidget, FSlottedWidget)
     public:
 
         FCompoundWidget();
 
         // - Public API -
 
+        Ref<FWidget> GetChild() const { return m_Child; }
+
         FShape GetClipShape() const override { return ClipContent() ? ClipShape() : EShapeType::None; }
 
         void SetParentSurfaceRecursive(Ref<FSurface> surface) override;
-
-        Ref<FWidget> GetChild() const { return m_Child; }
-
-        int GetChildCount() override { return m_Child.IsValid() ? 1 : 0; }
-
-        Ref<FWidget> GetChildAt(u32 index) override { return index == 0 ? m_Child : nullptr; }
-
-        void SetChild(Ref<FWidget> child);
-
-        void DetachChild(Ref<FWidget> child) override;
 
         void SetInternalPadding(FMargin padding)
         {
@@ -50,16 +42,13 @@ namespace Fusion
 
         void SetWidgetFlagInternal(EWidgetFlags flag, bool set);
 
-        Ref<FWidget> m_Child;
         FMargin m_InternalPadding;
 
     public: // - Fusion Properties - 
 
-        FUSION_PROPERTY_SET(FWidget&, Child)
-        {
-            self.SetChild(&value);
-            return self;
-        }
+    	FUSION_SLOTS(
+            (FWidget, Child)
+        );
 
         FUSION_PROPERTY_SET(bool, ForcePaintBoundary)
         {

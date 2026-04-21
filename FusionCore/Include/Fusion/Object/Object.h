@@ -113,7 +113,7 @@ namespace Fusion
         }
 
         template<typename TObject>
-        bool IsOfType() const
+        bool IsOfStaticType() const
 		{
             return IsOfType(TObject::StaticClassTypeID());
 		}
@@ -121,7 +121,7 @@ namespace Fusion
         template<typename TTo> requires TFIsDerivedClass<FObject, TTo>::Value
         Ref<TTo> Cast()
 		{
-            if (IsOfType<TTo>())
+            if (IsOfStaticType<TTo>())
             {
                 return (TTo*)this;
             }
@@ -131,7 +131,7 @@ namespace Fusion
         template<typename TTo, typename TFrom> requires TFIsDerivedClass<FObject, TTo>::Value and TFIsDerivedClass<FObject, TFrom>::Value
         static Ref<TTo> CastTo(Ref<TFrom> object)
 		{
-			if (object->template IsOfType<TTo>())
+			if (object->template IsOfStaticType<TTo>())
 			{
                 return (TTo*)object.Get();
 			}

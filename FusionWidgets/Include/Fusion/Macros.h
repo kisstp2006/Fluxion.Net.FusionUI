@@ -259,22 +259,33 @@
         Super::ApplyStyle(style); \
         FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_APPLY, __VA_ARGS__)) \
     }
-
-#define FUSION_SLOT(Type, Name)                                                     \
-	private:                                                                            \
-	    Ref<FWidget> m_##Name;                                                          \
-	    struct _FSlotReg_##Name                                                         \
-	    {                                                                               \
-	        _FSlotReg_##Name(FSlottedWidget* self, Ref<FWidget>& slot)                  \
-	            { self->RegisterSlotPtr(slot); }                                        \
-	    } _fslot_##Name { static_cast<FSlottedWidget*>(this), m_##Name };				\
-	public:                                                                             \
-	    Ref<Type> Name() const { return m_##Name->Cast<Type>(); }                       \
-	    auto& Name(this auto& self, Ref<Type> widget)                                  \
-	    {                                                                               \
-	        static_cast<FSlottedWidget&>(self).SetSlotWidgetInternal(self.m_##Name, widget);    \
-	        return self;                                                                \
+#define __FUSION_SLOT_DECL(i, Tuple)    __FUSION_SLOT_DECL_2(i, FUSION_UNPACK Tuple)
+#define __FUSION_SLOT_DECL_2(i, ...)    FUSION_MACRO_EXPAND(__FUSION_SLOT_DECL_I(i, __VA_ARGS__))
+#define __FUSION_SLOT_DECL_I(i, Type, Name)\
+	private:\
+	    Ref<Type> m_##Name;\
+	public:\
+	    Ref<Type> Name() const { return m_##Name; }\
+	    auto& Name(this auto& self, Type& widget)\
+	    {\
+	        self.m_##Name = &widget;\
+			self.SetSlotWidget(i, self.m_##Name);\
+	        return self;\
 	    }
+
+#define __FUSION_SLOT_CHECK(i, Tuple) __FUSION_SLOT_CHECK_2(i, FUSION_UNPACK Tuple)
+#define __FUSION_SLOT_CHECK_2(i, ...) FUSION_MACRO_EXPAND(__FUSION_SLOT_CHECK_I(i, __VA_ARGS__))
+#define __FUSION_SLOT_CHECK_I(i, Type, Name) if (slot == i && widget->IsOfStaticType<Type>()) return true;
+
+#define FUSION_SLOTS(...)\
+	FUSION_MACRO_EXPAND(FUSION_FOR_EACH_I(__FUSION_SLOT_DECL, __VA_ARGS__))\
+	public:\
+		u32 GetSlotCount() final { return FUSION_ARG_COUNT(__VA_ARGS__); }\
+		bool IsValidSlotWidget(u32 slot, Ref<FWidget> widget) final {\
+			if (slot >= GetSlotCount() || !widget.IsValid()) return false;\
+			FUSION_MACRO_EXPAND(FUSION_FOR_EACH_I(__FUSION_SLOT_CHECK, __VA_ARGS__))\
+			return true;\
+		}\
 
 #define __FAnimate_Tween(widgetPtr, PropertyName, setterPrefix)\
     FAnimate::Tween<TPtrType<decltype(widgetPtr)>::Type>(\

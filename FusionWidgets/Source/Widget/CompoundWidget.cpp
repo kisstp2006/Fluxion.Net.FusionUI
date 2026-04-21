@@ -22,30 +22,6 @@ namespace Fusion
 		}
 	}
 
-	void FCompoundWidget::SetChild(Ref<FWidget> widget)
-	{
-		ZoneScoped;
-
-		if (m_Child == widget) return;
-
-		if (m_Child) 
-			DetachChildWidget(m_Child);
-		
-		m_Child = widget;
-
-		if (m_Child) 
-			AttachChildWidget(m_Child);
-	}
-
-	void FCompoundWidget::DetachChild(Ref<FWidget> child)
-	{
-		Super::DetachChild(child);
-
-		if (m_Child != child || !m_Child) return;
-		m_Child = nullptr;
-		DetachChildWidget(child);
-	}
-
 	FVec2 FCompoundWidget::MeasureContent(FVec2 availableSize)
 	{
 		FVec2 baseSize = GetMinimumContentSize();
