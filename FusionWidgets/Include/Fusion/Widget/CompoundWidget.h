@@ -19,8 +19,6 @@ namespace Fusion
 
         void SetParentSurfaceRecursive(Ref<FSurface> surface) override;
 
-        void DetachChild(Ref<FWidget> child) override;
-
         Ref<FWidget> GetChild() const { return m_Child; }
 
         int GetChildCount() override { return m_Child.IsValid() ? 1 : 0; }
@@ -28,6 +26,8 @@ namespace Fusion
         Ref<FWidget> GetChildAt(u32 index) override { return index == 0 ? m_Child : nullptr; }
 
         void SetChild(Ref<FWidget> child);
+
+        void DetachChild(Ref<FWidget> child) override;
 
         void SetInternalPadding(FMargin padding)
         {

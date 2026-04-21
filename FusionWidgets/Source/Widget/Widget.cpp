@@ -357,7 +357,7 @@ namespace Fusion
 	{
 		if (Ref<FWidget> parent = m_ParentWidget.Lock())
 		{
-			parent->DetachChild(this);
+			parent->DetachChildWidget(this);
 		}
 	}
 
@@ -420,6 +420,34 @@ namespace Fusion
 		}
 
 		m_ParentWidget = nullptr;
+	}
+
+	void FWidget::AttachChildWidget(Ref<FWidget> child)
+	{
+		child->DetachFromParent();
+		child->SetParentWidget(this);
+		child->SetParentSurfaceRecursive(GetParentSurface());
+		child->UpdateBoundaryFlags();
+		child->OnAttachedToParent(this);
+
+		if (Ref<FSurface> surface = GetParentSurface())
+			surface->MarkLayerTreeDirty();
+
+		MarkLayoutDirty();
+		MarkPaintDirty();
+	}
+
+	void FWidget::DetachChildWidget(Ref<FWidget> child)
+	{
+		child->OnDetachedFromParent(this);
+		child->SetParentSurfaceRecursive(nullptr);
+		child->SetParentWidget(nullptr);
+
+		if (Ref<FSurface> surface = GetParentSurface())
+			surface->MarkLayerTreeDirty();
+
+		MarkLayoutDirty();
+		MarkPaintDirty();
 	}
 
 	void FWidget::SetWidgetFlag(EWidgetFlags flag, bool set)

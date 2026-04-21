@@ -19,35 +19,28 @@ namespace Fusion
 		}
 	}
 
-	void FContainerWidget::AddChildWidget(Ref<FWidget> childWidget)
+	void FContainerWidget::AddChildWidget(Ref<FWidget> child)
 	{
 		ZoneScoped;
 
-		if (!childWidget || m_Children.Contains(childWidget))
-			return;
-
-		childWidget->DetachFromParent();
-
-		m_Children.Add(childWidget);
-
-		childWidget->SetParentWidget(this);
-		childWidget->SetParentSurfaceRecursive(GetParentSurface());
-		childWidget->UpdateBoundaryFlags();
-
-		childWidget->OnAttachedToParent(this);
-
-		if (Ref<FSurface> surface = GetParentSurface())
-		{
-			surface->MarkLayerTreeDirty();
-		}
-
-		MarkLayoutDirty();
-		MarkPaintDirty();
+		if (!child || m_Children.Contains(child)) return;
+		m_Children.Add(child);
+		AttachChildWidget(child);
 	}
 
-	void FContainerWidget::RemoveChildWidget(Ref<FWidget> childWidget)
+	void FContainerWidget::RemoveChildWidget(Ref<FWidget> child)
 	{
-		DetachChild(childWidget);
+		int index = (int)m_Children.IndexOf(child);
+		if (index < 0) return;
+		m_Children.RemoveAt(index);
+		DetachChildWidget(child);
+	}
+
+	void FContainerWidget::DetachChild(Ref<FWidget> child)
+	{
+		Super::DetachChild(child);
+
+		RemoveChildWidget(child);
 	}
 
 	void FContainerWidget::SetChildIndex(Ref<FWidget> childWidget, int index)
@@ -58,33 +51,6 @@ namespace Fusion
 
 		m_Children.RemoveAt(curIndex);
 		m_Children.Insert(childWidget, index);
-	}
-
-	void FContainerWidget::DetachChild(Ref<FWidget> child)
-	{
-		ZoneScoped;
-
-		Super::DetachChild(child);
-
-		if (!child)
-			return;
-
-		if (const int index = (int)m_Children.IndexOf(child); index >= 0)
-		{
-			if (Ref<FSurface> surface = GetParentSurface())
-			{
-				surface->MarkLayerTreeDirty();
-			}
-
-			child->OnDetachedFromParent(this);
-
-			m_Children.RemoveAt(index);
-			child->SetParentWidget(nullptr);
-			child->SetParentSurfaceRecursive(nullptr);
-
-			MarkLayoutDirty();
-			MarkPaintDirty();
-		}
 	}
 
 	void FContainerWidget::SetWidgetFlagInternal(EWidgetFlags flag, bool set)

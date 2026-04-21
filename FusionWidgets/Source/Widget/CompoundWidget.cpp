@@ -22,66 +22,28 @@ namespace Fusion
 		}
 	}
 
-	void FCompoundWidget::DetachChild(Ref<FWidget> child)
-	{
-		ZoneScoped;
-
-		Super::DetachChild(child);
-
-		if (m_Child == child && m_Child != nullptr)
-		{
-			if (Ref<FSurface> surface = GetParentSurface())
-			{
-				surface->MarkLayerTreeDirty();
-			}
-
-			m_Child->OnDetachedFromParent(this);
-
-			m_Child->SetParentSurfaceRecursive(nullptr);
-			m_Child->SetParentWidget(nullptr);
-			m_Child = nullptr;
-
-			MarkLayoutDirty();
-			MarkPaintDirty();
-		}
-	}
-
 	void FCompoundWidget::SetChild(Ref<FWidget> widget)
 	{
 		ZoneScoped;
 
-		if (m_Child == widget)
-			return;
+		if (m_Child == widget) return;
 
-		DetachChild(m_Child);
-
-		if (widget)
-		{
-			widget->DetachFromParent();
-		}
-
+		if (m_Child) 
+			DetachChildWidget(m_Child);
+		
 		m_Child = widget;
 
-		if (m_Child)
-		{
-			if (m_Child->GetParentSurface() != GetParentSurface())
-			{
-				m_Child->SetParentSurfaceRecursive(GetParentSurface());
-			}
+		if (m_Child) 
+			AttachChildWidget(m_Child);
+	}
 
-			m_Child->SetParentWidget(this);
-			m_Child->OnAttachedToParent(this);
+	void FCompoundWidget::DetachChild(Ref<FWidget> child)
+	{
+		Super::DetachChild(child);
 
-			m_Child->UpdateBoundaryFlags();
-
-			if (Ref<FSurface> surface = GetParentSurface())
-			{
-				surface->MarkLayerTreeDirty();
-			}
-		}
-
-		MarkLayoutDirty();
-		MarkPaintDirty();
+		if (m_Child != child || !m_Child) return;
+		m_Child = nullptr;
+		DetachChildWidget(child);
 	}
 
 	FVec2 FCompoundWidget::MeasureContent(FVec2 availableSize)

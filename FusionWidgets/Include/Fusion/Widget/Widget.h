@@ -142,9 +142,9 @@ namespace Fusion
 
         virtual void SetParentSurfaceRecursive(Ref<FSurface> surface);
 
-        virtual void DetachChild(Ref<FWidget> child) {}
-
         void DetachFromParent();
+
+        virtual void DetachChild(Ref<FWidget> child) {}
 
         virtual void OnAttachedToParent(Ref<FWidget> parent);
 
@@ -207,6 +207,9 @@ namespace Fusion
         void SetFaulted();
 
     protected:
+
+        void AttachChildWidget(Ref<FWidget> child);
+        void DetachChildWidget(Ref<FWidget> child);
 
         // For internal use only!
         void SetWidgetFlag(EWidgetFlags flag, bool set);

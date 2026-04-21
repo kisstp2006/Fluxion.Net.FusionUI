@@ -260,6 +260,21 @@
         FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_APPLY, __VA_ARGS__)) \
     }
 
+#define FUSION_SLOT(Type, Name)                                                     \
+	private:                                                                            \
+	    Ref<FWidget> m_##Name;                                                          \
+	    struct _FSlotReg_##Name                                                         \
+	    {                                                                               \
+	        _FSlotReg_##Name(FSlottedWidget* self, Ref<FWidget>& slot)                  \
+	            { self->RegisterSlotPtr(slot); }                                        \
+	    } _fslot_##Name { static_cast<FSlottedWidget*>(this), m_##Name };				\
+	public:                                                                             \
+	    Ref<Type> Name() const { return m_##Name->Cast<Type>(); }                       \
+	    auto& Name(this auto& self, Ref<Type> widget)                                  \
+	    {                                                                               \
+	        static_cast<FSlottedWidget&>(self).SetSlotWidgetInternal(self.m_##Name, widget);    \
+	        return self;                                                                \
+	    }
 
 #define __FAnimate_Tween(widgetPtr, PropertyName, setterPrefix)\
     FAnimate::Tween<TPtrType<decltype(widgetPtr)>::Type>(\

@@ -118,6 +118,16 @@ namespace Fusion
             return IsOfType(TObject::StaticClassTypeID());
 		}
 
+        template<typename TTo> requires TFIsDerivedClass<FObject, TTo>::Value
+        Ref<TTo> Cast()
+		{
+            if (IsOfType<TTo>())
+            {
+                return (TTo*)this;
+            }
+            return nullptr;
+		}
+
         template<typename TTo, typename TFrom> requires TFIsDerivedClass<FObject, TTo>::Value and TFIsDerivedClass<FObject, TFrom>::Value
         static Ref<TTo> CastTo(Ref<TFrom> object)
 		{
@@ -128,6 +138,12 @@ namespace Fusion
 
             return nullptr;
 		}
+
+        template<typename TTo, typename TFrom> requires TFIsDerivedClass<FObject, TTo>::Value and TFIsDerivedClass<FObject, TFrom>::Value
+        static Ref<TTo> StaticCastTo(Ref<TFrom> object)
+        {
+            return (TTo*)object.Get();
+        }
 
         void BeginDestroy();
 

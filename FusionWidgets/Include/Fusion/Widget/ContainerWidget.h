@@ -28,9 +28,9 @@ namespace Fusion
 
         void RemoveChildWidget(Ref<FWidget> childWidget);
 
-        void SetChildIndex(Ref<FWidget> childWidget, int index);
-
         void DetachChild(Ref<FWidget> child) override;
+
+        void SetChildIndex(Ref<FWidget> childWidget, int index);
 
         int GetChildCount() override { return (u32)m_Children.Size(); }
 

@@ -72,6 +72,7 @@
 
 // Widgets
 #include "Widget/Widget.h"
+#include "Widget/SlottedWidget.h"
 #include "Widget/CompoundWidget.h"
 #include "Widget/DecoratedBox.h"
 #include "Widget/ContainerWidget.h"
