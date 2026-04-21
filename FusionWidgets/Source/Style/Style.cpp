@@ -54,6 +54,12 @@ namespace Fusion
 		return *this;
 	}
 
+	FStyle& FStyle::Transform(const FName& propertyName, const FAffineTransform& value, EStyleState state)
+	{
+		m_TransformValues[propertyName].Add(value, state);
+		return *this;
+	}
+
 	FStyle& FStyle::Transition(const FName& propertyName, const FTransition& value)
 	{
 		m_PropertyTransitions[propertyName] = value;
@@ -142,6 +148,15 @@ namespace Fusion
 		if (it == m_FontValues.End())
 			return false;
 		outFont = it->second.Resolve(state);
+		return true;
+	}
+
+	bool FStyle::TryGet(const FName& propertyName, FAffineTransform& outTransform, EStyleState state)
+	{
+		auto it = m_TransformValues.Find(propertyName);
+		if (it == m_TransformValues.End())
+			return false;
+		outTransform = it->second.Resolve(state);
 		return true;
 	}
 

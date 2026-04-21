@@ -26,6 +26,8 @@ namespace Fusion
 
         // If the widget is still in the Construct() method.
         PendingConstruction = FUSION_BIT(10),
+
+        StyleScopeBoundary = FUSION_BIT(11),
     };
     FUSION_ENUM_CLASS_FLAGS(EWidgetFlags);
     
@@ -61,6 +63,8 @@ namespace Fusion
         bool IsLayoutDirty() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::LayoutDirty); }
 
         bool IsWidgetPendingConstruction() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::PendingConstruction); }
+
+        bool IsStyleScopeBoundary() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::StyleScopeBoundary); }
 
         virtual void OnPropertyModified(const FName& propertyName);
 
@@ -213,12 +217,13 @@ namespace Fusion
     	
     	// - Fusion Properties -
 
-        FUSION_PROPERTY(FAffineTransform, Transform);
+        //FUSION_PROPERTY(FAffineTransform, Transform);
 
         FUSION_LAYOUT_PROPERTY(FMargin, Margin);
 
         __FUSION_STYLE_PROPERTIES_FWIDGET(
-            (FMargin, Padding,  Layout)
+            (FMargin,          Padding,    Layout),
+            (FAffineTransform, Transform,  Layout)
         );
 
         FUSION_LAYOUT_PROPERTY(FVec2, Pivot);
@@ -235,7 +240,7 @@ namespace Fusion
 
         FUSION_PROPERTY(FName, Style);
         FUSION_PROPERTY(FName, SubStyle);
-        FUSION_PROPERTY(EStyleState, InheritedParentStyleStates);
+        FUSION_PROPERTY(EStyleState, PropagatedStyleStates);
 
         FUSION_LAYOUT_PROPERTY(EHAlign, HAlign);
         FUSION_LAYOUT_PROPERTY(EVAlign, VAlign);
@@ -272,6 +277,12 @@ namespace Fusion
         FUSION_PROPERTY_SET(bool, Enabled)
         {
             static_cast<FWidget&>(self).SetEnabledRecursive(value, self.GetParentWidget());
+            return self;
+        }
+
+        FUSION_PROPERTY_SET(bool, StyleScopeBoundary)
+        {
+            static_cast<FWidget&>(self).SetWidgetFlag(EWidgetFlags::StyleScopeBoundary, value);
             return self;
         }
 

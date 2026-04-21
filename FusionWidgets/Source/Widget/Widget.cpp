@@ -182,7 +182,7 @@ namespace Fusion
 	{
 		return FAffineTransform::Translation(GetLayoutPosition()) *
 			FAffineTransform::Translation(m_Pivot) *
-			m_Transform *
+			Transform() *
 			FAffineTransform::Translation(-m_Pivot);
 	}
 
@@ -301,13 +301,22 @@ namespace Fusion
 
 	FName FWidget::ResolveStyleName()
 	{
+		ZoneScoped;
+
 		if (m_Style.IsValid())
 			return m_Style;
+
 		if (m_SubStyle.IsValid())
 		{
-			if (Ref<FWidget> parent = GetParentWidget())
+			Ref<FWidget> parent = GetParentWidget();
+			while (parent != nullptr)
 			{
-				return parent->ResolveStyleName().ToString() + "/" + m_SubStyle.ToString();
+				if (parent->IsStyleScopeBoundary() || parent->m_SubStyle.IsValid())
+				{
+					return parent->ResolveStyleName().ToString() + "/" + m_SubStyle.ToString();
+				}
+
+				parent = parent->GetParentWidget();
 			}
 		}
 		return GetClassName();
@@ -315,6 +324,8 @@ namespace Fusion
 
 	Ref<FStyle> FWidget::ResolveStyle()
 	{
+		ZoneScoped;
+
 		FName styleName = ResolveStyleName();
 
 		if (Ref<FSurface> surface = GetParentSurface())
@@ -454,13 +465,13 @@ namespace Fusion
 				RefreshStyle();
 			}
 
-			for (int i = 0; i < GetChildCount(); i++)
+			if ((PropagatedStyleStates() & state) != 0)
 			{
-				if (Ref<FWidget> child = GetChildAt(i))
+				for (int i = 0; i < GetChildCount(); i++)
 				{
-					if ((child->InheritedParentStyleStates() & state) != 0)
+					if (Ref<FWidget> child = GetChildAt(i))
 					{
-						child->SetStyleStateFlag(child->InheritedParentStyleStates() & state, set);
+						child->SetStyleStateFlag(PropagatedStyleStates() & state, set);
 					}
 				}
 			}

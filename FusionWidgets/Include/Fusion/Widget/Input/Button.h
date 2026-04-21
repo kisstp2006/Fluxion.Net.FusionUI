@@ -19,6 +19,8 @@ namespace Fusion
 
     protected:
 
+        void Construct() override;
+
         // - Events -
 
         void OnMouseEnter(FMouseEvent& event) override;

@@ -57,7 +57,7 @@ namespace Fusion
 			return;
 
 		m_Children.RemoveAt(curIndex);
-		//m_Children.Insert();
+		m_Children.Insert(childWidget, index);
 	}
 
 	void FContainerWidget::DetachChild(Ref<FWidget> child)
@@ -65,6 +65,9 @@ namespace Fusion
 		ZoneScoped;
 
 		Super::DetachChild(child);
+
+		if (!child)
+			return;
 
 		if (const int index = (int)m_Children.IndexOf(child); index >= 0)
 		{

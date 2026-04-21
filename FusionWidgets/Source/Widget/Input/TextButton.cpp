@@ -11,9 +11,11 @@ namespace Fusion
 	{
 		Super::Construct();
 
+		PropagatedStyleStates(EStyleState::All);
+		StyleScopeBoundary(true);
+
 		Child(
 			FAssignNew(FLabel, m_Label)
-			.InheritedParentStyleStates(EStyleState::All)
 			.SubStyle("Label")
 			.Text("Button")
 			.HAlign(EHAlign::Center)

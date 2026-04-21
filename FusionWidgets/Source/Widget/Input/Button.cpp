@@ -10,6 +10,13 @@ namespace Fusion
 		SetWidgetFlag(EWidgetFlags::Focusable, true);
 	}
 
+	void FButton::Construct()
+	{
+		Super::Construct();
+
+		StyleScopeBoundary(true);
+	}
+
 	void FButton::OnMouseEnter(FMouseEvent& event)
 	{
 		Super::OnMouseEnter(event);

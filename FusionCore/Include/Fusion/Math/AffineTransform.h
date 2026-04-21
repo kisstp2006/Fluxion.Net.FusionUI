@@ -48,6 +48,11 @@ namespace Fusion
             return out;
         }
 
+        static FAffineTransform RotationDegrees(float degrees)
+        {
+            return Rotation(FMath::Deg2Rad(degrees));
+        }
+
         // Shear factors:
         // x' = x + shx*y
         // y' = y + shy*x

@@ -212,6 +212,12 @@ public:
 					.MinWidth(10)
 				),
 
+				FNew(FExpanderBox)
+				.Content(
+					FNew(FLabel)
+					.Text("This is the content")
+				),
+
 				FAssignNew(FScrollBox, scrollBox)
 				.Style("ScrollBox/Base")
 				.FillRatio(1.0f)
@@ -451,6 +457,10 @@ int main(int argc, char* argv[])
 			{
 				Color = DisabledBtnTextColor;
 			}
+			FUSION_ON(Hovered)
+			{
+				Color = DisabledBtnTextColor;
+			}
 		}
 
 		FUSION_STYLE(FLabel, "Button/Secondary/Label", Color)
@@ -527,6 +537,37 @@ int main(int argc, char* argv[])
 				PlaceholderColor = FColor(0.25f, 0.25f, 0.28f);
 				CursorColor      = FColor(0.35f, 0.35f, 0.38f);
 			}
+		}
+
+		FUSION_STYLE(FExpanderBox, "FExpanderBox", Background, Border, Shape, Padding)
+		{
+			Background = FColor(0.10f, 0.10f, 0.12f);
+			Border = FColor(0.22f, 0.22f, 0.26f);
+			Shape = FRoundedRectangle(5.0f);
+		}
+
+		FUSION_STYLE(FButton, "FExpanderBox/Header", Background, Border, Shape, Padding)
+		{
+			Extends("Button/Secondary");
+
+			Padding = FMargin(1, 1, 1, 1) * 5.0f;
+		}
+
+		FUSION_STYLE(FDecoratedBox, "FExpanderBox/Header/Chevron", Transform)
+		{
+			Transform = FAffineTransform::RotationDegrees(-90);
+
+			Transition(Transform, FTransition::MakeTween(0.1f));
+
+			FUSION_ON(Expanded)
+			{
+				Transform = FAffineTransform::RotationDegrees(0);
+			}
+		}
+
+		FUSION_STYLE(FDecoratedBox, "FExpanderBox/ContentBox", Padding)
+		{
+			Padding = FMargin(1, 1, 1, 1) * 10.0f;
 		}
 	});
 

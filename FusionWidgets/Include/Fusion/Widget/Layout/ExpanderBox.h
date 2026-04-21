@@ -3,21 +3,40 @@
 namespace Fusion
 {
     
-    class FUSIONWIDGETS_API FExpanderBox : public FVerticalStack
+    class FUSIONWIDGETS_API FExpanderBox : public FContainerWidget
     {
-        FUSION_WIDGET(FExpanderBox, FVerticalStack)
+        FUSION_WIDGET(FExpanderBox, FContainerWidget)
     protected:
         
         FExpanderBox();
 
         void Construct() override;
 
+        // - Layout -
+
+        FVec2 MeasureContent(FVec2 availableSize) override;
+
+        void ArrangeContent(FVec2 finalSize) override;
+
+        // - Paint -
+
         void Paint(FPainter& painter) override;
+
+    public:
+        
+        bool IsExpanded() const
+        {
+            return TestStyleState(EStyleState::Expanded);
+        }
+
+        void SetExpanded(bool expanded);
 
     protected:
 
         Ref<FButton> m_Header;
-        Ref<FDecoratedBox> m_Content;
+        Ref<FDecoratedBox> m_ContentBox;
+        Ref<FWidget> m_Content;
+        Ref<FLabel> m_TitleLabel;
 
         void SetupHeader();
         void SetupContent();
@@ -37,14 +56,24 @@ namespace Fusion
             return self;
         }
 
-        FUSION_PROPERTY_SET(FDecoratedBox&, Content)
+        FUSION_PROPERTY_SET(FWidget&, Content)
         {
             if (self.m_Content == &value)
                 return self;
-            self.RemoveChildWidget(self.m_Content);
             self.m_Content = &value;
-            self.AddChildWidget(&value);
+            self.m_ContentBox->Child(value);
             static_cast<FExpanderBox&>(self).SetupContent();
+            return self;
+        }
+
+        FUSION_PROPERTY_GET(bool, Expanded)
+        {
+            return IsExpanded();
+        }
+
+        FUSION_PROPERTY_SET(bool, Expanded)
+        {
+            SetExpanded(value);
             return self;
         }
 

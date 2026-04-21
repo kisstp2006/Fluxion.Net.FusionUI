@@ -82,6 +82,7 @@ namespace Fusion
         FStyle& Vec2(const FName& propertyName, const FVec2& value, EStyleState state = EStyleState::Default);
         FStyle& Vec4(const FName& propertyName, const FVec4& value, EStyleState state = EStyleState::Default);
         FStyle& Font(const FName& propertyName, const FFont& value, EStyleState state = EStyleState::Default);
+        FStyle& Transform(const FName& propertyName, const FAffineTransform& value, EStyleState state = EStyleState::Default);
 
         FStyle& Transition(const FName& propertyName, const FTransition& value);
 
@@ -96,6 +97,7 @@ namespace Fusion
             else if constexpr (std::is_same_v<T, FVec2>)   return Vec2(propertyName, value, state);
             else if constexpr (std::is_same_v<T, FVec4>)   return Vec4(propertyName, value, state);
             else if constexpr (std::is_same_v<T, FFont>)   return Font(propertyName, value, state);
+            else if constexpr (std::is_same_v<T, FAffineTransform>)   return Transform(propertyName, value, state);
             else static_assert(sizeof(T) == 0, "FStyle::Set — unsupported property type");
 
             return *this;
@@ -111,6 +113,7 @@ namespace Fusion
         bool TryGet(const FName& propertyName, FVec2& outVec2, EStyleState state);
         bool TryGet(const FName& propertyName, FVec4& outVec4, EStyleState state);
         bool TryGet(const FName& propertyName, FFont& outFont, EStyleState state);
+        bool TryGet(const FName& propertyName, FAffineTransform& outTransform, EStyleState state);
 
         bool TryGetTransition(const FName& propertyName, FTransition& outTransition);
 
@@ -126,6 +129,7 @@ namespace Fusion
         FHashMap<FName, FStyleValue<FVec2>>  m_Vec2Values;
         FHashMap<FName, FStyleValue<FVec4>>  m_Vec4Values;
         FHashMap<FName, FStyleValue<FFont>>  m_FontValues;
+        FHashMap<FName, FStyleValue<FAffineTransform>>  m_TransformValues;
         FHashMap<FName, FTransition>         m_PropertyTransitions;
 
         friend class FTheme;

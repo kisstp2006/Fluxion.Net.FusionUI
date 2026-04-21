@@ -21,6 +21,11 @@ namespace Fusion
 
         void AddChildWidget(Ref<FWidget> childWidget);
 
+        void AddChild(FWidget& child)
+        {
+            AddChildWidget(&child);
+        }
+
         void RemoveChildWidget(Ref<FWidget> childWidget);
 
         void SetChildIndex(Ref<FWidget> childWidget, int index);
