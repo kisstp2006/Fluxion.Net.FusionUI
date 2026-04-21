@@ -17,21 +17,24 @@ namespace Fusion
 
         // Input states
         ReadOnly = FUSION_BIT(6),  // editable=false but not grayed out like Disabled
-        Error    = FUSION_BIT(7),  // validation failure — red border, etc.
-        Warning  = FUSION_BIT(8),  // non-fatal issue — yellow border, etc.
-        Editing  = FUSION_BIT(9),  // inline edit in progress (rename fields, cell editors)
+        Error = FUSION_BIT(7),  // validation failure — red border, etc.
+        Warning = FUSION_BIT(8),  // non-fatal issue — yellow border, etc.
+        Editing = FUSION_BIT(9),  // inline edit in progress (rename fields, cell editors)
 
         // Async / activity
-        Loading  = FUSION_BIT(10), // async operation in progress — spinner, dimmed content
+        Loading = FUSION_BIT(10), // async operation in progress — spinner, dimmed content
 
         // Activation
-        Active   = FUSION_BIT(11), // current item among peers (active tab, active tool)
+        Active = FUSION_BIT(11), // current item among peers (active tab, active tool)
 
         // Focus ring visibility (keyboard nav only, mirrors CSS :focus-visible)
         FocusVisible = FUSION_BIT(13),
 
         // Structural states
-        Expanded = FUSION_BIT(12), // tree nodes, accordions, dropdowns (collapsed = !Expanded)
+        Expanded = FUSION_BIT(12), // tree nodes, expanders, dropdowns (collapsed = !Expanded)
+
+        // Mask of all states
+        All = FNumericLimits<u32>::Max()
     };
     FUSION_ENUM_CLASS_FLAGS(EStyleState);
     

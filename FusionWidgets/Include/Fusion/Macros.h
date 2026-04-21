@@ -65,17 +65,20 @@
 		}
 
 #define FUSION_PROPERTY_FORWARD(PropertyType, PropertyName, m_ForwardingVariable, ForwardingPropertyName)\
-	PropertyType PropertyName() const { return m_ForwardingVariable->ForwardingPropertyName(); }\
+	PropertyType PropertyName() const { FUSION_ASSERT(m_ForwardingVariable != nullptr, "Forward property " #PropertyName " called on a nullptr forward object."); return m_ForwardingVariable->ForwardingPropertyName(); }\
 	template<typename TSelf>\
 	TSelf& PropertyName(this TSelf& self, PropertyType const& value) {\
-		static_assert(std::is_same_v<std::remove_cvref_t<decltype(std::declval<TPtrType<decltype(m_ForwardingVariable)>::Type>().ForwardingPropertyName())>, PropertyType>, "Property Type mismatch with the wrapped property.");\
+		FUSION_ASSERT(self.m_ForwardingVariable != nullptr, "Forward property " #PropertyName " called on a nullptr forward object.");\
 		self.m_ForwardingVariable->ForwardingPropertyName(value);\
 		return self;\
 	}\
 	void __StyleBypassSetter_##PropertyName(PropertyType const& value) {\
+		static_assert(std::is_same_v<std::remove_cvref_t<decltype(std::declval<TPtrType<decltype(m_ForwardingVariable)>::Type>().ForwardingPropertyName())>, PropertyType>, "Property Type mismatch with the wrapped property.");\
+		FUSION_ASSERT(m_ForwardingVariable != nullptr, "Forward property " #PropertyName " called on a nullptr forward object.");\
 		m_ForwardingVariable->__StyleBypassSetter_##ForwardingPropertyName(value);\
 	}\
 	void __AnimBypassSetter_##PropertyName(PropertyType const& value) {\
+		FUSION_ASSERT(m_ForwardingVariable != nullptr, "Forward property " #PropertyName " called on a nullptr forward object.");\
 		m_ForwardingVariable->__AnimBypassSetter_##ForwardingPropertyName(value);\
 	}\
 
@@ -209,20 +212,30 @@
 // where DirtyKind is Paint or Layout.
 
 // Dirty-kind dispatch — maps the trailing tag to the right property macro.
-#define __FUSION_SP_PROP_Paint(Type, Name)   __FUSION_STYLE_PROPERTY(Type, Name, self.MarkPaintDirty())
-#define __FUSION_SP_PROP_Layout(Type, Name)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty())
-#define __FUSION_SP_PROP_LayoutAndPaint(Type, Name)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty(); self.MarkPaintDirty())
-#define __FUSION_SP_PROP_PaintAndLayout(Type, Name)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty(); self.MarkPaintDirty())
+#define __FUSION_SP_PROP_Paint(Type, Name, ...)   __FUSION_STYLE_PROPERTY(Type, Name, self.MarkPaintDirty())
+#define __FUSION_SP_PROP_Layout(Type, Name, ...)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty())
+#define __FUSION_SP_PROP_LayoutAndPaint(Type, Name, ...)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty(); self.MarkPaintDirty())
+#define __FUSION_SP_PROP_PaintAndLayout(Type, Name, ...)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty(); self.MarkPaintDirty())
+#define __FUSION_SP_PROP_Forward(Type, Name, m_ForwardVariable, ForwardVariableName)   FUSION_PROPERTY_FORWARD(Type, Name, m_ForwardVariable, ForwardVariableName)
 
 // DECL: unpack via juxtaposition, then dispatch on the trailing DirtyKind tag.
-#define __FUSION_SP_DECL(Tuple)                    __FUSION_SP_DECL_I Tuple
-#define __FUSION_SP_DECL_I(Type, Name, DirtyKind)  FUSION_CONCATENATE(__FUSION_SP_PROP_, DirtyKind)(Type, Name)
+#define __FUSION_SP_DECL(Tuple)							__FUSION_SP_DECL_I Tuple
+#define __FUSION_SP_DECL_I(Type, Name, DirtyKind, ...)  FUSION_CONCATENATE(__FUSION_SP_PROP_, DirtyKind)(Type, Name, __VA_ARGS__)
 
 // APPLY: extract Name (2nd element) with an extra indirection so it is fully
 //        expanded before reaching the # / ## operators inside __FUSION_APPLY_STYLE.
-#define __FUSION_SP_NAME(Type, Name, DirtyKind)  Name
-#define __FUSION_SP_APPLY(Tuple)                 __FUSION_SP_APPLY2(__FUSION_SP_NAME Tuple)
-#define __FUSION_SP_APPLY2(Name)                 __FUSION_APPLY_STYLE(Name)
+#define __FUSION_SP_APPLY(Tuple)							__FUSION_SP_APPLY_I Tuple
+#define __FUSION_SP_APPLY_I(Type, Name, DirtyKind, ...)		FUSION_CONCATENATE(__FUSION_SP_APPLY_PROP_, DirtyKind)(Type, Name, __VA_ARGS__)
+
+#define __FUSION_SP_APPLY_PROP_Layout(Type, Name, ...)					__FUSION_APPLY_STYLE(Name)
+#define __FUSION_SP_APPLY_PROP_Paint(Type, Name, ...)					__FUSION_APPLY_STYLE(Name)
+#define __FUSION_SP_APPLY_PROP_LayoutAndPaint(Type, Name, ...)			__FUSION_APPLY_STYLE(Name)
+#define __FUSION_SP_APPLY_PROP_PaintAndLayout(Type, Name, ...)			__FUSION_APPLY_STYLE(Name)
+#define __FUSION_SP_APPLY_PROP_Forward(Type, Name, m_ForwardVariable, ForwardVariableName)	// Forwarded properties are styled separately
+
+//#define __FUSION_SP_NAME(Type, Name, DirtyKind)  Name
+//#define __FUSION_SP_APPLY(Tuple)                 __FUSION_SP_APPLY2(__FUSION_SP_NAME Tuple)
+//#define __FUSION_SP_APPLY2(Name)                 __FUSION_APPLY_STYLE(Name)
 
 // For internal use only! Do not use this!
 #define __FUSION_STYLE_PROPERTIES_FWIDGET(...) \

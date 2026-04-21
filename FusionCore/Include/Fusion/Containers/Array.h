@@ -1,8 +1,5 @@
 #pragma once
 
-// Copyright (c) 2026 Neil Mewada
-// SPDX-License-Identifier: MIT
-
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -13,6 +10,8 @@
 
 #include "Fusion/Misc/Assert.h"
 
+// Copyright (c) 2026 Neil Mewada
+// SPDX-License-Identifier: MIT
 
 namespace Fusion
 {
@@ -220,6 +219,38 @@ namespace Fusion
             return *ptr;
         }
 
+        void Insert(const T& value, SizeT index)
+        {
+            FUSION_ASSERT(index <= m_Size, "FArray: Insert() index out of bounds");
+
+            if (index == m_Size) { Add(value); return; }
+
+            EnsureCapacity();
+            new (m_Data + m_Size) T(std::move(m_Data[m_Size - 1]));
+            ++m_Size;
+
+            for (SizeT i = m_Size - 2; i > index; i--)
+                m_Data[i] = std::move(m_Data[i - 1]);
+
+            m_Data[index] = value;
+        }
+
+        void Insert(T&& value, SizeT index)
+        {
+            FUSION_ASSERT(index <= m_Size, "FArray: Insert() index out of bounds");
+
+            if (index == m_Size) { Add(std::move(value)); return; }
+
+            EnsureCapacity();
+            new (m_Data + m_Size) T(std::move(m_Data[m_Size - 1]));
+            ++m_Size;
+
+            for (SizeT i = m_Size - 2; i > index; i--)
+                m_Data[i] = std::move(m_Data[i - 1]);
+
+            m_Data[index] = std::move(value);
+        }
+
         void Pop()
         {
             FUSION_ASSERT(m_Size > 0, "FArray: Pop() called on empty array");
@@ -260,6 +291,15 @@ namespace Fusion
                 m_Data[m_Size - 1].~T();
             }
             --m_Size;
+        }
+
+        void Swap(SizeT lhsIndex, SizeT rhsIndex)
+        {
+            FUSION_ASSERT(lhsIndex < m_Size && rhsIndex < m_Size, "FArray: Swap() index out of bounds");
+            if (lhsIndex == rhsIndex)
+                return;
+
+            std::swap(m_Data[lhsIndex], m_Data[rhsIndex]);
         }
 
         void Clear()

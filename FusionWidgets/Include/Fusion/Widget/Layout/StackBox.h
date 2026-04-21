@@ -5,7 +5,7 @@
 
 namespace Fusion
 {
-    enum class EStackDirection
+    enum class EStackDirection : u8
     {
         Horizontal,
         Vertical
@@ -14,7 +14,7 @@ namespace Fusion
 
     class FUSIONWIDGETS_API FStackBox : public FContainerWidget
     {
-        FUSION_CLASS(FStackBox, FContainerWidget)
+        FUSION_WIDGET(FStackBox, FContainerWidget)
     public:
 
         FStackBox();
@@ -69,8 +69,8 @@ namespace Fusion
 
     public: // - Fusion Properties - 
 
-        FUSION_LAYOUT_PROPERTY(EStackDirection, Direction);
         FUSION_LAYOUT_PROPERTY(f32, Spacing);
+        FUSION_LAYOUT_PROPERTY(EStackDirection, Direction);
         FUSION_LAYOUT_PROPERTY(EHAlign, ContentHAlign);
         FUSION_LAYOUT_PROPERTY(EVAlign, ContentVAlign);
 
@@ -78,7 +78,7 @@ namespace Fusion
     
     class FUSIONWIDGETS_API FVerticalStack : public FStackBox
     {
-        FUSION_CLASS(FVerticalStack, FStackBox)
+        FUSION_WIDGET(FVerticalStack, FStackBox)
     public:
 
         FVerticalStack()
@@ -92,7 +92,7 @@ namespace Fusion
 
     class FUSIONWIDGETS_API FHorizontalStack : public FStackBox
     {
-        FUSION_CLASS(FHorizontalStack, FStackBox)
+        FUSION_WIDGET(FHorizontalStack, FStackBox)
     public:
 
         FHorizontalStack()

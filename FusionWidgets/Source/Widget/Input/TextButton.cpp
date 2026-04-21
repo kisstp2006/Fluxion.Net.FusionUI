@@ -13,7 +13,7 @@ namespace Fusion
 
 		Child(
 			FAssignNew(FLabel, m_Label)
-			.InheritParentStyleState(true)
+			.InheritedParentStyleStates(EStyleState::All)
 			.SubStyle("Label")
 			.Text("Button")
 			.HAlign(EHAlign::Center)

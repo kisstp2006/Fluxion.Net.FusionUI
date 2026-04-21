@@ -141,9 +141,9 @@ namespace Fusion
 
 		bool clipPushed = false;
 
-		if (widget->ClipContent())
+		if (widget->IsClipContent())
 		{
-			painter.PushClip(FRect(FVec2(), widget->GetLayoutSize()), widget->ClipShape());
+			painter.PushClip(FRect(FVec2(), widget->GetLayoutSize()), widget->GetClipShape());
 			clipPushed = true;
 		}
 
@@ -154,7 +154,7 @@ namespace Fusion
 				DoPaint(child.Get(), painter);
 
 				// We only include children in AABB if clipping is disabled
-				if (widget->ClipContent())
+				if (widget->IsClipContent())
 					continue;
 
 				// painter.GetCurrentTransform() is always the parent widget's transform here,

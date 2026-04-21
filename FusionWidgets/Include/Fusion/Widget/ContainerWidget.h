@@ -15,11 +15,15 @@ namespace Fusion
 
         // - Public API -
 
+        FShape GetClipShape() const override { return ClipContent() ? ClipShape() : EShapeType::None; }
+
         void SetParentSurfaceRecursive(Ref<FSurface> surface) override;
 
         void AddChildWidget(Ref<FWidget> childWidget);
 
         void RemoveChildWidget(Ref<FWidget> childWidget);
+
+        void SetChildIndex(Ref<FWidget> childWidget, int index);
 
         void DetachChild(Ref<FWidget> child) override;
 
@@ -51,6 +55,9 @@ namespace Fusion
             self.UpdateBoundaryFlags();
             return self;
         }
+
+        FUSION_PROPERTY(FShape, ClipShape);
+        FUSION_PROPERTY(bool, ClipContent);
     };
 
 } // namespace Fusion

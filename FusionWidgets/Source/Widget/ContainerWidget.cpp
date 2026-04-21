@@ -4,7 +4,7 @@ namespace Fusion
 {
 	FContainerWidget::FContainerWidget()
 	{
-		
+		m_ClipShape = FRectangle();
 	}
 
 	void FContainerWidget::SetParentSurfaceRecursive(Ref<FSurface> surface)
@@ -48,6 +48,16 @@ namespace Fusion
 	void FContainerWidget::RemoveChildWidget(Ref<FWidget> childWidget)
 	{
 		DetachChild(childWidget);
+	}
+
+	void FContainerWidget::SetChildIndex(Ref<FWidget> childWidget, int index)
+	{
+		i64 curIndex = m_Children.IndexOf(childWidget);
+		if (curIndex < 0 || curIndex == index)
+			return;
+
+		m_Children.RemoveAt(curIndex);
+		//m_Children.Insert();
 	}
 
 	void FContainerWidget::DetachChild(Ref<FWidget> child)

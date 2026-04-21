@@ -84,4 +84,5 @@
 // Layouts
 #include "Widget/Layout/ScrollBox.h"
 #include "Widget/Layout/SplitBox.h"
+#include "Widget/Layout/ExpanderBox.h"
 

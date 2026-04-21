@@ -23,7 +23,9 @@ namespace Fusion
         Hidden = FUSION_BIT(7),
         Excluded = FUSION_BIT(8),
         Focusable = FUSION_BIT(9),
-        InheritParentStyleState = FUSION_BIT(10),
+
+        // If the widget is still in the Construct() method.
+        PendingConstruction = FUSION_BIT(10),
     };
     FUSION_ENUM_CLASS_FLAGS(EWidgetFlags);
     
@@ -57,6 +59,8 @@ namespace Fusion
         bool IsPaintDirty() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::PaintDirty); }
 
         bool IsLayoutDirty() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::LayoutDirty); }
+
+        bool IsWidgetPendingConstruction() const { return FEnumHasFlag(m_WidgetFlags, EWidgetFlags::PendingConstruction); }
 
         virtual void OnPropertyModified(const FName& propertyName);
 
@@ -161,6 +165,12 @@ namespace Fusion
         virtual void Paint(FPainter& painter);
         virtual void PaintOverContent(FPainter& painter);
 
+        // - Clip -
+
+        virtual FShape GetClipShape() const { return EShapeType::None; }
+
+        bool IsClipContent() const { return GetClipShape().GetShapeType() != EShapeType::None; }
+
         // - Event -
 
         virtual void OnMouseEnter([[maybe_unused]] FMouseEvent& event) {}
@@ -221,13 +231,11 @@ namespace Fusion
 
         FUSION_LAYOUT_PROPERTY(f32, FillRatio);
 
-        FUSION_LAYOUT_PROPERTY(f32, Opacity);
-
-        FUSION_PROPERTY(FShape, ClipShape);
-        FUSION_PROPERTY(bool, ClipContent);
+        FUSION_PROPERTY(f32, Opacity);
 
         FUSION_PROPERTY(FName, Style);
         FUSION_PROPERTY(FName, SubStyle);
+        FUSION_PROPERTY(EStyleState, InheritedParentStyleStates);
 
         FUSION_LAYOUT_PROPERTY(EHAlign, HAlign);
         FUSION_LAYOUT_PROPERTY(EVAlign, VAlign);
@@ -264,17 +272,6 @@ namespace Fusion
         FUSION_PROPERTY_SET(bool, Enabled)
         {
             static_cast<FWidget&>(self).SetEnabledRecursive(value, self.GetParentWidget());
-            return self;
-        }
-
-        FUSION_PROPERTY_GET(bool, InheritParentStyleState)
-        {
-            return TestWidgetFlags(EWidgetFlags::InheritParentStyleState);
-        }
-
-        FUSION_PROPERTY_SET(bool, InheritParentStyleState)
-        {
-            static_cast<FWidget&>(self).SetWidgetFlag(EWidgetFlags::InheritParentStyleState, value);
             return self;
         }
 

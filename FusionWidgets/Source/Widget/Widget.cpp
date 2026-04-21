@@ -8,7 +8,6 @@ namespace Fusion
 
 	FWidget::FWidget() : Super("Widget")
 	{
-		m_ClipShape = FRectangle();
 		m_MaxHeight = FNumericLimits<f32>::Infinity();
 		m_MaxWidth = FNumericLimits<f32>::Infinity();
 		m_Pivot = FVec2(0.5f, 0.5f);
@@ -86,6 +85,8 @@ namespace Fusion
 	{
 		Super::OnConstruct();
 
+		m_WidgetFlags |= EWidgetFlags::PendingConstruction;
+
 		FUSION_TRY
 		{
 			Construct();
@@ -95,6 +96,8 @@ namespace Fusion
 			FUSION_LOG_ERROR("Widget", "Exception occurred during widget [{}] construction: {}\n{}", GetClassName(), exception.what(), exception.GetStackTraceString(true));
 			m_WidgetFlags |= EWidgetFlags::Faulted;
 		}
+
+		m_WidgetFlags &= ~EWidgetFlags::PendingConstruction;
 	}
 
 	void FWidget::OnAttachedToParent(Ref<FWidget> parent)
@@ -127,7 +130,17 @@ namespace Fusion
 		{
 			m_CachedStyle = nullptr;
 			m_StyleCached = false;
-			RefreshStyleRecursively();
+
+			for (int i = 0; i < GetChildCount(); i++)
+			{
+				if (Ref<FWidget> child = GetChildAt(i))
+				{
+					if (child->m_SubStyle.IsValid()) // Child's resolved style name is dependent on this widget
+					{
+						child->RefreshStyle();
+					}
+				}
+			}
 		}
 		else if (propertyName == opacityProperty)
 		{
@@ -445,9 +458,9 @@ namespace Fusion
 			{
 				if (Ref<FWidget> child = GetChildAt(i))
 				{
-					if (child->InheritParentStyleState())
+					if ((child->InheritedParentStyleStates() & state) != 0)
 					{
-						child->SetStyleStateFlag(state, set);
+						child->SetStyleStateFlag(child->InheritedParentStyleStates() & state, set);
 					}
 				}
 			}
@@ -470,7 +483,8 @@ namespace Fusion
 		
 		for (int i = 0; i < GetChildCount(); i++)
 		{
-			GetChildAt(i)->SetEnabledRecursive(enabled, this);
+			if (Ref<FWidget> widget = GetChildAt(i))
+				widget->SetEnabledRecursive(enabled, this);
 		}
 	}
 

@@ -15,6 +15,8 @@ namespace Fusion
 
         // - Public API -
 
+        FShape GetClipShape() const override { return ClipContent() ? ClipShape() : EShapeType::None; }
+
         void SetParentSurfaceRecursive(Ref<FSurface> surface) override;
 
         void DetachChild(Ref<FWidget> child) override;
@@ -69,6 +71,8 @@ namespace Fusion
             return self;
         }
         
+        FUSION_PROPERTY(FShape, ClipShape);
+        FUSION_PROPERTY(bool, ClipContent);
     };
     
 } // namespace Fusion
