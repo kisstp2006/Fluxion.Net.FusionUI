@@ -1,12 +1,18 @@
 # FusionUI
 
-A C++23 retained-mode UI library with declarative widgets, a type-safe stylesheet system, animations, transitions, and pluggable platform and rendering backends.
+A cross-platform C++23 retained-mode UI library with declarative widgets, a type-safe stylesheet system, animations, transitions, and pluggable platform and rendering backends.
+
+| Platform | Supported |
+|-|-|
+| Windows | Yes (Vulkan) |
+| Mac | Yes (MoltenVk) |
+| Linux | Planned |
 
 ### ⭐ Feel free to star the project to show your support!
 
 [Quick Start](#quick-start) | [Building](#building) | [Features](#features)
 
-![](./Screenshots/Sample.png)
+![](./Screenshots/Sample2.png)
 
 ---
 
@@ -176,7 +182,7 @@ cmake --build build
 | `FUSION_USE_VULKAN` | ON | Vulkan render backend |
 | `FUSION_ENABLE_TRACY` | OFF | Tracy profiler integration |
 
-**Platforms:** Windows, macOS, Linux
+**Platforms:** Windows, macOS
 
 **Dependencies:** [Vulkan SDK](https://vulkan.lunarg.com), [SDL3](https://github.com/libsdl-org/SDL), [FreeType](https://freetype.org), [xxHash](https://github.com/Cyan4973/xxHash), [cpptrace](https://github.com/jeremy-rifkin/cpptrace)
 
