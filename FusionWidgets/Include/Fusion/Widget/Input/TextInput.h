@@ -7,9 +7,9 @@ namespace Fusion
 {
     FUSION_SIGNAL_TYPE(FTextSignal, const FString& text);
 
-    class FUSIONWIDGETS_API FTextInput : public FDecoratedBox
+    class FUSIONWIDGETS_API FTextInput : public FDecoratedWidget
     {
-        FUSION_WIDGET(FTextInput, FDecoratedBox)
+        FUSION_WIDGET(FTextInput, FDecoratedWidget)
     protected:
 
         FTextInput();
