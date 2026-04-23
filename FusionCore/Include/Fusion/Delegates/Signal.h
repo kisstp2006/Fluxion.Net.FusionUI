@@ -98,16 +98,6 @@ namespace Fusion
             return handle;
         }
 
-        // Const member function (Ptr<const T>)
-        template<typename TObject, typename TMethod>
-        FSignalHandle Add(Ref<const TObject> object, TMethod method)
-        {
-            FSignalHandle handle{ m_NextID++ };
-            auto& binding = m_Bindings.Emplace(handle.ID, FDelegate<TReturn(TArgs...)>{});
-            binding.Delegate.Bind(object, method);
-            return handle;
-        }
-
         // ----------------------------------------------------------------
         // Remove
         // ----------------------------------------------------------------

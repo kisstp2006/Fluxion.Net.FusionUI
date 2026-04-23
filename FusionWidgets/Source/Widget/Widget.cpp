@@ -115,6 +115,8 @@ namespace Fusion
 		if (IsOfType(widgetClassId))
 			return this;
 
+		ZoneScoped;
+
 		int childCount = GetChildCount();
 		for (int i = 0; i < childCount; i++)
 		{

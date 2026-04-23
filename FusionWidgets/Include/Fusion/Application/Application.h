@@ -28,7 +28,7 @@ namespace Fusion
             return *ptr;
 		}
 
-        Ref<FTheme> CreateDefaultTheme();
+        Ref<FTheme> CreateMainTheme();
 
     	void SetInitialWindowSize(int width, int height)
     	{

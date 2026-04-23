@@ -88,8 +88,6 @@ public:
 					.Text("Primary")
 					.OnClick([this, gradientPen]
 					{
-						FUSION_LOG_INFO("Debug", "Primary clicked!");
-
 						FPen toPen = gradientPen;
 						toPen.GradientOffset(1.0f);
 
@@ -121,8 +119,6 @@ public:
 					.Style("Button/Secondary")
 					.OnClick([this]
 					{
-						FUSION_LOG_INFO("Debug", "Secondary clicked!");
-
 						FAnimate_Spring(gradientBorder, Transform)
 						.Target(!rotated ? FAffineTransform::Rotation(FMath::Deg2Rad(90)) : FAffineTransform::Identity())
 						.Play();
@@ -137,8 +133,6 @@ public:
 					.Style("Button/Destructive")
 					.OnClick([this, gradient]
 					{
-						FUSION_LOG_INFO("Debug", "Destructive clicked!");
-
 						FBrush altGradient = FGradient::Linear(FMath::Deg2Rad(45 + 180))
 							.AddStop(FColor(0.00f, 0.08f, 0.30f), 0.0f)   // deep navy
 							.AddStop(FColor(0.00f, 0.45f, 0.65f), 0.35f)  // ocean blue
@@ -361,11 +355,16 @@ public:
 	bool gradientToggled = false;
 };
 
+constexpr static SizeT operator""_pt(SizeT Value)
+{
+	return Value;
+}
+
 int main(int argc, char* argv[])
 {
 	FApplication app(argc, argv);
 
-	Ref<FTheme> theme = app.CreateDefaultTheme();
+	Ref<FTheme> theme = app.CreateMainTheme();
 
 	theme->MergeStyleSheet(FUSION_STYLE_SHEET
 	{

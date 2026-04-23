@@ -2,11 +2,13 @@
 
 A cross-platform C++23 retained-mode UI library with declarative widgets, a type-safe stylesheet system, animations, transitions, and pluggable platform and rendering backends.
 
-| Platform | Supported |
-|-|-|
-| Windows | Yes (Vulkan) |
-| Mac | Yes (MoltenVk) |
-| Linux | Planned |
+| Platform | Status | Platform Backend | Render Backend |
+|-|-|-|-|
+| Windows | ✅ | SDL3 | Vulkan |
+| Mac | ✅ | SDL3 | MoltenVk |
+| Linux | ❌ | ❌ | ❌ |
+
+**Note**: FusionUI is in **experimental** stage, with future plans for linux support.
 
 ### ⭐ Feel free to star the project to show your support!
 

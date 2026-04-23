@@ -10,7 +10,7 @@ namespace Fusion
 		m_MainApplication = new FApplicationInstance("FusionApplication");
 	}
 
-	Ref<FTheme> FApplication::CreateDefaultTheme()
+	Ref<FTheme> FApplication::CreateMainTheme()
 	{
 		m_MainTheme = NewObject<FTheme>(nullptr);
 		return m_MainTheme;
