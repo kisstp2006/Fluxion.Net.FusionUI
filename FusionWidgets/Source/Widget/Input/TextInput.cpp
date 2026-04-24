@@ -70,14 +70,26 @@ namespace Fusion
     {
         ZoneScoped;
         f32 height = 32.0f; // fallback
+        FMargin pad = Padding();
 
         if (Ref<FApplicationInstance> app = GetApplication())
         {
             FFontAtlas* atlas = app->GetFontAtlas().Get();
             FFontMetrics metrics = atlas->GetScaledMetrics(Font());
-            FMargin pad = Padding();
             height = metrics.LineHeight + pad.top + pad.bottom;
         }
+
+        // Let optional slots measure themselves so their desired sizes are available
+        // for ArrangeContent. They get the full inner height and whatever width they need.
+        f32 slotAvailH = FMath::Max(0.0f, height - pad.top - pad.bottom);
+        f32 slotAvailW = FMath::Max(0.0f, availableSize.x - pad.left - pad.right);
+        FVec2 slotAvail(slotAvailW, slotAvailH);
+
+        if (m_Leading && !m_Leading->IsExcluded())
+            m_Leading->MeasureContent(slotAvail);
+
+        if (m_Trailing && !m_Trailing->IsExcluded())
+            m_Trailing->MeasureContent(slotAvail);
 
         return m_DesiredSize = ApplyLayoutConstraints(FVec2(availableSize.x, height));
     }
@@ -85,6 +97,32 @@ namespace Fusion
     void FTextInput::ArrangeContent(FVec2 finalSize)
     {
         Super::ArrangeContent(finalSize);
+
+        FMargin pad    = Padding();
+        FVec2   layout = GetLayoutSize();
+
+        f32 contentHeight = FMath::Max(0.0f, layout.y - pad.top - pad.bottom);
+        f32 textLeft      = pad.left;
+        f32 textRight     = layout.x - pad.right;
+
+        if (m_Leading && !m_Leading->IsExcluded())
+        {
+            FVec2 size(m_Leading->GetDesiredSize().x, contentHeight);
+            m_Leading->SetLayoutPosition(FVec2(textLeft, pad.top));
+            m_Leading->ArrangeContent(size);
+            textLeft += size.x;
+        }
+
+        if (m_Trailing && !m_Trailing->IsExcluded())
+        {
+            FVec2 size(m_Trailing->GetDesiredSize().x, contentHeight);
+            textRight -= size.x;
+            m_Trailing->SetLayoutPosition(FVec2(textRight, pad.top));
+            m_Trailing->ArrangeContent(size);
+        }
+
+        m_TextAreaLeft  = textLeft;
+        m_TextAreaRight = textRight;
     }
 
     FCursor FTextInput::GetActiveCursorAt(FVec2 localPos)
@@ -107,6 +145,7 @@ namespace Fusion
         result.reserve(m_Text.ByteLength()); // approximate
         for ([[maybe_unused]] char32_t cp : m_Text.Codepoints())
             result += "\xE2\x80\xA2";
+            //result += '*';
         return FString(result);
     }
 
@@ -195,9 +234,7 @@ namespace Fusion
     void FTextInput::EnsureCursorVisible()
     {
         ZoneScoped;
-        FMargin pad = Padding();
-        FVec2   sz  = GetLayoutSize();
-        f32 contentWidth = FMath::Max(0.0f, sz.x - pad.left - pad.right);
+        f32 contentWidth = FMath::Max(0.0f, m_TextAreaRight - m_TextAreaLeft);
 
         f32 cx = CursorPixelX(m_CursorPos);
 
@@ -357,10 +394,10 @@ namespace Fusion
         FVec2   sz  = GetLayoutSize();
 
         FRect contentRect = FRect::FromSize(
-            pad.left,
+            m_TextAreaLeft,
             pad.top,
-            sz.x - pad.left - pad.right,
-            sz.y - pad.top  - pad.bottom
+            FMath::Max(0.0f, m_TextAreaRight - m_TextAreaLeft),
+            sz.y - pad.top - pad.bottom
         );
 
         if (contentRect.GetWidth() <= 0 || contentRect.GetHeight() <= 0)
@@ -439,8 +476,7 @@ namespace Fusion
             return FEventReply::Unhandled();
 
         FVec2 localPos = GetGlobalTransform().Inverse().TransformPoint(event.MousePosition);
-        FMargin pad    = Padding();
-        f32 textX      = localPos.x - pad.left;
+        f32 textX      = localPos.x - m_TextAreaLeft;
 
         if (event.ClickCount >= 3)
         {
@@ -517,9 +553,7 @@ namespace Fusion
             return FEventReply::Unhandled();
 
         FVec2 localPos = GetGlobalTransform().Inverse().TransformPoint(event.MousePosition);
-
-        FMargin pad   = Padding();
-        f32     textX = localPos.x - pad.left;
+        f32   textX    = localPos.x - m_TextAreaLeft;
 
         int newPos = HitTestCursorIndex(textX);
         if (newPos != m_CursorPos)

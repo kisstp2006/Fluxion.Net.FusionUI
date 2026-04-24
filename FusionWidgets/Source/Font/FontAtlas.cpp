@@ -119,7 +119,11 @@ namespace Fusion
 
         if (it == m_Glyphs.End())
         {
-            // TODO: Add this new glyph to the atlas
+            LoadGlyphs({
+                .Family = font.GetFamily(),
+                .Weight = font.GetWeight(),
+                .Style = font.GetStyle()
+            }, &codePoint, 1);
             return {};
         }
 

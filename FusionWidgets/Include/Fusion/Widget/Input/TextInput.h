@@ -89,6 +89,11 @@ namespace Fusion
         bool    m_IsDragging      = false;
         FString m_TextBeforeEdit;         // snapshot taken when editing starts; restored on cancel
 
+        // Text area bounds — set by ArrangeContent, used by Paint and hit-testing.
+        // These are local X coordinates (left-edge inclusive, right-edge exclusive).
+        f32     m_TextAreaLeft    = 0.0f;
+        f32     m_TextAreaRight   = 0.0f;
+
         Ref<FTimer> m_BlinkTimer;
 
     public:
@@ -114,6 +119,10 @@ namespace Fusion
             (FColor, CursorColor,      Paint)
         );
 
+        FUSION_SLOTS(
+            (FWidget, Leading),
+            (FWidget, Trailing)
+        )
     };
 
 } // namespace Fusion
