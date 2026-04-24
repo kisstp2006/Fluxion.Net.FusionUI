@@ -160,9 +160,19 @@ namespace Fusion
                 contentAreaOrigin.x + m_ContentPadding.left - m_ScrollOffset.x + childMargin.left,
                 contentAreaOrigin.y + m_ContentPadding.top  - m_ScrollOffset.y + childMargin.top
             );
+
+            bool fillH = GetChild()->HAlign() == EHAlign::Fill || GetChild()->HAlign() == EHAlign::Auto;
+            bool fillV = GetChild()->VAlign() == EVAlign::Fill || GetChild()->VAlign() == EVAlign::Auto;
+
             FVec2 childSize = FVec2(
-                FMath::Max(effectiveViewport.x, m_ContentSize.x) - childMargin.left - childMargin.right,
-                FMath::Max(effectiveViewport.y, m_ContentSize.y) - childMargin.top  - childMargin.bottom
+                m_CanScrollHorizontal
+                    ? FMath::Max(effectiveViewport.x, m_ContentSize.x)
+                    : (fillH ? effectiveViewport.x : FMath::Min(effectiveViewport.x, m_ContentSize.x))
+                    - childMargin.left - childMargin.right,
+                m_CanScrollVertical
+                    ? FMath::Max(effectiveViewport.y, m_ContentSize.y)
+                    : (fillV ? effectiveViewport.y : FMath::Min(effectiveViewport.y, m_ContentSize.y))
+                    - childMargin.top  - childMargin.bottom
             );
 
             GetChild()->SetLayoutPosition(childPos);

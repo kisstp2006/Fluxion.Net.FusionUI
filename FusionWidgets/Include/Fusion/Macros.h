@@ -246,6 +246,7 @@
     FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_DECL, __VA_ARGS__)) \
     virtual void ApplyStyle(FStyle& style) \
     {\
+		ZoneScoped;\
         FUSION_MACRO_EXPAND(FUSION_FOR_EACH(__FUSION_SP_APPLY, __VA_ARGS__)) \
     }
 

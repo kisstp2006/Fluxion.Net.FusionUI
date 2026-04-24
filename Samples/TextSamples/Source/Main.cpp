@@ -6,9 +6,9 @@
 
 using namespace Fusion;
 
-class SampleWindow : public FDecoratedBox
+class SampleWindow : public FScrollBox
 {
-	FUSION_WIDGET(SampleWindow, FDecoratedBox)
+	FUSION_WIDGET(SampleWindow, FScrollBox)
 public:
 
 	void Construct() override
@@ -17,6 +17,8 @@ public:
 
 		Name("Text Samples");
 
+		CanScrollVertical(true);
+		CanScrollHorizontal(false);
 
 		Child(
 			FNew(FVerticalStack)
@@ -94,10 +96,26 @@ int main(int argc, char* argv[])
 
 		FColor DisabledBtnTextColor = FColor(0.35f, 0.35f, 0.38f);
 
-		FUSION_STYLE(SampleWindow, "SampleWindow", Background, Padding)
+		FUSION_STYLE(SampleWindow, "SampleWindow", Background, Border, Shape,
+			TrackBackground, TrackShape,
+			ThumbBackground, ThumbHoverBackground, ThumbPressedBackground, ThumbDisabledBackground, ThumbShape,
+			ScrollbarThickness, ScrollbarPadding, ContentPadding, Padding)
 		{
 			Background = WindowBackgroundColor;
 			Padding	   = FMargin(1, 1, 1, 1) * 5;
+
+			TrackBackground         = FColor(0.08f, 0.08f, 0.10f);
+			TrackShape              = FRoundedRectangle(4.0f);
+
+			ThumbBackground         = FColor(0.28f, 0.28f, 0.33f);
+			ThumbHoverBackground    = FColor(0.42f, 0.42f, 0.48f);
+			ThumbPressedBackground  = FColor(0.58f, 0.58f, 0.65f);
+			ThumbDisabledBackground = FColor(0.18f, 0.18f, 0.20f);
+			ThumbShape              = FRoundedRectangle(4.0f);
+
+			ContentPadding		    = FMargin(1, 1, 1, 1) * 10;
+			ScrollbarThickness	    = 15.0f;
+			ScrollbarPadding	    = 3.0f;
 		}
 
 		FUSION_STYLE(FDecoratedBox, "Base/FocusRing", Outline, OutlineOffset)

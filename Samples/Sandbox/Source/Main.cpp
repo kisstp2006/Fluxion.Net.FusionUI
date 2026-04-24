@@ -355,11 +355,6 @@ public:
 	bool gradientToggled = false;
 };
 
-constexpr static SizeT operator""_pt(SizeT Value)
-{
-	return Value;
-}
-
 int main(int argc, char* argv[])
 {
 	FApplication app(argc, argv);
