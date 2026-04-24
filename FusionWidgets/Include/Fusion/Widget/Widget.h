@@ -228,13 +228,11 @@ namespace Fusion
     	
     	// - Fusion Properties -
 
-        //FUSION_PROPERTY(FAffineTransform, Transform);
-
         FUSION_LAYOUT_PROPERTY(FMargin, Margin);
 
         __FUSION_STYLE_PROPERTIES_FWIDGET(
             (FMargin,          Padding,    Layout),
-            (FAffineTransform, Transform,  Layout)
+            (FAffineTransform, Transform,  Paint)
         );
 
         FUSION_LAYOUT_PROPERTY(FVec2, Pivot);

@@ -26,7 +26,6 @@ public:
 			.Spacing(10)
 			.Name("RootStack")
 			(
-
 				FNew(FHorizontalStack)
 				.ContentHAlign(EHAlign::Center)
 				.ContentVAlign(EVAlign::Center)
@@ -68,25 +67,6 @@ public:
 					.OnTextChanged([this](const FString& text)
 					{
 					})
-				),
-
-				FNew(FExpanderBox)
-				.Title("Expander Box")
-				.Child(
-					FNew(FVerticalStack)
-					(
-						FNew(FLabel)
-						.Text("Header")
-						.FontSize(16),
-
-						FNew(FLabel)
-						.Text("Section Title")
-						.FontSize(12),
-
-						FNew(FLabel)
-						.Text("This is the content body.")
-						.FontSize(10)
-					)
 				),
 
 				FNew(FWidget)
