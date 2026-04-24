@@ -27,7 +27,7 @@ namespace Fusion
         uuid[1] = high;
     }
 
-    FUuid::FUuid(Hash128 hash)
+    FUuid::FUuid(FHash128 hash)
     {
         uuid[0] = hash.low64;
         uuid[1] = hash.high64;

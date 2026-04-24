@@ -212,7 +212,8 @@ namespace Fusion
 		if (m_Content)
 		{
             (*m_Content)
-            .SubStyle("Content");
+            .SubStyle("Content")
+			.ClipContent(false);
 		}
 	}
 

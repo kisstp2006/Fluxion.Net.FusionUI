@@ -9,7 +9,7 @@ namespace Fusion
         FUuid();
 
         FUuid(u64 low, u64 high);
-        FUuid(Hash128 hash);
+        FUuid(FHash128 hash);
 
         static FUuid Random();
 

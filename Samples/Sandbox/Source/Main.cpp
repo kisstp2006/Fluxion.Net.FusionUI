@@ -151,7 +151,6 @@ public:
 					FNew(FTextInput)
 					.Style("TextInput/Base")
 					.Placeholder("Type here...")
-					.IsPassword(true)
 					.FillRatio(1.0f)
 					.OnTextChanged([this](const FString& text)
 					{

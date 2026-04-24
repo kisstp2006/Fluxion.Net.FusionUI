@@ -54,7 +54,7 @@ namespace Fusion
 
 		if (m_MainWindow)
 		{
-			FWindowHandle windowHandle = m_PlatformBackend->CreateWindow(instanceHandle, "Fusion 1", m_InitialWindowSize.width, m_InitialWindowSize.height, {
+			FWindowHandle windowHandle = m_PlatformBackend->CreateWindow(instanceHandle, m_MainWindow->GetName().ToString(), m_InitialWindowSize.width, m_InitialWindowSize.height, {
 				.maximised = false,
 				.fullscreen = false,
 				.resizable = true,

@@ -5,10 +5,10 @@
 namespace Fusion
 {
 
-	FUSIONCORE_API Hash128 CalculateHash128(const void* data, SizeT length)
+	FUSIONCORE_API FHash128 CalculateHash128(const void* data, SizeT length)
 	{
 		XXH128_hash_t hash = XXH3_128bits(data, length);
-		Hash128 out;
+		FHash128 out;
 		out.high64 = hash.high64;
 		out.low64 = hash.low64;
 		return out;

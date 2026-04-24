@@ -13,13 +13,13 @@
 namespace Fusion
 {
 
-	struct Hash128
+	struct FHash128
 	{
 		u64 high64;
 		u64 low64;
 	};
 
-	FUSIONCORE_API Hash128 CalculateHash128(const void* data, SizeT length);
+	FUSIONCORE_API FHash128 CalculateHash128(const void* data, SizeT length);
 
 	FUSIONCORE_API SizeT CalculateHash(const void* data, SizeT length);
 

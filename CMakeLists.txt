@@ -21,13 +21,11 @@ if(PROJECT_IS_TOP_LEVEL)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
 endif()
 
-option(FUSION_BUILD_TESTS    "Build Fusion tests"               ${PROJECT_IS_TOP_LEVEL})
-option(FUSION_ENABLE_TRACY   "Enable Tracy profiler integration" OFF)
-option(FUSION_SHADER_DEBUG_SYMBOLS "Enable debug symbols for slang shaders" ${PROJECT_IS_TOP_LEVEL})
-
-option(FUSION_BUILD_SAMPLES "Build Fusion tests" ${PROJECT_IS_TOP_LEVEL})
-
-option(FUSION_ENABLE_EXCEPTIONS "Enable exceptions, for safe C++." ON)
+option(FUSION_BUILD_TESTS           "Build Fusion tests"                        ${PROJECT_IS_TOP_LEVEL})
+option(FUSION_ENABLE_TRACY          "Enable Tracy profiler integration"         OFF)
+option(FUSION_SHADER_DEBUG_SYMBOLS  "Enable debug symbols for slang shaders"    ${PROJECT_IS_TOP_LEVEL})
+option(FUSION_BUILD_SAMPLES         "Build Fusion tests"                        ${PROJECT_IS_TOP_LEVEL})
+option(FUSION_ENABLE_EXCEPTIONS     "Enable exceptions, for safe C++."          ON)
 
 include(CMake/ThirdParty.cmake)
 include(CMake/Shaders.cmake)
