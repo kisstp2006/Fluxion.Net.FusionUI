@@ -1662,3 +1662,320 @@ TEST(FStableDynamicArrayTest, InsertAfterFree)
 }
 
 #pragma endregion FStableDynamicArray
+
+#pragma region FStringView
+
+TEST(FStringViewTest, DefaultConstructor)
+{
+    FStringView sv;
+    EXPECT_EQ(sv.ByteLength(), 0);
+    EXPECT_TRUE(sv.Empty());
+    EXPECT_EQ(sv.Data()[0], '\0');
+}
+
+TEST(FStringViewTest, ConstructFromCStr)
+{
+    FStringView sv("Hello");
+    EXPECT_EQ(sv.ByteLength(), 5);
+    EXPECT_FALSE(sv.Empty());
+    EXPECT_EQ(sv[0], 'H');
+    EXPECT_EQ(sv[4], 'o');
+}
+
+TEST(FStringViewTest, ConstructFromNullCStr)
+{
+    FStringView sv(nullptr);
+    EXPECT_TRUE(sv.Empty());
+    EXPECT_EQ(sv.ByteLength(), 0);
+}
+
+TEST(FStringViewTest, ConstructFromPtrAndLength)
+{
+    const char* buf = "HelloWorld";
+    FStringView sv(buf, 5);
+    EXPECT_EQ(sv.ByteLength(), 5);
+    EXPECT_EQ(sv[0], 'H');
+    EXPECT_EQ(sv[4], 'o');
+}
+
+TEST(FStringViewTest, ConstructFromStdStringView)
+{
+    std::string_view stdSv = "Hello";
+    FStringView sv(stdSv);
+    EXPECT_EQ(sv.ByteLength(), 5);
+    EXPECT_EQ(sv[0], 'H');
+}
+
+TEST(FStringViewTest, ConstructFromFString)
+{
+    FString str("Hello");
+    FStringView sv(str);
+    EXPECT_EQ(sv.ByteLength(), 5);
+    EXPECT_EQ(sv[0], 'H');
+}
+
+TEST(FStringViewTest, SizeAndLength)
+{
+    FStringView sv("abc");
+    EXPECT_EQ(sv.Size(),   3);
+    EXPECT_EQ(sv.Length(), 3);
+}
+
+TEST(FStringViewTest, IndexOperatorValid)
+{
+    FStringView sv("Hello");
+    EXPECT_EQ(sv[0], 'H');
+    EXPECT_EQ(sv[4], 'o');
+}
+
+TEST(FStringViewTest, IndexOperatorOutOfBounds)
+{
+    FStringView sv("Hello");
+    EXPECT_THROW(sv[5], FException);
+}
+
+TEST(FStringViewTest, View)
+{
+    FStringView sv("Hello");
+    std::string_view stdSv = sv.View();
+    EXPECT_EQ(stdSv, "Hello");
+    EXPECT_EQ(stdSv.size(), 5);
+}
+
+TEST(FStringViewTest, ToString)
+{
+    FStringView sv("Hello");
+    FString str = sv.ToString();
+    EXPECT_EQ(str, "Hello");
+    EXPECT_EQ(str.ByteLength(), 5);
+}
+
+TEST(FStringViewTest, ToStdString)
+{
+    FStringView sv("Hello");
+    std::string s = sv.ToStdString();
+    EXPECT_EQ(s, "Hello");
+}
+
+TEST(FStringViewTest, UTF8ASCIICodepoints)
+{
+    FStringView sv("Hello");
+    int count = 0;
+    for (char32_t cp : sv.Codepoints())
+    {
+        (void)cp;
+        count++;
+    }
+    EXPECT_EQ(count, 5);
+}
+
+// "café" — 4 codepoints, 5 bytes
+TEST(FStringViewTest, UTF8MultiByteCodepoints)
+{
+    FStringView sv("café");
+    EXPECT_EQ(sv.ByteLength(), 5);
+    EXPECT_EQ(std::ranges::distance(sv.Codepoints()), 4);
+}
+
+// "こんにちは" — 5 codepoints, 15 bytes
+TEST(FStringViewTest, UTF8JapaneseCodepoints)
+{
+    FStringView sv("こんにちは");
+    EXPECT_EQ(sv.ByteLength(), 15);
+    EXPECT_EQ(std::ranges::distance(sv.Codepoints()), 5);
+}
+
+TEST(FStringViewTest, SubstrNormal)
+{
+    FStringView sv("Hello World");
+    FStringView sub = sv.Substr(6, 5);
+    EXPECT_EQ(sub.ByteLength(), 5);
+    EXPECT_EQ(sub[0], 'W');
+    EXPECT_EQ(sub[4], 'd');
+}
+
+TEST(FStringViewTest, SubstrNposLength)
+{
+    FStringView sv("Hello World");
+    FStringView sub = sv.Substr(6);
+    EXPECT_EQ(sub.ByteLength(), 5);
+    EXPECT_EQ(sub[0], 'W');
+}
+
+TEST(FStringViewTest, SubstrOffsetAtEnd)
+{
+    FStringView sv("Hello");
+    FStringView sub = sv.Substr(5);
+    EXPECT_TRUE(sub.Empty());
+    EXPECT_EQ(sub.ByteLength(), 0);
+}
+
+TEST(FStringViewTest, SubstrOffsetBeyondEnd)
+{
+    FStringView sv("Hello");
+    FStringView sub = sv.Substr(100);
+    EXPECT_TRUE(sub.Empty());
+}
+
+TEST(FStringViewTest, SubstrClampedLength)
+{
+    FStringView sv("Hello");
+    FStringView sub = sv.Substr(3, 100);
+    EXPECT_EQ(sub.ByteLength(), 2);
+    EXPECT_EQ(sub[0], 'l');
+    EXPECT_EQ(sub[1], 'o');
+}
+
+TEST(FStringViewTest, TrimLeftRemovesLeadingWhitespace)
+{
+    FStringView sv("   Hello");
+    FStringView trimmed = sv.TrimLeft();
+    EXPECT_EQ(trimmed.ByteLength(), 5);
+    EXPECT_EQ(trimmed[0], 'H');
+}
+
+TEST(FStringViewTest, TrimRightRemovesTrailingWhitespace)
+{
+    FStringView sv("Hello   ");
+    FStringView trimmed = sv.TrimRight();
+    EXPECT_EQ(trimmed.ByteLength(), 5);
+    EXPECT_EQ(trimmed[4], 'o');
+}
+
+TEST(FStringViewTest, TrimBothSides)
+{
+    FStringView sv("  Hello  ");
+    FStringView trimmed = sv.Trim();
+    EXPECT_EQ(trimmed.ByteLength(), 5);
+    EXPECT_EQ(trimmed[0], 'H');
+    EXPECT_EQ(trimmed[4], 'o');
+}
+
+TEST(FStringViewTest, TrimNoWhitespace)
+{
+    FStringView sv("Hello");
+    FStringView trimmed = sv.Trim();
+    EXPECT_EQ(trimmed.ByteLength(), 5);
+}
+
+TEST(FStringViewTest, TrimAllWhitespace)
+{
+    FStringView sv("   \t\n  ");
+    FStringView trimmed = sv.Trim();
+    EXPECT_TRUE(trimmed.Empty());
+}
+
+TEST(FStringViewTest, StartsWithTrue)
+{
+    FStringView sv("Hello World");
+    EXPECT_TRUE(sv.StartsWith("Hello"));
+}
+
+TEST(FStringViewTest, StartsWithFalse)
+{
+    FStringView sv("Hello World");
+    EXPECT_FALSE(sv.StartsWith("World"));
+}
+
+TEST(FStringViewTest, StartsWithEmpty)
+{
+    FStringView sv("Hello");
+    EXPECT_TRUE(sv.StartsWith(""));
+}
+
+TEST(FStringViewTest, StartsWithLongerThanSelf)
+{
+    FStringView sv("Hi");
+    EXPECT_FALSE(sv.StartsWith("Hello"));
+}
+
+TEST(FStringViewTest, EndsWithTrue)
+{
+    FStringView sv("Hello World");
+    EXPECT_TRUE(sv.EndsWith("World"));
+}
+
+TEST(FStringViewTest, EndsWithFalse)
+{
+    FStringView sv("Hello World");
+    EXPECT_FALSE(sv.EndsWith("Hello"));
+}
+
+TEST(FStringViewTest, EndsWithEmpty)
+{
+    FStringView sv("Hello");
+    EXPECT_TRUE(sv.EndsWith(""));
+}
+
+TEST(FStringViewTest, EndsWithLongerThanSelf)
+{
+    FStringView sv("Hi");
+    EXPECT_FALSE(sv.EndsWith("Hello World"));
+}
+
+TEST(FStringViewTest, EqualityWithFStringView)
+{
+    FStringView a("Hello");
+    FStringView b("Hello");
+    FStringView c("World");
+    EXPECT_TRUE(a == b);
+    EXPECT_FALSE(a == c);
+}
+
+TEST(FStringViewTest, EqualityWithFString)
+{
+    FStringView sv("Hello");
+    FString str("Hello");
+    FString other("World");
+    EXPECT_TRUE(sv == str);
+    EXPECT_FALSE(sv == other);
+}
+
+TEST(FStringViewTest, EqualityWithCStr)
+{
+    FStringView sv("Hello");
+    EXPECT_TRUE(sv == "Hello");
+    EXPECT_FALSE(sv == "World");
+}
+
+TEST(FStringViewTest, EqualityWithNullCStr)
+{
+    FStringView sv;
+    EXPECT_TRUE(sv == nullptr);
+
+    FStringView nonEmpty("Hi");
+    EXPECT_FALSE(nonEmpty == nullptr);
+}
+
+TEST(FStringViewTest, EqualityWithStdStringView)
+{
+    FStringView sv("Hello");
+    EXPECT_TRUE(sv == std::string_view("Hello"));
+    EXPECT_FALSE(sv == std::string_view("World"));
+}
+
+TEST(FStringViewTest, InequalityOperators)
+{
+    FStringView a("Hello");
+    FStringView b("World");
+    EXPECT_TRUE(a != b);
+    EXPECT_FALSE(a != FStringView("Hello"));
+}
+
+TEST(FStringViewTest, GetHashConsistency)
+{
+    FStringView a("Hello");
+    FStringView b("Hello");
+    FStringView c("World");
+    EXPECT_EQ(a.GetHash(), b.GetHash());
+    EXPECT_NE(a.GetHash(), c.GetHash());
+}
+
+TEST(FStringViewTest, GetHashEmptyView)
+{
+    FStringView a;
+    FStringView b;
+    EXPECT_EQ(a.GetHash(), b.GetHash());
+}
+
+#pragma endregion FStringView

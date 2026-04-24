@@ -26,6 +26,7 @@
 #include "Fusion/Math/AffineTransform.h"
 
 #include "Fusion/Containers/String.h"
+#include "Fusion/Containers/StringView.h"
 #include "Fusion/Containers/Uuid.h"
 #include "Fusion/Containers/Name.h"
 #include "Fusion/Containers/Array.h"
