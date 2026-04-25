@@ -48,6 +48,8 @@ namespace Fusion
             return hash;
         }
 
+        Ref<FItemModel> GetModel() const { return m_Model.Lock(); }
+
     private:
         int m_Row = -1;
         int m_Col = 0;
@@ -78,6 +80,12 @@ namespace Fusion
 
         virtual u32 GetRowCount(const FModelIndex& parent = {}) = 0;
         virtual u32 GetColumnCount(const FModelIndex& parent = {}) = 0;
+
+        virtual FVariant GetItemData(const FModelIndex& index) = 0;
+
+        virtual bool HasHeader() const { return false; }
+
+        virtual FVariant GetHeaderItemData([[maybe_unused]] u32 column) { return {}; }
 
     private:
 

@@ -9,7 +9,7 @@ namespace Fusion
     {
     public:
 
-        FVariant() = default;
+        FVariant() { m_TypeID = 0; }
         ~FVariant() { Free(); }
 
         FVariant(const FVariant& other)          { CopyFrom(other); }
@@ -33,6 +33,7 @@ namespace Fusion
         explicit FVariant(f32 value)            { SetInternalValue(value); }
         explicit FVariant(f64 value)            { SetInternalValue(value); }
         FVariant(const FString& value)          { SetInternalValue(value); }
+        FVariant(const char* value)             { SetInternalValue(FString(value)); }
         FVariant(FString&& value)               { SetInternalValue(std::move(value)); }
         FVariant(const FName& value)            { SetInternalValue(value); }
         FVariant(FName&& value)                 { SetInternalValue(std::move(value)); }
@@ -58,6 +59,12 @@ namespace Fusion
         {
             FUSION_ASSERT(m_TypeID == FUSION_TYPEID(T), "FVariant type mismatch in Get<T>()");
             return *GetPtr<T>();
+        }
+
+        template<typename T>
+        bool Has() const
+        {
+            return m_TypeID == FUSION_TYPEID(T);
         }
 
         bool HasValue() const { return m_TypeID != 0; }

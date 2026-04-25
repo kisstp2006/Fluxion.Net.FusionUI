@@ -13,9 +13,29 @@ namespace Fusion
 
         FTreeViewHeader();
 
+        void Construct() override;
+
     public:
 
+        void UpdateHeaderData(Ref<FItemModel> model);
+
     protected:
+
+        Ref<FSplitBox> m_Splitter;
+
+    public:
+        // - Fusion Properties -
+
+        FUSION_PROPERTY_GET(bool, CanResizeColumns)
+        {
+            return m_Splitter->CanResizeSplitter();
+        }
+
+        FUSION_PROPERTY_SET(bool, CanResizeColumns)
+        {
+            static_cast<Self&>(self).m_Splitter->CanResizeSplitter(value);
+            return self;
+        }
     };
     
 } // namespace Fusion

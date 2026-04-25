@@ -75,6 +75,18 @@ public:
         return 2; // Name, Type
     }
 
+    bool HasHeader() const override
+    {
+        return true;
+    }
+
+    FVariant GetHeaderItemData(u32 column) override
+    {
+        if (column == 0)
+            return "Name";
+        return "Type";
+    }
+
     u32 GetRowCount(const FModelIndex& parent) override
     {
         Node* node = parent.IsValid() ? static_cast<Node*>(parent.InternalPtr()) : &rootNode;
@@ -110,6 +122,21 @@ public:
         }
 
         return {};
+    }
+
+    FVariant GetItemData(const FModelIndex& index) override
+    {
+        if (!index.IsValid())
+            return {};
+
+        Node* node   = static_cast<Node*>(index.InternalPtr());
+        if (!node)
+            return {};
+
+        if (index.Column() == 0)
+            return node->Name.ToString();
+
+        return node->bIsFile ? FString("File") : FString("Folder");
     }
 };
 
@@ -178,7 +205,9 @@ public:
 				),
 
 				FNew(FTreeView)
+				.CanResizeColumns(true)
 				.Model(m_TreeModel)
+				.HAlign(EHAlign::Fill)
 				.FillRatio(1.0f)
 			)
 		);

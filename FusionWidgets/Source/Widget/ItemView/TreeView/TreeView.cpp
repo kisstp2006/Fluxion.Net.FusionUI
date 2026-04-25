@@ -38,6 +38,7 @@ namespace Fusion
                     .TreeView(this)
                     .SubStyle("Content")
                 )
+                .FillRatio(1.0f)
             )
         );
     }
@@ -46,7 +47,18 @@ namespace Fusion
     {
         Super::OnModelChanged();
 
-        
+        if (m_Model)
+        {
+            if (m_Model->HasHeader())
+            {
+                m_Header->Excluded(false);
+                m_Header->UpdateHeaderData(m_Model);
+            }
+            else
+            {
+                m_Header->Excluded(true);
+            }
+        }
     }
 
 } // namespace Fusion

@@ -32,7 +32,16 @@ namespace Fusion
         // - Fusion Properties -
 
         FUSION_STATE_PROPERTY(FDelegate<FTreeViewRow&()>, RowDelegate);
-        
+
+        FUSION_PROPERTY_GET(bool, CanResizeColumns)
+        {
+            return m_Header->CanResizeColumns();
+        }
+        FUSION_PROPERTY_SET(bool, CanResizeColumns)
+        {
+            static_cast<Self&>(self).m_Header->CanResizeColumns(value);
+            return self;
+        }
     };
     
 } // namespace Fusion

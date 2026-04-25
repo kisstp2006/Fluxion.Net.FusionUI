@@ -10,11 +10,12 @@ namespace Fusion
 		m_Spacing = 5.0f;
 		m_SplitterSizeRatio = 1.5f;
 		m_SplitterHoverColor = FColors::White.WithAlpha(0.5f);
+	    m_CanResizeSplitter = true;
 	}
 
 	FCursor FSplitBox::GetActiveCursorAt(FVec2 localPos)
 	{
-		if (GetChildCount() <= 1)
+		if (GetChildCount() <= 1 || !CanResizeSplitter())
 			return Super::GetActiveCursorAt(localPos);
 
 		ESystemCursor resizeCursor = Direction() == EStackDirection::Horizontal
@@ -49,8 +50,8 @@ namespace Fusion
 
 			if (Direction() == EStackDirection::Horizontal)
 			{
-				f32 gapLeft = cur->GetLayoutPosition().x + cur->GetLayoutSize().x;
-				f32 gapRight = next->GetLayoutPosition().x;
+				f32 gapLeft = cur->GetLayoutPosition().x + cur->GetLayoutSize().x + cur->Margin().right;
+				f32 gapRight = next->GetLayoutPosition().x - next->Margin().left;
 				f32 dist = gapRight - gapLeft;
 				f32 diff = (dist * SplitterSizeRatio()) - dist;
 
@@ -58,8 +59,8 @@ namespace Fusion
 			}
 			else
 			{
-				f32 gapTop = cur->GetLayoutPosition().y + cur->GetLayoutSize().y;
-				f32 gapBottom = next->GetLayoutPosition().y;
+				f32 gapTop = cur->GetLayoutPosition().y + cur->GetLayoutSize().y + cur->Margin().bottom;
+				f32 gapBottom = next->GetLayoutPosition().y - next->Margin().top;
 				f32 dist = gapBottom - gapTop;
 				f32 diff = (dist * SplitterSizeRatio()) - dist;
 
@@ -70,6 +71,9 @@ namespace Fusion
 
 	bool FSplitBox::ShouldHitTestChildren(FVec2 localMousePos)
 	{
+	    if (!CanResizeSplitter())
+	        return Super::ShouldHitTestChildren(localMousePos);
+
 		for (const FRect& handle : m_HandleRects)
 		{
 			if (handle.Contains(localMousePos))
@@ -81,6 +85,9 @@ namespace Fusion
 
 	FEventReply FSplitBox::OnMouseButtonDown(FMouseEvent& event)
 	{
+	    if (!CanResizeSplitter())
+	        return FEventReply::Unhandled();
+
 		if (!event.IsLeftButton())
 			return Super::OnMouseButtonDown(event);
 
@@ -124,6 +131,9 @@ namespace Fusion
 
 	FEventReply FSplitBox::OnMouseButtonUp(FMouseEvent& event)
 	{
+	    if (!CanResizeSplitter())
+	        return FEventReply::Unhandled();
+
 		if (event.IsLeftButton() && m_bIsBeingResized)
 		{
 			m_bIsBeingResized = false;
@@ -135,6 +145,9 @@ namespace Fusion
 	void FSplitBox::OnMouseEnter(FMouseEvent& event)
 	{
 		Super::OnMouseEnter(event);
+
+	    if (!CanResizeSplitter())
+	        return;
 
 		FVec2 localPos = GetGlobalTransform().Inverse().TransformPoint(event.MousePosition);
 
@@ -164,6 +177,9 @@ namespace Fusion
 
 	FEventReply FSplitBox::OnMouseMove(FMouseEvent& event)
 	{
+	    if (!CanResizeSplitter())
+	        return FEventReply::Unhandled();
+
 		FVec2 localPos = GetGlobalTransform().Inverse().TransformPoint(event.MousePosition);
 
 		bool hovered = false;
@@ -226,6 +242,9 @@ namespace Fusion
 	{
 		Super::OnMouseLeave(event);
 
+	    if (!CanResizeSplitter())
+	        return;
+
 		if (m_bIsDragHovered && !m_bIsBeingResized)
 		{
 			m_bIsDragHovered = false;
@@ -238,6 +257,9 @@ namespace Fusion
 	void FSplitBox::Paint(FPainter& painter)
 	{
 		Super::Paint(painter);
+
+	    if (!CanResizeSplitter())
+	        return;
 
 		if (m_bIsDragHovered && m_DraggedRect >= 0 && m_DraggedRect < (int)m_HandleRects.Size())
 		{

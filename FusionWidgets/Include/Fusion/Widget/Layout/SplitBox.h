@@ -51,10 +51,16 @@ namespace Fusion
         f32   m_DragStartTotalSize  = 0.0f;
         f32   m_DragStartTotalRatio = 0.0f;
 
+    public:
+
+        // - Fusion Properties -
+
         FUSION_STYLE_PROPERTIES(
             (FColor, SplitterHoverColor, Paint),
             (f32,    SplitterSizeRatio,  Paint)
         );
+
+        FUSION_PROPERTY(bool, CanResizeSplitter);
     };
 
 } // namespace Fusion

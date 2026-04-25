@@ -19,12 +19,20 @@ namespace Fusion
 
     FVec2 FTreeViewContent::MeasureContent(FVec2 availableSize)
     {
+        Ref<FTreeView> treeView = GetTreeView();
+        if (!treeView)
+            return FVec2();
 
+        return m_DesiredSize = ApplyLayoutConstraints(availableSize);
     }
 
     void FTreeViewContent::ArrangeContent(FVec2 finalSize)
     {
         Super::ArrangeContent(finalSize);
+
+        Ref<FTreeView> treeView = GetTreeView();
+        if (!treeView)
+            return;
 
 
     }

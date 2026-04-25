@@ -275,7 +275,10 @@ namespace Fusion
 
         FUSION_PROPERTY_SET(bool, Excluded)
         {
+            if (self.Excluded() == value)
+                return self;
             static_cast<FWidget&>(self).SetWidgetFlag(EWidgetFlags::Excluded, value);
+            self.MarkLayoutDirty();
             return self;
         }
 
