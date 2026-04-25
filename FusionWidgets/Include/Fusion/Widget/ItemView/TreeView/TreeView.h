@@ -31,6 +31,7 @@ namespace Fusion
     public:
         // - Fusion Properties -
 
+        FUSION_STATE_PROPERTY(FDelegate<FTreeViewRow&()>, RowDelegate);
         
     };
     

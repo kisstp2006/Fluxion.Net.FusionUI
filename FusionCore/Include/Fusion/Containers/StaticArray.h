@@ -18,7 +18,7 @@ namespace Fusion
     //!        All N elements are always alive (constructed). Analogous to std::array
     //!        but follows the Fusion naming and API conventions.
     template<typename T, size_t N>
-    class FStaticArray
+    class TStaticArray
     {
         static_assert(N > 0, "FStaticArray: N must be greater than zero");
 
@@ -30,9 +30,9 @@ namespace Fusion
         // Construction / Destruction
         // ----------------------------------------------------------------
 
-        FStaticArray() = default;
+        TStaticArray() = default;
 
-        FStaticArray(std::initializer_list<T> list)
+        TStaticArray(std::initializer_list<T> list)
         {
             FUSION_ASSERT(list.size() <= N, "FStaticArray: initializer_list is larger than the array extent");
             size_t i = 0;
@@ -40,17 +40,17 @@ namespace Fusion
                 m_Data[i++] = value;
         }
 
-        FStaticArray(const FStaticArray&) = default;
-        FStaticArray(FStaticArray&&) noexcept = default;
+        TStaticArray(const TStaticArray&) = default;
+        TStaticArray(TStaticArray&&) noexcept = default;
 
-        ~FStaticArray() = default;
+        ~TStaticArray() = default;
 
         // ----------------------------------------------------------------
         // Assignment
         // ----------------------------------------------------------------
 
-        FStaticArray& operator=(const FStaticArray&) = default;
-        FStaticArray& operator=(FStaticArray&&) noexcept = default;
+        TStaticArray& operator=(const TStaticArray&) = default;
+        TStaticArray& operator=(TStaticArray&&) noexcept = default;
 
         // ----------------------------------------------------------------
         // Element access

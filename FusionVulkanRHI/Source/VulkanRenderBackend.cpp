@@ -822,8 +822,8 @@ namespace Fusion::Vulkan
 
 			instance->GlobalSet = m_PoolsPerFrame[m_FrameSlot]->Allocate(m_MainPipeline->m_SetLayouts[kGlobalSetIndex]);
 
-			FStaticArray<VkDescriptorImageInfo, 2> imageInfos{};
-			FStaticArray<VkWriteDescriptorSet, 2> writeSets{};
+			TStaticArray<VkDescriptorImageInfo, 2> imageInfos{};
+			TStaticArray<VkWriteDescriptorSet, 2> writeSets{};
 
 			VkDescriptorImageInfo& imageAtlasInfo = imageInfos[0];
 			imageAtlasInfo.imageView = imageAtlas->m_ImageView;

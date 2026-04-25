@@ -7,9 +7,9 @@ namespace Fusion
 {
     class FTreeView;
 
-    class FUSIONWIDGETS_API FTreeViewContent : public FWidget
+    class FUSIONWIDGETS_API FTreeViewContent : public FContainerWidget
     {
-        FUSION_WIDGET(FTreeViewContent, FWidget)
+        FUSION_WIDGET(FTreeViewContent, FContainerWidget)
     protected:
 
         FTreeViewContent();
@@ -18,7 +18,13 @@ namespace Fusion
 
     public:
 
-        Ref<FTreeView> GetFTreeView() const { return m_TreeView.Lock(); }
+        Ref<FTreeView> GetTreeView() const { return m_TreeView.Lock(); }
+
+        // - Layout -
+
+        FVec2 MeasureContent(FVec2 availableSize) override;
+
+        void ArrangeContent(FVec2 finalSize) override;
 
     protected:
 

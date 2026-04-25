@@ -23,7 +23,7 @@ namespace Fusion
 
         u32 GetSlotCount() override { return 0; }
 
-        bool IsValidSlotWidget(u32 slot, Ref<FWidget> widget) override { return false; }
+        bool IsValidSlotWidget(u32 slot, FWidget* widget) override { return false; }
 
     public:
 

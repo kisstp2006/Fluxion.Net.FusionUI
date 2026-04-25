@@ -100,6 +100,7 @@
 #include "Model/ItemModel.h"
 
 // Item View
+#include "Widget/ItemView/ItemViewDelegate.h"
 #include "Widget/ItemView/ItemView.h"
 #include "Widget/ItemView/TreeView/TreeViewHeader.h"
 #include "Widget/ItemView/TreeView/TreeViewContent.h"

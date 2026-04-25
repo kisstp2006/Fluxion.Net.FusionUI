@@ -37,5 +37,8 @@ namespace Fusion
             static_cast<FItemView&>(self).OnModelChanged();
             return self;
         }
+
+        FUSION_STATE_PROPERTY(Ref<FItemViewDelegate>, ItemDelegate);
+
     };
 }

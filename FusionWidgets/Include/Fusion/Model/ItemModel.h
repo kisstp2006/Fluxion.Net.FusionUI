@@ -62,6 +62,7 @@ namespace Fusion
 
     class FUSIONWIDGETS_API FItemModel : public FObject
     {
+        FUSION_CLASS(FItemModel, FObject)
     public:
 
         FModelIndex CreateIndex(u32 row, u32 column, u64 internalId = 0, void* internalPtr = nullptr)

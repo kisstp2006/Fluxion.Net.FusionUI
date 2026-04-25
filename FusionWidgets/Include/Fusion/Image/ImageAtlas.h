@@ -43,7 +43,7 @@ namespace Fusion
 
         struct FUSIONCORE_API FBinaryNode : FIntrusiveBase
         {
-            FStaticArray<IPtr<FBinaryNode>, 2> Child;
+            TStaticArray<IPtr<FBinaryNode>, 2> Child;
             FBinaryNode* Parent = nullptr;
             int TotalChildren = 0;
             u32 UsedArea = 0;

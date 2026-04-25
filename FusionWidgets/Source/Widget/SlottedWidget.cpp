@@ -35,7 +35,7 @@ namespace Fusion
 
 	bool FSlottedWidget::SetSlotWidget(u32 slot, Ref<FWidget> widget)
 	{
-		if (slot >= GetSlotCount() || !widget || !IsValidSlotWidget(slot, widget))
+		if (slot >= GetSlotCount() || !widget || !IsValidSlotWidget(slot, widget.Get()))
 			return false;
 
 		if (m_Slots[slot].IsValid())

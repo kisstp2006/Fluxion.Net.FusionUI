@@ -51,10 +51,14 @@ namespace Fusion
 
 		m_Children.RemoveAt(curIndex);
 		m_Children.Insert(childWidget, index);
+
+	    MarkLayoutDirty();
+	    MarkPaintDirty();
 	}
 
 	void FContainerWidget::SetWidgetFlagInternal(EWidgetFlags flag, bool set)
 	{
 		SetWidgetFlag(flag, set);
 	}
+
 } // namespace Fusion

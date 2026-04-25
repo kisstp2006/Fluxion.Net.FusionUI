@@ -23,7 +23,7 @@
 		m_##PropertyName = value;\
 		if ((GetFlags() & EObjectFlags::PendingConstruction) == 0) {\
 			 OnPropertyModified(nameValue);\
-			 DirtyFunc;\
+			 DirtyFunc\
 		}\
 	}
 
@@ -44,7 +44,7 @@
 			self.m_##PropertyName = value;\
 			if ((self.GetFlags() & EObjectFlags::PendingConstruction) == 0) {\
 				 static_cast<Fusion::FWidget&>(self).OnPropertyModified(nameValue);\
-				 DirtyFunc;\
+				 DirtyFunc\
 			}\
 			return self;\
 		}\
@@ -60,7 +60,7 @@
 			m_##PropertyName = value;\
 			if ((GetFlags() & EObjectFlags::PendingConstruction) == 0) {\
 				 OnPropertyModified(nameValue);\
-				 DirtyFunc;\
+				 DirtyFunc\
 			}\
 		}
 
@@ -105,7 +105,7 @@
 			self.m_##PropertyName = value;\
 			if ((self.GetFlags() & EObjectFlags::PendingConstruction) == 0) {\
 				 static_cast<Fusion::FWidget&>(self).OnPropertyModified(nameValue);\
-				 DirtyFunc;\
+				 DirtyFunc\
 			}\
 			return self;\
 		}\
@@ -124,14 +124,15 @@
 			else self.m_##PropertyName = value;\
 			if ((GetFlags() & EObjectFlags::PendingConstruction) == 0) {\
 				 OnPropertyModified(nameValue);\
-				 DirtyFunc;\
+				 DirtyFunc\
 			}\
 		}
 
 
-#define FUSION_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty())
-#define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkLayoutDirty())
+#define FUSION_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty();)
+#define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkLayoutDirty();)
 
+#define FUSION_STATE_PROPERTY(PropertyType, PropertyName) __FUSION_PROPERTY(PropertyType, PropertyName, );
 
 #define FUSION_PROPERTY_GET(PropertyType, PropertyName) \
 	PropertyType PropertyName()
@@ -216,10 +217,10 @@
 // where DirtyKind is Paint or Layout.
 
 // Dirty-kind dispatch — maps the trailing tag to the right property macro.
-#define __FUSION_SP_PROP_Paint(Type, Name, ...)   __FUSION_STYLE_PROPERTY(Type, Name, self.MarkPaintDirty())
-#define __FUSION_SP_PROP_Layout(Type, Name, ...)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty())
-#define __FUSION_SP_PROP_LayoutAndPaint(Type, Name, ...)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty(); self.MarkPaintDirty())
-#define __FUSION_SP_PROP_PaintAndLayout(Type, Name, ...)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty(); self.MarkPaintDirty())
+#define __FUSION_SP_PROP_Paint(Type, Name, ...)   __FUSION_STYLE_PROPERTY(Type, Name, self.MarkPaintDirty();)
+#define __FUSION_SP_PROP_Layout(Type, Name, ...)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty();)
+#define __FUSION_SP_PROP_LayoutAndPaint(Type, Name, ...)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty(); self.MarkPaintDirty();)
+#define __FUSION_SP_PROP_PaintAndLayout(Type, Name, ...)  __FUSION_STYLE_PROPERTY(Type, Name, self.MarkLayoutDirty(); self.MarkPaintDirty();)
 //#define __FUSION_SP_PROP_Forward(Type, Name, m_ForwardVariable, ForwardVariableName)   FUSION_PROPERTY_FORWARD(Type, Name, m_ForwardVariable, ForwardVariableName)
 
 // DECL: unpack via juxtaposition, then dispatch on the trailing DirtyKind tag.
@@ -288,8 +289,8 @@
 	FUSION_MACRO_EXPAND(FUSION_FOR_EACH_I(__FUSION_SLOT_DECL, __VA_ARGS__))\
 	public:\
 		u32 GetSlotCount() override { return FUSION_ARG_COUNT(__VA_ARGS__) + Super::GetSlotCount(); }\
-		bool IsValidSlotWidget(u32 slot, Ref<FWidget> widget) override {\
-			if (slot >= GetSlotCount() || !widget.IsValid()) return false;\
+		bool IsValidSlotWidget(u32 slot, FWidget* widget) override {\
+			if (slot >= GetSlotCount() || widget == nullptr) return false;\
 			if (slot < Super::GetSlotCount()) return Super::IsValidSlotWidget(slot, widget);\
 			u32 startSlot = Super::GetSlotCount();\
 			FUSION_MACRO_EXPAND(FUSION_FOR_EACH_I(__FUSION_SLOT_CHECK, __VA_ARGS__))\

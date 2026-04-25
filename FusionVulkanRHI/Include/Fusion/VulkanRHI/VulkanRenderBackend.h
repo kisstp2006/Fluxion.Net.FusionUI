@@ -332,7 +332,7 @@ namespace Fusion::Vulkan
         u32 m_FrameSlot = 0;
         
         TArray<FDescriptorPool*, kImageCount> m_PoolsPerFrame;
-        FStaticArray<IPtr<FMappedBuffer>, kImageCount> m_UIDrawDataBuffers;
+        TStaticArray<IPtr<FMappedBuffer>, kImageCount> m_UIDrawDataBuffers;
 
         TArray<VkCommandBuffer, kImageCount> m_CommandBuffers;
         TArray<VkSemaphore, kImageCount> m_RenderFinishedSemaphores;
@@ -343,7 +343,7 @@ namespace Fusion::Vulkan
         // - Transient Resources -
 
         TArray<FDrawDataBufferViews> m_OffsetDataPerSnapshot;
-        FStaticArray<IPtr<FMappedBuffer>, kImageCount> m_StagingBuffers;
+        TStaticArray<IPtr<FMappedBuffer>, kImageCount> m_StagingBuffers;
 
         FBufferImageCopyArray m_BufferImageCopies;
 

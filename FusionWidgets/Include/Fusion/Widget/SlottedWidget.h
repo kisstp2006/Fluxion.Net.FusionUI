@@ -24,7 +24,7 @@ namespace Fusion
 
         virtual u32 GetSlotCount() { return 0; }
 
-        virtual bool IsValidSlotWidget(u32 slot, Ref<FWidget> widget) { return false; }
+        virtual bool IsValidSlotWidget(u32 slot, FWidget* widget) { return false; }
 
         bool SetSlotWidget(u32 slot, Ref<FWidget> widget);
 
