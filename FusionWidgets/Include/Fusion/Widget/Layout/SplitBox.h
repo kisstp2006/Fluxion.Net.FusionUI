@@ -56,11 +56,13 @@ namespace Fusion
         // - Fusion Properties -
 
         FUSION_STYLE_PROPERTIES(
+            (FColor, SplitterColor,      Paint),
             (FColor, SplitterHoverColor, Paint),
             (f32,    SplitterSizeRatio,  Paint)
         );
 
         FUSION_PROPERTY(bool, CanResizeSplitter);
+        FUSION_PROPERTY(bool, RespectContentSize);
     };
 
 } // namespace Fusion

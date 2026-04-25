@@ -17,6 +17,7 @@ namespace Fusion
         Child(
             FAssignNew(FSplitBox, m_Splitter)
             .Direction(EStackDirection::Horizontal)
+            .RespectContentSize(true)
             .HAlign(EHAlign::Fill)
             .ContentHAlign(EHAlign::Fill)
             .ContentVAlign(EVAlign::Fill)

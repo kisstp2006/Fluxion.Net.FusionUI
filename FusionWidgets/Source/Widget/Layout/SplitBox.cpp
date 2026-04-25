@@ -10,6 +10,7 @@ namespace Fusion
 		m_Spacing = 5.0f;
 		m_SplitterSizeRatio = 1.5f;
 		m_SplitterHoverColor = FColors::White.WithAlpha(0.5f);
+	    m_SplitterColor = FColor(0, 0, 0, 0);
 	    m_CanResizeSplitter = true;
 	}
 
@@ -210,6 +211,16 @@ namespace Fusion
 				f32 minLeft  = Direction() == EStackDirection::Horizontal ? left->MinWidth()  : left->MinHeight();
 				f32 minRight = Direction() == EStackDirection::Horizontal ? right->MinWidth() : right->MinHeight();
 
+			    if (RespectContentSize())
+			    {
+			        minLeft = Direction() == EStackDirection::Horizontal
+                       ? FMath::Max(left->MinWidth(), left->GetDesiredSize().width)
+                       : FMath::Max(left->MinHeight(), left->GetDesiredSize().height);
+			        minRight = Direction() == EStackDirection::Horizontal
+			            ? FMath::Max(right->MinWidth(), right->GetDesiredSize().height)
+			            : FMath::Max(right->MinHeight(), right->GetDesiredSize().height);
+			    }
+
 				// Clamp so neither child goes below its minimum size.
 				// If the two minimums exceed the total (infeasible), left's minimum wins.
 				f32 clampMin = minLeft;
@@ -258,20 +269,24 @@ namespace Fusion
 	{
 		Super::Paint(painter);
 
-	    if (!CanResizeSplitter())
-	        return;
-
 		if (m_bIsDragHovered && m_DraggedRect >= 0 && m_DraggedRect < (int)m_HandleRects.Size())
 		{
-			painter.SetAntiAliasing(true);
-			painter.SetBrush(SplitterHoverColor());
-			painter.SetPen(FPen());
+		    FVec2 expansion = Direction() == EStackDirection::Horizontal
+                ? FVec2(-m_HandleRects[m_DraggedRect].GetWidth() * SplitterSizeRatio() / 2, 0)
+                : FVec2(0, -m_HandleRects[m_DraggedRect].GetHeight() * SplitterSizeRatio() / 2);
 
-			FVec2 expansion = Direction() == EStackDirection::Horizontal 
-				? FVec2(-m_HandleRects[m_DraggedRect].GetWidth() * SplitterSizeRatio() / 2, 0)
-				: FVec2(0, -m_HandleRects[m_DraggedRect].GetHeight() * SplitterSizeRatio() / 2);
+		    painter.SetBrush(SplitterColor());
+		    painter.SetPen(FPen());
 
-			painter.FillRect(m_HandleRects[m_DraggedRect].Expand(expansion));
+		    painter.FillRect(m_HandleRects[m_DraggedRect].Expand(expansion));
+
+			if (CanResizeSplitter())
+			{
+			    painter.SetBrush(SplitterHoverColor());
+			    painter.SetPen(FPen());
+
+			    painter.FillRect(m_HandleRects[m_DraggedRect].Expand(expansion));
+			}
 		}
 	}
 
