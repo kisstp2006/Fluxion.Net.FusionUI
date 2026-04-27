@@ -33,6 +33,8 @@ namespace Fusion
 
         void ArrangeContent(FVec2 finalSize) override;
 
+        FVec2 GetViewportSize() { return m_ViewportSize; }
+
         // - Paint -
 
         void PaintOverContent(FPainter& painter) override;

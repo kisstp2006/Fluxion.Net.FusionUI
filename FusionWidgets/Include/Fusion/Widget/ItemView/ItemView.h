@@ -18,6 +18,8 @@ namespace Fusion
 
         virtual void OnModelChanged() {}
 
+    private:
+
         Ref<FItemModel> m_Model;
 
     public:

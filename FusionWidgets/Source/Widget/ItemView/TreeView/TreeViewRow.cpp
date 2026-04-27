@@ -9,4 +9,19 @@ namespace Fusion
     {
 
     }
+
+    void FTreeViewRow::Construct()
+    {
+        Super::Construct();
+
+        Child(
+            FAssignNew(FHorizontalStack, m_HStack)
+            .ContentVAlign(EVAlign::Fill)
+            .HAlign(EHAlign::Fill)
+            .VAlign(EVAlign::Fill)
+        );
+    }
+
+
+
 } // namespace Fusion

@@ -7,6 +7,7 @@ namespace Fusion
 {
     class FTreeViewHeader;
     class FTreeViewContent;
+    typedef FDelegate<f32(FModelIndex)> FRowHeightDelegate;
 
     class FUSIONWIDGETS_API FTreeView : public FItemView
     {
@@ -42,6 +43,9 @@ namespace Fusion
             static_cast<Self&>(self).m_Header->CanResizeColumns(value);
             return self;
         }
+
+        FUSION_LAYOUT_PROPERTY(f32, RowHeight);
+        FUSION_LAYOUT_PROPERTY(f32, IndentWidth);
     };
     
 } // namespace Fusion

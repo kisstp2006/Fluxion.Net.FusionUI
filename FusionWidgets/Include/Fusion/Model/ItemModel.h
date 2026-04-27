@@ -6,6 +6,9 @@
 namespace Fusion
 {
     class FItemModel;
+    struct FModelIndex;
+
+    FUSION_SIGNAL_TYPE(FModelDataChangedSignal, FModelIndex topLeft, FModelIndex bottomRight);
 
     struct FModelIndex
     {
@@ -87,7 +90,12 @@ namespace Fusion
 
         virtual FVariant GetHeaderItemData([[maybe_unused]] u32 column) { return {}; }
 
-    private:
+        // - Signals -
+
+        FUSION_SIGNAL(FVoidSignal, OnModelReset);
+        FUSION_SIGNAL(FModelDataChangedSignal, OnDataChanged);
+
+    protected:
 
     };
     

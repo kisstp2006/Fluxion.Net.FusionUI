@@ -6,31 +6,25 @@
 namespace Fusion
 {
 
-    class FUSIONWIDGETS_API FTreeViewRow : public FDecoratedWidget
+    class FUSIONWIDGETS_API FTreeViewRow : public FDecoratedBox
     {
-        FUSION_WIDGET(FTreeViewRow, FDecoratedWidget)
+        FUSION_WIDGET(FTreeViewRow, FDecoratedBox)
     protected:
 
         FTreeViewRow();
 
+        void Construct() override;
+
     public:
 
-        u32 GetSlotCount() override { return m_ColumnCount; }
-
-        bool IsValidSlotWidget(u32 slot, FWidget* widget) override { return slot < m_ColumnCount; }
-
-        int GetChildCount() override { return m_ColumnCount; }
-
-        Ref<FWidget> GetChildAt(u32 index) override
-        {
-            return nullptr; // TODO
-        }
+        Ref<FTreeView> GetTreeView() const { return m_TreeView.Lock(); }
 
     protected:
 
-    private:
+        Ref<FHorizontalStack> m_HStack;
+        WeakRef<FTreeView> m_TreeView;
 
-        u32 m_ColumnCount;
+    private:
 
         friend class FTreeView;
         friend class FTreeViewContent;

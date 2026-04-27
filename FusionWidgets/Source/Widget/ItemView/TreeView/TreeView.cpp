@@ -8,7 +8,7 @@ namespace Fusion
 
     FTreeView::FTreeView()
     {
-
+        m_RowHeight = 16.0f;
     }
 
     void FTreeView::Construct()
@@ -28,7 +28,7 @@ namespace Fusion
                 .SubStyle("Header"),
 
                 FAssignNew(FScrollBox, m_ScrollBox)
-                .CanScrollHorizontal(true)
+                .CanScrollHorizontal(false)
                 .CanScrollVertical(true)
                 .HorizontalScrollVisibility(EScrollbarVisibility::Auto)
                 .VerticalScrollVisibility(EScrollbarVisibility::Auto)
@@ -38,6 +38,10 @@ namespace Fusion
                     .TreeView(this)
                     .SubStyle("Content")
                 )
+                .OnScrollOffsetChanged([this](FVec2 offset)
+                {
+                    m_Content->OnScrollOffsetChanged(offset);
+                })
                 .FillRatio(1.0f)
             )
         );
@@ -47,17 +51,21 @@ namespace Fusion
     {
         Super::OnModelChanged();
 
-        if (m_Model)
+        Ref<FItemModel> model = Model();
+
+        if (Model())
         {
-            if (m_Model->HasHeader())
+            if (model->HasHeader())
             {
                 m_Header->Excluded(false);
-                m_Header->UpdateHeaderData(m_Model);
+                m_Header->UpdateHeaderData(model);
             }
             else
             {
                 m_Header->Excluded(true);
             }
+
+            m_Content->OnModelChanged(model);
         }
     }
 
