@@ -466,12 +466,11 @@ int main(int argc, char* argv[])
 		    Padding            = FMargin(0, 4, 0, 4);
 		}
 
-	    FUSION_STYLE(FScrollBox, "TreeView/ScrollBox", Background, Border, Shape, Padding, ContentPadding)
+	    FUSION_STYLE(FScrollBox, "TreeView/ScrollBox", Background, Border, Shape, Padding)
 		{
 		    Extends("ScrollBox/Base");
 
-		    Shape          = FRoundedRectangle(0, 0, 5.0f, 5.0f);
-		    ContentPadding = FMargin(0);  // rows handle their own layout — no inset
+		    Shape = FRoundedRectangle(0, 0, 5.0f, 5.0f);
 		}
 	});
 

@@ -14,7 +14,7 @@ namespace Fusion
             painter.SetPen(FColors::White);
 
             const FString text = content.Get<FString>();
-            painter.DrawText(info.Rect.Translate(FVec2(5.0f, 0)),
+            painter.DrawText(info.Rect.Translate(FVec2(0.0f, 0)),
                 text, ETextWrap::None, EHAlign::Left, EVAlign::Center);
         }
 

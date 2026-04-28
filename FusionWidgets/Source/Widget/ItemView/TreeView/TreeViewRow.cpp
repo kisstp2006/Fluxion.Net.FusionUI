@@ -40,8 +40,23 @@ namespace Fusion
         f32 splitterSpacing = 0;
         if (Ref<FTreeViewHeader> header = treeView->GetHeader())
         {
-            childWidths = header->GetChildrenWidths();
+            childWidths     = header->GetChildrenWidths();
             splitterSpacing = header->GetSplitterSpacing();
+
+            // childWidths are in header space. Scale them to fit the row's
+            // actual width — the scrollbar and any content padding make the
+            // row narrower than the header, so we preserve proportions.
+            f32 totalHeaderWidth = splitterSpacing * (f32)childWidths.Size();
+            for (f32 w : childWidths)
+                totalHeaderWidth += w;
+
+            if (totalHeaderWidth > 0.001f)
+            {
+                const f32 scale = layoutSize.width / totalHeaderWidth;
+                for (f32& w : childWidths)
+                    w *= scale;
+                splitterSpacing *= scale;
+            }
         }
         else
         {
