@@ -104,4 +104,9 @@ namespace Fusion
 		m_Child->SetLayoutPosition(childPos);
 		m_Child->ArrangeContent(childSize);
 	}
+
+    void FDecoratedBox::SetWidgetFlagInternal(EWidgetFlags flag, bool set)
+    {
+	    SetWidgetFlag(flag, set);
+    }
 } // namespace Fusion

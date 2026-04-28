@@ -210,6 +210,7 @@ public:
 				.Model(m_TreeModel)
 				.HAlign(EHAlign::Fill)
 				.FillRatio(1.0f)
+				.ForcePaintBoundary(true)
 			)
 		);
 	}

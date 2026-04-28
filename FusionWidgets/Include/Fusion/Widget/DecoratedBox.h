@@ -23,6 +23,10 @@ namespace Fusion
 
         void ArrangeContent(FVec2 finalSize) override;
 
+    private:
+
+        void SetWidgetFlagInternal(EWidgetFlags flag, bool set);
+
     public:
 
         // - Fusion Properties -
@@ -30,6 +34,16 @@ namespace Fusion
         FUSION_SLOTS(
             (FWidget, Child)
         );
+
+        FUSION_PROPERTY_SET(bool, ForcePaintBoundary)
+        {
+            if (self.TestWidgetFlags(EWidgetFlags::ForcePaintBoundary) == value)
+                return self;
+
+            self.SetWidgetFlagInternal(EWidgetFlags::ForcePaintBoundary, value);
+            self.UpdateBoundaryFlags();
+            return self;
+        }
 
     private:
 
