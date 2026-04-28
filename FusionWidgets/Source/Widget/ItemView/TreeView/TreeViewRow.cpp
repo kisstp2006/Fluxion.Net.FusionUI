@@ -35,11 +35,13 @@ namespace Fusion
             return;
 
         const FVec2 layoutSize = GetLayoutSize();
+        f32 cellPaddingX = 0.0f;
 
         TArray<f32> childWidths;
         f32 splitterSpacing = 0;
         if (Ref<FTreeViewHeader> header = treeView->GetHeader())
         {
+            cellPaddingX    = header->CellPadding().left;
             childWidths     = header->GetChildrenWidths();
             splitterSpacing = header->GetSplitterSpacing();
 
@@ -93,7 +95,7 @@ namespace Fusion
 
             FItemViewPaintInfo paintInfo{};
 
-            f32 indent = (i == 0) ? Padding().left : 0.0f;
+            f32 indent = (i == 0) ? Padding().left + cellPaddingX : cellPaddingX;
             f32 colX   = offsetX + indent;
             f32 colW   = childWidths[i] - indent;
             f32 colY   = Padding().top;

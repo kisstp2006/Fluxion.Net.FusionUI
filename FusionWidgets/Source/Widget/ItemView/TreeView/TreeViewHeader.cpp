@@ -7,7 +7,7 @@ namespace Fusion
 {
     FTreeViewHeader::FTreeViewHeader()
     {
-
+        m_CellPadding = FMargin(2, 1, 2, 1) * 5.0f;
     }
 
     void FTreeViewHeader::Construct()
@@ -46,10 +46,17 @@ namespace Fusion
                         FNew(FLabel)
                         .Text("Column")
                         .FontSize(12)
-                        .HAlign(EHAlign::Center)
+                        .HAlign(EHAlign::Left)
                         .FillRatio(1.0f / maxChildCount)
-                        .Margin(FMargin(2, 1, 2, 1) * 5.0f)
+                        .Margin(CellPadding())
                     );
+                }
+                else
+                {
+                    if (Ref<FLabel> label = m_Splitter->GetChildAt(i)->Cast<FLabel>())
+                    {
+                        label->Margin(CellPadding());
+                    }
                 }
 
                 if (Ref<FLabel> label = m_Splitter->GetChildAt(i)->Cast<FLabel>())

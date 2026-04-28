@@ -39,6 +39,10 @@ namespace Fusion
             static_cast<Self&>(self).m_Splitter->CanResizeSplitter(value);
             return self;
         }
+
+        FUSION_STYLE_PROPERTIES(
+            (FMargin, CellPadding, Layout)
+        );
     };
     
 } // namespace Fusion
