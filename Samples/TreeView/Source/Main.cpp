@@ -126,17 +126,35 @@ public:
 
     FVariant GetItemData(const FModelIndex& index, EItemRole role) override
     {
-        if (!index.IsValid() || role != EItemRole::Content)
+        if (!index.IsValid())
             return {};
 
-        Node* node   = static_cast<Node*>(index.InternalPtr());
+        Node* node = static_cast<Node*>(index.InternalPtr());
         if (!node)
             return {};
 
         if (index.Column() == 0)
-            return node->Name.ToString();
+        {
+            switch (role)
+            {
+            case EItemRole::Content:
+                return node->Name.ToString();
+            case EItemRole::Icon:
+                return node->bIsFile ? "embed:/Icons/File.png" : "embed:/Icons/Folder.png";
+            }
 
-        return node->bIsFile ? FString("File") : FString("Folder");
+            return {};
+        }
+
+        if (role != EItemRole::Content)
+            return {};
+
+        return node->bIsFile ? "File" : "Folder";
+    }
+
+    bool HasIcons(u32 column) override
+    {
+        return column == 0;
     }
 };
 
@@ -467,10 +485,11 @@ int main(int argc, char* argv[])
 		    Padding            = FMargin(0, 4, 0, 4);
 		}
 
-	    FUSION_STYLE(FScrollBox, "TreeView/ScrollBox", Background, Border, Shape, Padding)
+	    FUSION_STYLE(FScrollBox, "TreeView/ScrollBox", Shape, ContentPadding)
 		{
 		    Extends("ScrollBox/Base");
 
+		    ContentPadding = FMargin(0, 0, 0, 0);
 		    Shape = FRoundedRectangle(0, 0, 5.0f, 5.0f);
 		}
 

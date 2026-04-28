@@ -34,6 +34,9 @@ namespace Fusion
         if (!model)
             return;
 
+        painter.SetBrush(FColors::Black);
+        painter.FillRect(FRect::FromSize(0, GetLayoutSize()));
+
         const FVec2 layoutSize = GetLayoutSize();
         f32 cellPaddingX = 0.0f;
 

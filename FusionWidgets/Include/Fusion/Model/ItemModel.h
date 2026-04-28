@@ -96,6 +96,8 @@ namespace Fusion
 
         virtual f32 GetColumnFillRatioHint(u32 column) { return 1.0f; }
 
+        virtual bool HasIcons(u32 column) = 0;
+
         virtual FModelIndex GetIndex(u32 row, u32 column, const FModelIndex& parent = {}) = 0;
 
         virtual u32 GetRowCount(const FModelIndex& parent = {}) = 0;
