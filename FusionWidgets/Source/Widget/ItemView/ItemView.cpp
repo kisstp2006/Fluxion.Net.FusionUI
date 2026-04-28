@@ -9,5 +9,6 @@ namespace Fusion
     {
         m_ClipContent = true;
         m_ClipShape = FRectangle();
+        m_ItemDelegate = CreateSubobject<FItemViewDelegate>();
     }
 }

@@ -19,6 +19,8 @@ namespace Fusion
 
         void UpdateHeaderData(Ref<FItemModel> model);
 
+        TArray<f32> GetChildrenWidths();
+
     protected:
 
         Ref<FSplitBox> m_Splitter;

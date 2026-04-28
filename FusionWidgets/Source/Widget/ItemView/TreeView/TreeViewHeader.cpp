@@ -64,4 +64,8 @@ namespace Fusion
         }
     }
 
+    TArray<f32> FTreeViewHeader::GetChildrenWidths()
+    {
+        return m_Splitter->GetChildrenWidths();
+    }
 } // namespace Fusion

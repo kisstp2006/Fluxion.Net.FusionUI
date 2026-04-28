@@ -23,6 +23,8 @@ namespace Fusion
 
         void ArrangeContent(FVec2 finalSize) override;
 
+        TArray<f32> GetChildrenWidths();
+
         // - Events -
 
         bool ShouldHitTestChildren(FVec2 localMousePose) override;

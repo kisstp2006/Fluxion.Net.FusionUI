@@ -10,6 +10,21 @@ namespace Fusion
 
     FUSION_SIGNAL_TYPE(FModelDataChangedSignal, FModelIndex topLeft, FModelIndex bottomRight);
 
+    enum class EItemRole : u32
+    {
+        None = 0,
+        Content,
+        Icon,
+        ToolTip,
+        UserRole,
+        UserRole0 = UserRole,
+        UserRole1,
+        UserRole2,
+        UserRole3,
+        UserRole4,
+    };
+    FUSION_ENUM_CLASS(EItemRole);
+
     struct FModelIndex
     {
     public:
@@ -79,12 +94,14 @@ namespace Fusion
 
         virtual FModelIndex GetParent(const FModelIndex& index) = 0;
 
+        virtual f32 GetColumnFillRatioHint(u32 column) { return 1.0f; }
+
         virtual FModelIndex GetIndex(u32 row, u32 column, const FModelIndex& parent = {}) = 0;
 
         virtual u32 GetRowCount(const FModelIndex& parent = {}) = 0;
         virtual u32 GetColumnCount(const FModelIndex& parent = {}) = 0;
 
-        virtual FVariant GetItemData(const FModelIndex& index) = 0;
+        virtual FVariant GetItemData(const FModelIndex& index, EItemRole role) = 0;
 
         virtual bool HasHeader() const { return false; }
 

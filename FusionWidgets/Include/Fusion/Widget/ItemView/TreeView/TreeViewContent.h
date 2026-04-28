@@ -33,14 +33,31 @@ namespace Fusion
 
     protected:
 
+        struct FTreeViewFlatRow
+        {
+            FModelIndex index;
+            FModelIndex parentIndex;  // cached to avoid GetParent() calls during scroll
+            int         depth;
+            bool        hasChildren;
+        };
+
         Ref<FScrollBox> GetParentScrollBox();
 
         void RebuildFlatRows();
         void AppendRows(FModelIndex parent, int depth);
 
+        void ToggleExpanded(FModelIndex index);
+        void CollectRows(FModelIndex parent, int depth, TArray<FTreeViewFlatRow>& out);
+
         void UpdateVisibleRows(FVec2 finalSize);
 
         WeakRef<FTreeView> m_TreeView;
+
+        TArray<FTreeViewFlatRow> m_FlatRows;
+        THashSet<FModelIndex> m_ExpandedItems;
+        TArray<Ref<FTreeViewRow>> m_Rows;
+        FVec2 m_CachedFinalSize;
+        int   m_FirstVisibleRow = 0;
 
     public:
 
@@ -49,20 +66,6 @@ namespace Fusion
             self.m_TreeView = value;
             return self;
         }
-
-    private:
-
-        struct FTreeViewFlatRow
-        {
-            FModelIndex index;
-            int         depth;
-            bool        hasChildren;
-        };
-
-        TArray<FTreeViewFlatRow> m_FlatRows;
-        THashSet<FModelIndex> m_ExpandedItems;
-        TArray<Ref<FTreeViewRow>> m_Rows;
-        FVec2 m_CachedFinalSize;
     };
     
 } // namespace Fusion

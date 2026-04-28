@@ -22,6 +22,81 @@ namespace Fusion
         );
     }
 
+    void FTreeViewRow::Paint(FPainter& painter)
+    {
+        Super::Paint(painter);
 
+        Ref<FTreeView> treeView = GetTreeView();
+        if (!treeView || m_Columns.Empty())
+            return;
+
+        Ref<FItemModel> model = treeView->Model();
+        if (!model)
+            return;
+
+        const FVec2 layoutSize = GetLayoutSize();
+
+        TArray<f32> childWidths;
+        if (Ref<FTreeViewHeader> header = treeView->GetHeader())
+        {
+            childWidths = header->GetChildrenWidths();
+        }
+        else
+        {
+            childWidths.Resize(m_Columns.Size());
+            f32 totalFillRatio = 0.0f;
+
+            for (int i = 0; i < m_Columns.Size(); i++)
+            {
+                childWidths[i] = model->GetColumnFillRatioHint(i);
+                totalFillRatio += childWidths[i];
+            }
+
+            for (int i = 0; i < m_Columns.Size(); i++)
+            {
+                if (totalFillRatio > TNumericLimits<f32>::Epsilon())
+                {
+                    childWidths[i] /= totalFillRatio;
+                }
+                else
+                {
+                    childWidths[i] = (i + 1.0f) / m_Columns.Size();
+                }
+
+                childWidths[i] *= layoutSize.width;
+            }
+        }
+
+        Ref<FItemViewDelegate> delegate = treeView->ItemDelegate();
+        if (!delegate)
+            return;
+
+        f32 offsetX = 0;
+
+        for (int i = 0; i < m_Columns.Size(); ++i)
+        {
+            FModelIndex index = m_Columns[i];
+
+            FItemViewPaintInfo paintInfo{};
+
+            f32 indent = (i == 0) ? Padding().left : 0.0f;
+            f32 colX   = offsetX + indent;
+            f32 colW   = childWidths[i] - indent;
+            f32 colY   = Padding().top;
+            f32 colH   = layoutSize.y - Padding().top - Padding().bottom;
+
+            paintInfo.Rect = FRect::FromSize(FVec2(colX, colY), FVec2(colW, colH));
+            paintInfo.Model = model;
+
+            delegate->Paint(painter, index, paintInfo);
+
+            offsetX += childWidths[i];
+        }
+    }
+
+    void FTreeViewRow::SetData(const TArray<FModelIndex>& columns)
+    {
+        m_Columns = columns;
+    }
 
 } // namespace Fusion

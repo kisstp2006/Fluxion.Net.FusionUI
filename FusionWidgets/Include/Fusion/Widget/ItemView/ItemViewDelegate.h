@@ -7,6 +7,12 @@ namespace Fusion
 {
     class FItemView;
 
+    struct FItemViewPaintInfo
+    {
+        Ref<FItemModel> Model;
+        FRect Rect;
+    };
+
     class FUSIONWIDGETS_API FItemViewDelegate : public FObject
     {
         FUSION_CLASS(FItemViewDelegate, FObject)
@@ -16,6 +22,7 @@ namespace Fusion
 
     public:
 
+        virtual void Paint(FPainter& painter, FModelIndex index, const FItemViewPaintInfo& info);
 
     private:
 

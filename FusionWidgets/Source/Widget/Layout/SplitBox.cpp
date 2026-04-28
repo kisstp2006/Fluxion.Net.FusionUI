@@ -70,7 +70,19 @@ namespace Fusion
 		}
 	}
 
-	bool FSplitBox::ShouldHitTestChildren(FVec2 localMousePos)
+    TArray<f32> FSplitBox::GetChildrenWidths()
+    {
+	    TArray<f32> result;
+
+	    for (int i = 0; i < GetChildCount(); i++)
+	    {
+	        result.Add(GetChildAt(i)->GetLayoutSize().width);
+	    }
+
+	    return result;
+    }
+
+    bool FSplitBox::ShouldHitTestChildren(FVec2 localMousePos)
 	{
 	    if (!CanResizeSplitter())
 	        return Super::ShouldHitTestChildren(localMousePos);

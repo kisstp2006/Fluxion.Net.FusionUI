@@ -26,6 +26,11 @@ namespace Fusion
         {
             return std::numeric_limits<T>::infinity();
         }
+
+        constexpr static T Epsilon() noexcept
+        {
+            return std::numeric_limits<T>::epsilon();
+        }
     };
 
     template<SizeT Bits = 32>

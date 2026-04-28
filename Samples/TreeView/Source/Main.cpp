@@ -124,9 +124,9 @@ public:
         return {};
     }
 
-    FVariant GetItemData(const FModelIndex& index) override
+    FVariant GetItemData(const FModelIndex& index, EItemRole role) override
     {
-        if (!index.IsValid())
+        if (!index.IsValid() || role != EItemRole::Content)
             return {};
 
         Node* node   = static_cast<Node*>(index.InternalPtr());
@@ -205,6 +205,7 @@ public:
 				),
 
 				FNew(FTreeView)
+				.Style("TreeView")
 				.CanResizeColumns(true)
 				.Model(m_TreeModel)
 				.HAlign(EHAlign::Fill)
@@ -449,6 +450,11 @@ int main(int argc, char* argv[])
 		FUSION_STYLE(FDecoratedBox, "FExpanderBox/Content", Padding)
 		{
 			Padding = FMargin(1, 1, 1, 1) * 10.0f;
+		}
+
+	    FUSION_STYLE(FScrollBox, "TreeView/ScrollBox", Background, Border, Shape, Padding)
+		{
+		    Extends("ScrollBox/Base");
 		}
 	});
 

@@ -20,6 +20,8 @@ namespace Fusion
 
     public:
 
+        Ref<FTreeViewHeader> GetHeader() const { return m_Header; }
+
     protected:
 
         void OnModelChanged() override;
