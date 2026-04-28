@@ -281,16 +281,26 @@ namespace Fusion
 	{
 		Super::Paint(painter);
 
+	    for (int i = 0; i < m_HandleRects.Size(); i++)
+	    {
+	        if (m_bIsDragHovered && m_DraggedRect == i)
+	            continue;
+
+	        FVec2 expansion = Direction() == EStackDirection::Horizontal
+                ? FVec2(-m_HandleRects[i].GetWidth() * SplitterSizeRatio() / 2, 0)
+                : FVec2(0, -m_HandleRects[i].GetHeight() * SplitterSizeRatio() / 2);
+
+	        painter.SetBrush(SplitterColor());
+	        painter.SetPen(FPen());
+
+	        painter.FillRect(m_HandleRects[i].Expand(expansion));
+	    }
+
 		if (m_bIsDragHovered && m_DraggedRect >= 0 && m_DraggedRect < (int)m_HandleRects.Size())
 		{
 		    FVec2 expansion = Direction() == EStackDirection::Horizontal
                 ? FVec2(-m_HandleRects[m_DraggedRect].GetWidth() * SplitterSizeRatio() / 2, 0)
                 : FVec2(0, -m_HandleRects[m_DraggedRect].GetHeight() * SplitterSizeRatio() / 2);
-
-		    painter.SetBrush(SplitterColor());
-		    painter.SetPen(FPen());
-
-		    painter.FillRect(m_HandleRects[m_DraggedRect].Expand(expansion));
 
 			if (CanResizeSplitter())
 			{

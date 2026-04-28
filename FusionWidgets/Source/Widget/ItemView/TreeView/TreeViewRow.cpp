@@ -37,9 +37,11 @@ namespace Fusion
         const FVec2 layoutSize = GetLayoutSize();
 
         TArray<f32> childWidths;
+        f32 splitterSpacing = 0;
         if (Ref<FTreeViewHeader> header = treeView->GetHeader())
         {
             childWidths = header->GetChildrenWidths();
+            splitterSpacing = header->GetSplitterSpacing();
         }
         else
         {
@@ -90,7 +92,7 @@ namespace Fusion
 
             delegate->Paint(painter, index, paintInfo);
 
-            offsetX += childWidths[i];
+            offsetX += childWidths[i] + splitterSpacing;
         }
     }
 

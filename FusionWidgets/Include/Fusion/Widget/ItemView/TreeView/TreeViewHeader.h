@@ -20,6 +20,7 @@ namespace Fusion
         void UpdateHeaderData(Ref<FItemModel> model);
 
         TArray<f32> GetChildrenWidths();
+        f32 GetSplitterSpacing();
 
     protected:
 

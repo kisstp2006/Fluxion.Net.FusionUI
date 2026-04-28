@@ -16,9 +16,12 @@ namespace Fusion
 
         Child(
             FAssignNew(FSplitBox, m_Splitter)
+            .SubStyle("Splitter")
             .Direction(EStackDirection::Horizontal)
             .RespectContentSize(true)
             .HAlign(EHAlign::Fill)
+            .Spacing(2.0f)
+            .SplitterSizeRatio(1.5f)
             .ContentHAlign(EHAlign::Fill)
             .ContentVAlign(EVAlign::Fill)
         );
@@ -67,5 +70,10 @@ namespace Fusion
     TArray<f32> FTreeViewHeader::GetChildrenWidths()
     {
         return m_Splitter->GetChildrenWidths();
+    }
+
+    f32 FTreeViewHeader::GetSplitterSpacing()
+    {
+        return m_Splitter->Spacing() * m_Splitter->SplitterSizeRatio();
     }
 } // namespace Fusion

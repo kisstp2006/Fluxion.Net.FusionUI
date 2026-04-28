@@ -5,7 +5,14 @@
 
 namespace Fusion
 {
-    
+    enum class ETextWrap : u8
+    {
+        None,  // single line, no breaking
+        Word,  // break at word boundaries
+        Char,  // break at any character
+    };
+    FUSION_ENUM_CLASS(ETextWrap);
+
     class FUSIONWIDGETS_API FPainter
     {
     public:
@@ -78,6 +85,11 @@ namespace Fusion
         // - Text -
 
         void DrawText(const FVec2& pos, const FString& text);
+
+        void DrawText(const FRect& rect, const FString& text,
+                      ETextWrap wrap   = ETextWrap::None,
+                      EHAlign   hAlign = EHAlign::Left,
+                      EVAlign   vAlign = EVAlign::Top);
 
     private:
 

@@ -1070,4 +1070,191 @@ namespace Fusion
 		}
 	}
 
+	void FPainter::DrawText(const FRect& rect, const FString& text,
+	                        ETextWrap wrap, EHAlign hAlign, EVAlign vAlign)
+	{
+		if (text.Empty())
+			return;
+
+		ZoneScoped;
+
+		FFontAtlas* atlas = m_Application->GetFontAtlas().Get();
+		FUSION_ASSERT(atlas != nullptr, "Font Atlas not found!");
+
+		const f32 scale      = m_CurrentFont.GetPointSize() / (f32)FFontAtlas::kSdfRenderSize;
+		const f32 lineHeight = m_CurrentFont.GetPointSize() * 1.2f;
+		const f32 ascender   = m_CurrentFont.GetPointSize() * 0.8f;
+		const f32 rectWidth  = rect.GetSize().x;
+
+		// --- Pass 1: collect codepoints and build lines ---
+
+		struct FTextLine
+		{
+			int startIndex;
+			int endIndex;
+			f32 width;
+		};
+
+		TArray<char32_t> codepoints;
+		for (char32_t cp : text.Codepoints())
+			codepoints.Add(cp);
+
+		TArray<FTextLine> lines;
+
+		int i = 0;
+		const int n = (int)codepoints.Size();
+
+		while (i < n)
+		{
+			const int lineStart  = i;
+			f32       lineWidth  = 0.0f;
+			int       lastSpaceIdx   = -1;
+			f32       lastSpaceWidth = 0.0f;
+			bool      broke = false;
+
+			while (i < n)
+			{
+				const char32_t cp = codepoints[i];
+
+				// Explicit newline always breaks
+				if (cp == U'\n')
+				{
+					lines.Add({ lineStart, i, lineWidth });
+					i++;  // consume the newline
+					broke = true;
+					break;
+				}
+
+				const FGlyph glyph       = atlas->FindOrAddGlyph(m_CurrentFont, cp);
+				const f32    glyphAdvance = glyph.IsValid() ? (f32)glyph.Advance * scale : 0.0f;
+
+				// Wrap check (only if not the first char of the line — never emit an empty line)
+				if (wrap != ETextWrap::None && i > lineStart && lineWidth + glyphAdvance > rectWidth)
+				{
+					if (wrap == ETextWrap::Word && lastSpaceIdx != -1)
+					{
+						// Break at the last space — don't include it in the line
+						lines.Add({ lineStart, lastSpaceIdx, lastSpaceWidth });
+						i = lastSpaceIdx + 1;  // skip the space
+					}
+					else
+					{
+						// Char wrap, or word wrap with no space found yet
+						lines.Add({ lineStart, i, lineWidth });
+					}
+					broke = true;
+					break;
+				}
+
+				if (cp == U' ')
+				{
+					lastSpaceIdx   = i;
+					lastSpaceWidth = lineWidth;
+				}
+
+				lineWidth += glyphAdvance;
+				i++;
+			}
+
+			// End of string — add whatever remains as the last line
+			if (!broke && lineStart < n)
+				lines.Add({ lineStart, n, lineWidth });
+		}
+
+		if (lines.Empty())
+			return;
+
+		// --- Pass 2: render lines ---
+
+		const f32 totalHeight = (f32)lines.Size() * lineHeight;
+
+		f32 startY;
+		switch (vAlign)
+		{
+		case EVAlign::Center:
+			startY = rect.min.y + (rect.GetSize().y - totalHeight) * 0.5f + ascender;
+			break;
+		case EVAlign::Bottom:
+			startY = rect.max.y - totalHeight + ascender;
+			break;
+		default:  // Top, Fill, Auto
+			startY = rect.min.y + ascender;
+			break;
+		}
+
+		const u32              color     = m_CurrentPen.GetColor().ToU32();
+		const FAffineTransform transform = GetCurrentTransform();
+
+		FUIDrawItem drawItem = {
+			.shaderType        = EUIShaderType::SDFText,
+			.textureIndex      = 0,
+			.samplerIndex      = 0,
+			.drawItemFlags     = EUIDrawItemFlags::None,
+			.clipRectIndex     = GetCurrentClipIndex(),
+			.gradientStartIndex = 0,
+			.gradientStopCount = 0,
+			.userFlags         = 0,
+			.data              = {}
+		};
+		drawItem.data[0] = FFontAtlas::kPxRange;
+		drawItem.data[1] = FFontAtlas::kAtlasSize;
+
+		u32 drawItemIndex = m_DrawList->AddDrawItem(drawItem);
+
+		for (int lineIdx = 0; lineIdx < (int)lines.Size(); lineIdx++)
+		{
+			const FTextLine& line   = lines[lineIdx];
+			const f32        cursorY = startY + (f32)lineIdx * lineHeight;
+
+			f32 cursorX;
+			switch (hAlign)
+			{
+			case EHAlign::Center:
+				cursorX = rect.min.x + (rectWidth - line.width) * 0.5f;
+				break;
+			case EHAlign::Right:
+				cursorX = rect.max.x - line.width;
+				break;
+			default:  // Left, Fill, Auto
+				cursorX = rect.min.x;
+				break;
+			}
+
+			for (int j = line.startIndex; j < line.endIndex; j++)
+			{
+				const FGlyph glyph = atlas->FindOrAddGlyph(m_CurrentFont, codepoints[j]);
+				if (!glyph.IsValid())
+					continue;
+
+				const f32 quadW  = (f32)glyph.Width   * scale;
+				const f32 quadH  = (f32)glyph.Height  * scale;
+				const f32 localX = cursorX + (f32)glyph.BearingX * scale;
+				const f32 localY = cursorY - (f32)glyph.BearingY * scale;
+
+				if (!IsRectClipped(FRect::FromSize(localX, localY, quadW, quadH)))
+				{
+					const f32 u0 = (f32)glyph.X                  / (f32)glyph.AtlasSize;
+					const f32 v0 = (f32)glyph.Y                  / (f32)glyph.AtlasSize;
+					const f32 u1 = (f32)(glyph.X + glyph.Width)  / (f32)glyph.AtlasSize;
+					const f32 v1 = (f32)(glyph.Y + glyph.Height) / (f32)glyph.AtlasSize;
+
+					if (drawItem.textureIndex != glyph.AtlasLayerIndex)
+					{
+						drawItem.textureIndex = glyph.AtlasLayerIndex;
+						drawItemIndex = m_DrawList->AddDrawItem(drawItem);
+					}
+
+					const FVec2 tl = transform.TransformPoint(FVec2(localX,         localY));
+					const FVec2 tr = transform.TransformPoint(FVec2(localX + quadW,  localY));
+					const FVec2 br = transform.TransformPoint(FVec2(localX + quadW,  localY + quadH));
+					const FVec2 bl = transform.TransformPoint(FVec2(localX,          localY + quadH));
+
+					m_DrawList->AddQuadPoints(tl, tr, br, bl, FVec2(u0, v0), FVec2(u1, v1), color, drawItemIndex);
+				}
+
+				cursorX += (f32)glyph.Advance * scale;
+			}
+		}
+	}
+
 } // namespace Fusion
