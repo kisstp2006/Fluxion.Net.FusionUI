@@ -9,7 +9,7 @@ namespace Fusion
     FTreeView::FTreeView()
     {
         m_RowHeight = 24.0f;
-        m_IconWidth = 14.0f;
+        m_IconWidth = 16.0f;
     }
 
     void FTreeView::Construct()

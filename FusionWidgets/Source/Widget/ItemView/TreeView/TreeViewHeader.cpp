@@ -74,6 +74,11 @@ namespace Fusion
         }
     }
 
+    TArray<f32> FTreeViewHeader::GetColumnBoundaries()
+    {
+        return m_Splitter->GetColumnBoundaries();
+    }
+
     TArray<f32> FTreeViewHeader::GetChildrenWidths()
     {
         return m_Splitter->GetChildrenWidths();

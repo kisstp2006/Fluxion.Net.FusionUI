@@ -34,55 +34,41 @@ namespace Fusion
         if (!model)
             return;
 
-        painter.SetBrush(FColors::Black);
-        painter.FillRect(FRect::FromSize(0, GetLayoutSize()));
-
         const FVec2 layoutSize = GetLayoutSize();
         f32 cellPaddingX = 0.0f;
 
-        TArray<f32> childWidths;
-        f32 splitterSpacing = 0;
+        // Column boundaries in header-local space: [0, col1_start, col2_start, ..., headerWidth]
+        // Using boundaries instead of child widths gives pixel-accurate alignment with the
+        // visual splitter positions regardless of label margins or fill-ratio rounding.
+        TArray<f32> boundaries;
+
         if (Ref<FTreeViewHeader> header = treeView->GetHeader())
         {
-            cellPaddingX    = header->CellPadding().left;
-            childWidths     = header->GetChildrenWidths();
-            splitterSpacing = header->GetSplitterSpacing();
+            cellPaddingX = header->CellPadding().left;
+            boundaries   = header->GetColumnBoundaries();
 
-            // The row is narrower than the header by a constant amount
-            // (scrollbar width + content padding). Keep all column boundaries
-            // at exactly the same pixel positions as the header splitters —
-            // just absorb the difference into the last column's right edge.
-            f32 totalHeaderWidth = splitterSpacing * (f32)childWidths.Size();
-            for (f32 w : childWidths)
-                totalHeaderWidth += w;
-
-            const f32 widthDiff = totalHeaderWidth - layoutSize.width;
-            if (!childWidths.Empty() && widthDiff > 0.001f)
-                childWidths.Last() -= widthDiff;
+            // The row is narrower than the header by the scrollbar width.
+            // Clamp the last boundary to the row width so the last column
+            // doesn't overflow, while all earlier boundaries stay pixel-perfect.
+            if (!boundaries.Empty())
+                boundaries.Last() = FMath::Min(boundaries.Last(), layoutSize.width);
         }
         else
         {
-            childWidths.Resize(m_Columns.Size());
+            // No header — divide equally by fill ratio hints
+            boundaries.Add(0.0f);
             f32 totalFillRatio = 0.0f;
+            for (int i = 0; i < m_Columns.Size(); i++)
+                totalFillRatio += model->GetColumnFillRatioHint(i);
 
+            f32 cursor = 0.0f;
             for (int i = 0; i < m_Columns.Size(); i++)
             {
-                childWidths[i] = model->GetColumnFillRatioHint(i);
-                totalFillRatio += childWidths[i];
-            }
-
-            for (int i = 0; i < m_Columns.Size(); i++)
-            {
-                if (totalFillRatio > TNumericLimits<f32>::Epsilon())
-                {
-                    childWidths[i] /= totalFillRatio;
-                }
-                else
-                {
-                    childWidths[i] = (i + 1.0f) / m_Columns.Size();
-                }
-
-                childWidths[i] *= layoutSize.width;
+                f32 ratio = totalFillRatio > 0.001f
+                    ? model->GetColumnFillRatioHint(i) / totalFillRatio
+                    : 1.0f / (f32)m_Columns.Size();
+                cursor += ratio * layoutSize.width;
+                boundaries.Add(cursor);
             }
         }
 
@@ -90,27 +76,24 @@ namespace Fusion
         if (!delegate)
             return;
 
-        f32 offsetX = 0;
+        const f32 colY        = Padding().top;
+        const f32 colH        = layoutSize.y - Padding().top - Padding().bottom;
+        const f32 depthIndent = Padding().left;  // set by UpdateVisibleRows: depth * indentWidth
 
         for (int i = 0; i < m_Columns.Size(); ++i)
         {
-            FModelIndex index = m_Columns[i];
+            if (i + 1 >= boundaries.Size())
+                break;
+
+            const f32 colStart  = boundaries[i] + (i == 0 ? depthIndent : 0.0f);
+            const f32 colEnd    = boundaries[i + 1];
 
             FItemViewPaintInfo paintInfo{};
-
-            f32 indent = (i == 0) ? Padding().left + cellPaddingX : cellPaddingX;
-            f32 colX   = offsetX + indent;
-            f32 colW   = childWidths[i] - indent;
-            f32 colY   = Padding().top;
-            f32 colH   = layoutSize.y - Padding().top - Padding().bottom;
-
-            paintInfo.Rect = FRect::FromSize(FVec2(colX, colY), FVec2(colW, colH));
+            paintInfo.Rect  = FRect(FVec2(colStart, colY), FVec2(colEnd, colY + colH));
             paintInfo.Model = model;
-            paintInfo.View = treeView;
+            paintInfo.View  = treeView;
 
-            delegate->Paint(painter, index, paintInfo);
-
-            offsetX += childWidths[i] + splitterSpacing;
+            delegate->Paint(painter, m_Columns[i], paintInfo);
         }
     }
 

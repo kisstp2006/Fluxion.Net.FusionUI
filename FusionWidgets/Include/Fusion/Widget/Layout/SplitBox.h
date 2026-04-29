@@ -25,6 +25,12 @@ namespace Fusion
 
         TArray<f32> GetChildrenWidths();
 
+        // Returns the x positions of each column's LEFT edge (including margin)
+        // plus the right edge of the last column, in FSplitBox-local space.
+        // e.g. for 2 columns: [0, W/2, W]
+        // Use this instead of GetChildrenWidths() for pixel-accurate column alignment.
+        TArray<f32> GetColumnBoundaries();
+
         // - Events -
 
         bool ShouldHitTestChildren(FVec2 localMousePose) override;

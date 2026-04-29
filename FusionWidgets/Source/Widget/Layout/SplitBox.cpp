@@ -82,6 +82,26 @@ namespace Fusion
 	    return result;
     }
 
+    TArray<f32> FSplitBox::GetColumnBoundaries()
+    {
+        TArray<f32> result;
+
+        result.Add(0.0f);  // left edge of column 0
+
+        for (int i = 1; i < GetChildCount(); i++)
+        {
+            Ref<FWidget> child = GetChildAt(i);
+            if (!child || child->IsExcluded())
+                continue;
+            // Left boundary of column i = child's layout position minus its left margin
+            result.Add(child->GetLayoutPosition().x - child->Margin().left);
+        }
+
+        result.Add(GetLayoutSize().x);  // right edge of last column
+
+        return result;
+    }
+
     bool FSplitBox::ShouldHitTestChildren(FVec2 localMousePos)
 	{
 	    if (!CanResizeSplitter())
