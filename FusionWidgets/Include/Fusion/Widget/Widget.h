@@ -28,6 +28,8 @@ namespace Fusion
         PendingConstruction = FUSION_BIT(10),
 
         StyleScopeBoundary = FUSION_BIT(11),
+
+        ForceLayoutBoundary = FUSION_BIT(12),
     };
     FUSION_ENUM_CLASS_FLAGS(EWidgetFlags);
     
@@ -89,6 +91,9 @@ namespace Fusion
 
         //! @brief Computes and returns the transform that can be used to transform local position to Global (i.e. surface space) position.
         FAffineTransform GetGlobalTransform() const;
+
+        //! @brief Converts a global space (i.e. surface space) position into Widget's local space position.
+        FVec2 GlobalToLocalPoint(FVec2 globalPoint) const;
 
         FAffineTransform GetChildTransform();
 

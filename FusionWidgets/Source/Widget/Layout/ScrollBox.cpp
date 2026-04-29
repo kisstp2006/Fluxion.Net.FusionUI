@@ -295,7 +295,7 @@ namespace Fusion
             return FEventReply::Unhandled();
 
         // Convert surface space → local widget space
-        FVec2 localPos = GetCachedLayerSpaceTransform().Inverse().TransformPoint(event.MousePosition);
+        FVec2 localPos = GetGlobalTransform().Inverse().TransformPoint(event.MousePosition);
 
         if (m_bShowVertScrollbar && m_VertTrackRect.Contains(localPos))
         {
@@ -377,7 +377,7 @@ namespace Fusion
         if (!Enabled())
             return FEventReply::Unhandled();
 
-        FVec2 localPos = GetCachedLayerSpaceTransform().Inverse().TransformPoint(event.MousePosition);
+        FVec2 localPos = GetGlobalTransform().Inverse().TransformPoint(event.MousePosition);
 
         if (m_bDraggingVert)
         {

@@ -23,6 +23,7 @@ namespace Fusion
             .ContentVAlign(EVAlign::Top)
             .HAlign(EHAlign::Fill)
             .VAlign(EVAlign::Fill)
+            .Padding(FMargin())
             (
                 FAssignNew(FTreeViewHeader, m_Header)
                 .SubStyle("Header"),
@@ -32,12 +33,13 @@ namespace Fusion
                 .CanScrollVertical(true)
                 .HorizontalScrollVisibility(EScrollbarVisibility::Auto)
                 .VerticalScrollVisibility(EScrollbarVisibility::Auto)
-                .ScrollSpeed(10.0f)
+                .ScrollSpeed(15.0f)
                 .SubStyle("ScrollBox")
                 .Child(
                     FAssignNew(FTreeViewContent, m_Content)
                     .TreeView(this)
                     .SubStyle("Content")
+                    .Margin(FMargin())
                 )
                 .OnScrollOffsetChanged([this](FVec2 offset)
                 {

@@ -205,6 +205,11 @@ namespace Fusion
 		return m_CachedLayerSpaceTransform;
 	}
 
+	FVec2 FWidget::GlobalToLocalPoint(FVec2 globalPoint) const
+	{
+		return GetGlobalTransform().Inverse().TransformPoint(globalPoint);
+	}
+
 	FAffineTransform FWidget::GetChildTransform()
 	{
 		return FAffineTransform::Translation(GetLayoutPosition()) *
@@ -232,6 +237,9 @@ namespace Fusion
 	bool FWidget::IsLayoutBoundary()
 	{
 		ZoneScoped;
+
+		if (TestWidgetFlags(EWidgetFlags::ForceLayoutBoundary))
+			return true;
 
 		const bool isFixedSize = FMath::ApproxEquals(m_MinWidth, m_MaxWidth) && FMath::ApproxEquals(m_MinHeight, m_MaxHeight);
 		if (isFixedSize)
