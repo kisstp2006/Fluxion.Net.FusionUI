@@ -14,7 +14,7 @@ namespace Fusion
 			flags |= SDL_WINDOW_RESIZABLE;
 		if (info.hidden)
 			flags |= SDL_WINDOW_HIDDEN;
-		if (info.borderless)
+		if (info.titleBarStyle != ETitleBarStyle::Default)
 			flags |= SDL_WINDOW_BORDERLESS;
 
 #if FUSION_TRAIT_METAL_SUPPORTED
@@ -49,6 +49,8 @@ namespace Fusion
 			FUSION_LOG_ERROR("SDL3PlatformWindow", "Failed to create SDL window: {}", SDL_GetError());
 			return;
 		}
+
+	    FSDL3Platform::SetupWindow(sdlWindow, info);
 
 		initialFlags = info.windowFlags;
 		

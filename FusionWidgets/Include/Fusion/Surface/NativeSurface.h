@@ -19,6 +19,8 @@ namespace Fusion
 
         void Shutdown() override;
 
+        FNativeChromeMetrics GetNativeChromeMetrics() const override;
+
         bool IsNativeSurface() const final { return true; }
 
         FVec2 ScreenToSurfacePoint(FVec2 position) override;

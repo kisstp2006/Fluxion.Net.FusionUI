@@ -14,6 +14,10 @@ namespace Fusion
         ~FSDL3MacPlatform() = delete;
 
         static f32 GetWindowDpiScale(SDL_Window* sdlWindow);
+        
+        static void SetupWindow(SDL_Window* sdlWindow, const FPlatformWindowInfo& info);
+
+        static FNativeChromeMetrics GetChromeMetrics(SDL_Window* sdlWindow);
     };
 
     typedef FSDL3MacPlatform FSDL3Platform;

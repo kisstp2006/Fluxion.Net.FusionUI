@@ -1,4 +1,5 @@
 #include "Fusion/SDL3Platform.h"
+#include "PAL/SDL3Platform.h"
 
 // Copyright (c) 2026 Neil Mewada
 // SPDX-License-Identifier: MIT
@@ -301,7 +302,16 @@ namespace Fusion
 		return m_InputState.modifierStates;
 	}
 
-	FWindowHandle FSDL3PlatformBackend::CreateWindow(FInstanceHandle instance, const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info)
+    FNativeChromeMetrics FSDL3PlatformBackend::GetChromeMetrics(FWindowHandle window)
+    {
+	    auto it = m_WindowsByHandle.Find(window);
+	    if (it != m_WindowsByHandle.End() || it->second == nullptr)
+	        return {};
+
+	    return FSDL3Platform::GetChromeMetrics(it->second->GetSdlHandle());
+    }
+
+    FWindowHandle FSDL3PlatformBackend::CreateWindow(FInstanceHandle instance, const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info)
 	{
 		FSDL3PlatformWindow* newWindow = new FSDL3PlatformWindow(title, width, height, info);
 		

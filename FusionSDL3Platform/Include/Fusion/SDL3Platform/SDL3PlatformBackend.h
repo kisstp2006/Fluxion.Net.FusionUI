@@ -89,6 +89,8 @@ namespace Fusion
 
         // - Windowing -
 
+        FNativeChromeMetrics GetChromeMetrics(FWindowHandle window) override;
+
         FWindowHandle CreateWindow(FInstanceHandle instance, const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info) override;
 
 		void DestroyWindow(FWindowHandle window) override;

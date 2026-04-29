@@ -55,7 +55,9 @@ namespace Fusion
 
 		// - Window API -
 
-		FVec2i GetWindowPosition(FWindowHandle window) { return m_PlatformBackend->GetWindowPosition(window); }
+		FVec2i GetWindowPosition(FWindowHandle window) const { return m_PlatformBackend->GetWindowPosition(window); }
+
+	    FNativeChromeMetrics GetNativeChromeMetrics(FWindowHandle window) const { return m_PlatformBackend->GetChromeMetrics(window); }
 
 		// - Lifecycle -
 

@@ -32,7 +32,16 @@ namespace Fusion
 		Super::Shutdown();
 	}
 
-	FVec2 FNativeSurface::ScreenToSurfacePoint(FVec2 position)
+    FNativeChromeMetrics FNativeSurface::GetNativeChromeMetrics() const
+    {
+	    if (auto application = GetApplication())
+	    {
+	        return application->GetNativeChromeMetrics(m_WindowHandle);
+	    }
+        return {};
+    }
+
+    FVec2 FNativeSurface::ScreenToSurfacePoint(FVec2 position)
 	{
 		Ref<FApplicationInstance> application = GetApplication();
 		if (!application)

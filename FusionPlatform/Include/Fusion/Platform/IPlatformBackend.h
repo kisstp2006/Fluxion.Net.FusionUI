@@ -5,13 +5,35 @@
 
 namespace Fusion
 {
+    enum class ETitleBarStyle
+    {
+        Default = 0,
+        NoTitleBar,
+        //! @brief Available only on macOS. Falls back to NoTitleBar on other platforms.
+        TransparentWithNativeControls,
+        //! @brief Available only on macOS. Falls back to NoTitleBar on other platforms.
+        ToolBarWithNativeControls,
+    };
+    FUSION_ENUM_CLASS(ETitleBarStyle);
+
+    struct FNativeChromeMetrics
+    {
+        // Bounding rect of native window controls (traffic lights) in window-local POINTS
+        // (top-left origin, not pixels). All zeros on platforms with no native controls.
+        FRect  nativeControlsRect;
+
+        // Height of any opaque native titlebar/toolbar above your content.
+        // 0 when FullSizeContentView is used — you own the full window area.
+        float  titlebarHeight = 0.0f;
+    };
+
     enum class FPlatformWindowFlags
     {
         None = 0,
         ToolTip = FUSION_BIT(0),
         PopupMenu = FUSION_BIT(1),
         Utility = FUSION_BIT(2),
-        DestroyOnClose = FUSION_BIT(3)
+        DestroyOnClose = FUSION_BIT(3),
     };
     FUSION_ENUM_CLASS_FLAGS(FPlatformWindowFlags);
 
@@ -21,7 +43,7 @@ namespace Fusion
         bool fullscreen = false;
         bool resizable = true;
         bool hidden = false;
-		bool borderless = false;
+        ETitleBarStyle titleBarStyle = ETitleBarStyle::Default;
 
 		FDisplayId displayId = FDisplayId::NullValue;
         bool openCentered = true;
@@ -105,6 +127,8 @@ namespace Fusion
         virtual EKeyModifier GetModifierStates() = 0;
 
 		// - Window Management -
+
+        virtual FNativeChromeMetrics GetChromeMetrics(FWindowHandle window) = 0;
 
 		virtual FWindowHandle CreateWindow(FInstanceHandle instance, const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info) = 0;
 

@@ -85,13 +85,13 @@
 #include "Widget/DecoratedBox.h"
 #include "Widget/ContainerWidget.h"
 #include "Widget/Layout/StackBox.h"
+#include "Widget/Window/TitleBar.h"
+#include "Widget/Window/Window.h"
 #include "Widget/Label.h"
 #include "Widget/Input/Button.h"
 #include "Widget/Input/TextButton.h"
 #include "Widget/Input/TextInput.h"
 #include "Widget/Input/TextEditor.h"
-
-// Layouts
 #include "Widget/Layout/ScrollBox.h"
 #include "Widget/Layout/SplitBox.h"
 #include "Widget/Layout/ExpanderBox.h"

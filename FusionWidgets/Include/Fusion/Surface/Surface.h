@@ -40,6 +40,8 @@ namespace Fusion
 
         virtual bool IsNativeSurface() const { return false; }
 
+        virtual FNativeChromeMetrics GetNativeChromeMetrics() const { return {}; }
+
         Ref<FTheme> GetTheme() const;
 
         FWidget* HitTestWidget(FVec2 pos, FWidget* widget = nullptr);
