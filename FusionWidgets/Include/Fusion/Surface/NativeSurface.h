@@ -19,7 +19,7 @@ namespace Fusion
 
         void Shutdown() override;
 
-        FNativeChromeMetrics GetNativeChromeMetrics() const override;
+        ETitleBarStyle GetNativeTitleBarStyle() const override;
 
         bool IsNativeSurface() const final { return true; }
 

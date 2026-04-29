@@ -33,6 +33,12 @@ namespace Fusion
             (FTitleBar, TitleBar),
             (FWidget, Content)
         );
+
+        FUSION_STYLE_PROPERTIES(
+            (f32, TitleBarHeight, Layout)
+        );
+
+        FUSION_PROPERTY_FORWARD(FString, WindowTitle, m_TitleBar, Title)
     };
     
 } // namespace Fusion

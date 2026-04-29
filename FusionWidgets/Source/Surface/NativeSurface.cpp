@@ -32,13 +32,13 @@ namespace Fusion
 		Super::Shutdown();
 	}
 
-    FNativeChromeMetrics FNativeSurface::GetNativeChromeMetrics() const
+    ETitleBarStyle FNativeSurface::GetNativeTitleBarStyle() const
     {
-	    if (auto application = GetApplication())
+	    if (Ref<FApplicationInstance> application = GetApplication())
 	    {
-	        return application->GetNativeChromeMetrics(m_WindowHandle);
+	        return application->GetWindowTitleBarStyle(m_WindowHandle);
 	    }
-        return {};
+        return FSurface::GetNativeTitleBarStyle();
     }
 
     FVec2 FNativeSurface::ScreenToSurfacePoint(FVec2 position)

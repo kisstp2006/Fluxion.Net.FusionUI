@@ -25,16 +25,19 @@ namespace Fusion
 
 		f32 GetDpiScale();
 
-		FPlatformWindowFlags GetInitialFlags() const { return initialFlags; }
+		EPlatformWindowFlags GetInitialFlags() const { return initialFlags; }
 
 		SDL_Window* GetSdlHandle() const { return sdlWindow; }
+
+	    ETitleBarStyle GetWindowTitleBarStyle() const { return titleBarStyle; }
 
     private:
 
 		FWindowHandle windowHandle = FWindowHandle::NullValue;
 		SDL_Window* sdlWindow = nullptr;
 
-		FPlatformWindowFlags initialFlags = FPlatformWindowFlags::None;
+		EPlatformWindowFlags initialFlags = EPlatformWindowFlags::None;
+	    ETitleBarStyle titleBarStyle = ETitleBarStyle::Default;
     };
 
 } // namespace Fusion

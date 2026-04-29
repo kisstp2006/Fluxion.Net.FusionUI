@@ -6,6 +6,20 @@
 
 namespace Fusion
 {
+    SDL_HitTestResult SDLHitTest(SDL_Window *win, const SDL_Point *area, void *data)
+    {
+        FSDL3PlatformWindow* platform = (FSDL3PlatformWindow*)data;
+
+        if (area->y < 28) {
+            if (area->x < 80) {
+                return SDL_HITTEST_NORMAL; // Pass to Native Traffic Lights
+            }
+
+            // ONLY return DRAGGABLE for the specific gaps between your widgets.
+            return SDL_HITTEST_DRAGGABLE;
+        }
+        return SDL_HITTEST_NORMAL;
+    }
 
 	FSDL3PlatformWindow::FSDL3PlatformWindow(const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info)
 	{
@@ -14,7 +28,14 @@ namespace Fusion
 			flags |= SDL_WINDOW_RESIZABLE;
 		if (info.hidden)
 			flags |= SDL_WINDOW_HIDDEN;
-		if (info.titleBarStyle != ETitleBarStyle::Default)
+
+        titleBarStyle = info.titleBarStyle;
+#if !FUSION_PLATFORM_MAC
+        if (titleBarStyle != ETitleBarStyle::Default) // Transparent title bars only supported on Mac
+            titleBarStyle = ETitleBarStyle::NoTitleBar;
+#endif
+
+		if (titleBarStyle != ETitleBarStyle::Default)
 			flags |= SDL_WINDOW_BORDERLESS;
 
 #if FUSION_TRAIT_METAL_SUPPORTED
@@ -27,11 +48,11 @@ namespace Fusion
 			flags |= SDL_WINDOW_MAXIMIZED;
 		if (info.fullscreen)
 			flags |= SDL_WINDOW_FULLSCREEN;
-		if (FEnumHasFlag(info.windowFlags, FPlatformWindowFlags::PopupMenu))
+		if (FEnumHasFlag(info.windowFlags, EPlatformWindowFlags::PopupMenu))
 			flags |= SDL_WINDOW_POPUP_MENU;
-		if (FEnumHasFlag(info.windowFlags, FPlatformWindowFlags::ToolTip))
+		if (FEnumHasFlag(info.windowFlags, EPlatformWindowFlags::ToolTip))
 			flags |= SDL_WINDOW_TOOLTIP;
-		if (FEnumHasFlag(info.windowFlags, FPlatformWindowFlags::Utility))
+		if (FEnumHasFlag(info.windowFlags, EPlatformWindowFlags::Utility))
 			flags |= SDL_WINDOW_UTILITY;
 
 		int x = SDL_WINDOWPOS_CENTERED;
@@ -56,6 +77,11 @@ namespace Fusion
 		
 		SDL_SetWindowPosition(sdlWindow, x, y);
 		SDL_SetWindowMinimumSize(sdlWindow, 32, 32);
+
+        if (titleBarStyle != ETitleBarStyle::Default)
+		{
+		    SDL_SetWindowHitTest(sdlWindow, SDLHitTest, this);
+		}
 		
 		windowHandle = SDL_GetWindowID(sdlWindow);
 	}

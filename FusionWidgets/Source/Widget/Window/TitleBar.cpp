@@ -7,6 +7,20 @@ namespace Fusion
 {
     FTitleBar::FTitleBar()
     {
-
+        SetWidgetFlag(EWidgetFlags::TitleBarHint, true);
     }
+
+    void FTitleBar::Construct()
+    {
+        Super::Construct();
+
+        Child(
+            FAssignNew(FLabel, m_TitleLabel)
+            .Text("Title")
+            .SubStyle("Title")
+            .HAlign(EHAlign::Center)
+            .VAlign(EVAlign::Center)
+        );
+    }
+
 }

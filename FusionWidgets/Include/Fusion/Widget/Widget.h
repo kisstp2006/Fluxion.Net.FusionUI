@@ -30,6 +30,8 @@ namespace Fusion
         StyleScopeBoundary = FUSION_BIT(11),
 
         ForceLayoutBoundary = FUSION_BIT(12),
+
+        TitleBarHint = FUSION_BIT(13),
     };
     FUSION_ENUM_CLASS_FLAGS(EWidgetFlags);
     

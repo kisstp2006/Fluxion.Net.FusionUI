@@ -27,7 +27,7 @@ namespace Fusion
         float  titlebarHeight = 0.0f;
     };
 
-    enum class FPlatformWindowFlags
+    enum class EPlatformWindowFlags
     {
         None = 0,
         ToolTip = FUSION_BIT(0),
@@ -35,7 +35,7 @@ namespace Fusion
         Utility = FUSION_BIT(2),
         DestroyOnClose = FUSION_BIT(3),
     };
-    FUSION_ENUM_CLASS_FLAGS(FPlatformWindowFlags);
+    FUSION_ENUM_CLASS_FLAGS(EPlatformWindowFlags);
 
     struct FPlatformWindowInfo
     {
@@ -48,7 +48,7 @@ namespace Fusion
 		FDisplayId displayId = FDisplayId::NullValue;
         bool openCentered = true;
         FVec2i openPos = FVec2i();
-        FPlatformWindowFlags windowFlags = FPlatformWindowFlags::DestroyOnClose;
+        EPlatformWindowFlags windowFlags = EPlatformWindowFlags::DestroyOnClose;
     };
 
     struct FPlatformCapabilities
@@ -128,11 +128,11 @@ namespace Fusion
 
 		// - Window Management -
 
-        virtual FNativeChromeMetrics GetChromeMetrics(FWindowHandle window) = 0;
-
 		virtual FWindowHandle CreateWindow(FInstanceHandle instance, const FString& title, u32 width, u32 height, const FPlatformWindowInfo& info) = 0;
 
 		virtual void DestroyWindow(FWindowHandle window) = 0;
+
+        virtual ETitleBarStyle GetWindowTitleBarStyle(FWindowHandle window) = 0;
 
         virtual FVec2i GetWindowSizeInPixels(FWindowHandle window) = 0;
 

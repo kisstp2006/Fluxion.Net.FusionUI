@@ -54,15 +54,7 @@ namespace Fusion
 
 		if (m_MainWindow)
 		{
-			FWindowHandle windowHandle = m_PlatformBackend->CreateWindow(instanceHandle, m_MainWindow->GetName().ToString(), m_InitialWindowSize.width, m_InitialWindowSize.height, {
-				.maximised = false,
-				.fullscreen = false,
-				.resizable = true,
-				.hidden = false,
-				.titleBarStyle = ETitleBarStyle::TransparentWithNativeControls,
-				.openCentered = true,
-				.windowFlags = FPlatformWindowFlags::DestroyOnClose
-			});
+			FWindowHandle windowHandle = m_PlatformBackend->CreateWindow(instanceHandle, m_MainWindow->GetName().ToString(), m_InitialWindowSize.width, m_InitialWindowSize.height, m_DefaultWindowConfig);
 
 			Ref<FNativeSurface> nativeSurface = m_MainApplication->CreateNativeSurfaceForWindow(windowHandle);
 

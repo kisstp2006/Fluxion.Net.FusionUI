@@ -100,8 +100,18 @@ namespace Fusion
 			break;
 		}
 
-		m_Child->SetLayoutPosition(childPos);
-		m_Child->ArrangeContent(childSize);
+	    FUSION_TRY
+	    {
+	        m_Child->SetLayoutPosition(childPos);
+		    m_Child->ArrangeContent(childSize);
+	    }
+	    FUSION_CATCH(const FException& exception)
+		{
+		    FUSION_LOG_ERROR("Widget", "Exception: {}. Exception thrown by a Widget [{}] in FCompoundWidget::ArrangeContent.\n{}",
+                exception.what(), m_Child->GetClassName(), exception.GetStackTraceString(true));
+
+		    m_Child->SetFaulted();
+		}
 	}
 
 	void FCompoundWidget::SetWidgetFlagInternal(EWidgetFlags flag, bool set)

@@ -57,7 +57,7 @@ namespace Fusion
 
 		FVec2i GetWindowPosition(FWindowHandle window) const { return m_PlatformBackend->GetWindowPosition(window); }
 
-	    FNativeChromeMetrics GetNativeChromeMetrics(FWindowHandle window) const { return m_PlatformBackend->GetChromeMetrics(window); }
+	    ETitleBarStyle GetWindowTitleBarStyle(FWindowHandle window) const { return m_PlatformBackend->GetWindowTitleBarStyle(window); }
 
 		// - Lifecycle -
 

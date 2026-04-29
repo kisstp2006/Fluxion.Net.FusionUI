@@ -35,12 +35,27 @@ namespace Fusion
     		m_InitialWindowSize = { width, height };
     	}
 
+        void SetDefaultWindowConfig(const FPlatformWindowInfo& windowConfig)
+    	{
+    	    m_DefaultWindowConfig = windowConfig;
+    	}
+
         int Run();
 
     private:
 
         Ref<FWidget> m_MainWindow;
         FVec2i m_InitialWindowSize = FVec2i(1200, 900);
+
+        FPlatformWindowInfo m_DefaultWindowConfig = {
+            .maximised = false,
+            .fullscreen = false,
+            .resizable = true,
+            .hidden = false,
+            .titleBarStyle = ETitleBarStyle::ToolBarWithNativeControls,
+            .openCentered = true,
+            .windowFlags = EPlatformWindowFlags::DestroyOnClose
+        };
 
 		Ref<FApplicationInstance> m_MainApplication;
         Ref<FTheme> m_MainTheme;

@@ -19,40 +19,6 @@ namespace Fusion
         return (f32)[nsWindow backingScaleFactor];
     }
 
-    FNativeChromeMetrics FSDL3MacPlatform::GetChromeMetrics(SDL_Window* sdlWindow)
-    {
-        SDL_PropertiesID props = SDL_GetWindowProperties(sdlWindow);
-        NSWindow* nswindow = (NSWindow*)SDL_GetPointerProperty(props, SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, NULL);
-        if (!nswindow) return {};
-
-        NSButton* close    = [nswindow standardWindowButton:NSWindowCloseButton];
-        NSButton* miniaturize = [nswindow standardWindowButton:NSWindowMiniaturizeButton];
-        NSButton* zoom     = [nswindow standardWindowButton:NSWindowZoomButton];
-        if (!close || !miniaturize || !zoom) return {};
-
-        // Button frames are in contentView coords (bottom-left origin on macOS).
-        // Convert to top-left origin (FusionUI convention).
-        NSRect contentBounds = nswindow.contentView.bounds;
-        float  winH = (float)contentBounds.size.height;
-
-        auto toFRect = [&](NSButton* btn) -> FRect {
-            NSRect f = [btn convertRect:btn.bounds toView:nil]; // window coords, bottom-left
-            return FRect(f.origin.x, winH - f.origin.y - f.size.height,
-                         f.size.width, f.size.height);
-        };
-
-        FRect cr = toFRect(close);
-        FRect zr = toFRect(zoom);
-
-        // Union close→zoom to get the full reserved rect
-        FRect combined = FRect::Union(cr, zr);
-
-        // Add a small margin so custom content doesn't hug the buttons
-        combined.max.x  += 8.0f;
-
-        return FNativeChromeMetrics{ combined, 0.0f };
-    }
-
     void FSDL3MacPlatform::SetupWindow(SDL_Window* sdlWindow, const FPlatformWindowInfo& info)
     {
         SDL_PropertiesID props = SDL_GetWindowProperties(sdlWindow);
@@ -92,8 +58,24 @@ namespace Fusion
                 [[nswindow standardWindowButton:NSWindowCloseButton]    setHidden:NO];
                 [[nswindow standardWindowButton:NSWindowMiniaturizeButton] setHidden:NO];
                 [[nswindow standardWindowButton:NSWindowZoomButton]     setHidden:NO];
+
+                [nswindow setMovableByWindowBackground:NO];
                 break;
             case ETitleBarStyle::ToolBarWithNativeControls:
+                {
+                    nswindow.styleMask |= NSWindowStyleMaskFullSizeContentView;
+                    nswindow.titlebarAppearsTransparent = YES;
+                    nswindow.titleVisibility            = NSWindowTitleHidden;
+                    [[nswindow standardWindowButton:NSWindowCloseButton]    setHidden:NO];
+                    [[nswindow standardWindowButton:NSWindowMiniaturizeButton] setHidden:NO];
+                    [[nswindow standardWindowButton:NSWindowZoomButton]     setHidden:NO];
+
+                    NSToolbar* toolbar = [[NSToolbar alloc] initWithIdentifier:@"FusionToolbar"];
+                    toolbar.showsBaselineSeparator = NO;
+                    [nswindow setToolbar:toolbar];
+
+                    [nswindow setMovableByWindowBackground:NO];
+                }
                 break;
             }
 

@@ -250,9 +250,9 @@ public:
     }
 };
 
-class SampleWindow : public FDecoratedBox
+class SampleWindow : public FWindow
 {
-	FUSION_WIDGET(SampleWindow, FDecoratedBox)
+	FUSION_WIDGET(SampleWindow, FWindow)
 public:
 
 	void Construct() override
@@ -260,10 +260,11 @@ public:
 		Super::Construct();
 
 		Name("TreeView Samples");
+	    WindowTitle("TreeView Samples");
 
 	    m_TreeModel = NewObject<TreeModel>(this);
 
-		Child(
+		Content(
 			FNew(FVerticalStack)
 			.ContentHAlign(EHAlign::Fill)
 			.HAlign(EHAlign::Fill)
@@ -341,15 +342,30 @@ int main(int argc, char* argv[])
 	theme->MergeStyleSheet(FUSION_STYLE_SHEET
 	{
 		FColor WindowBackgroundColor = FColor(0.13f, 0.13f, 0.15f);
+	    FColor TitleBarBackgroundColor = FColor(0.18f, 0.18f, 0.20f);
+	    FColor TitleBarTextColor = FColors::LightGray;
 		FPen   FocusOutline			 = FPen::Solid(FColor(0.47f, 0.73f, 1.0f, 0.85f)).Thickness(2.0f);
 		f32    FocusOutlineOffset	 = 2.5f;
 
 		FColor DisabledBtnTextColor = FColor(0.35f, 0.35f, 0.38f);
 
-		FUSION_STYLE(SampleWindow, "SampleWindow", Background, Padding)
+		FUSION_STYLE(SampleWindow, "SampleWindow", Background, Padding, TitleBarHeight)
 		{
 			Background = WindowBackgroundColor;
 			Padding	   = FMargin(1, 1, 1, 1) * 10;
+
+		    TitleBarHeight = 30.0f;
+		}
+
+	    FUSION_STYLE(FTitleBar, "SampleWindow/TitleBar", Background)
+        {
+            Background = TitleBarBackgroundColor;
+        }
+
+	    FUSION_STYLE(FLabel, "SampleWindow/TitleBar/Title", Color, Font)
+		{
+		    Font = FFont::Regular(FFont::kDefaultFamilyName, 14);
+		    Color = TitleBarTextColor;
 		}
 
 		FUSION_STYLE(FDecoratedBox, "Base/FocusRing", Outline, OutlineOffset)
@@ -626,6 +642,16 @@ int main(int argc, char* argv[])
 	});
 
 	app.CreateMainWindow<SampleWindow>();
+
+    app.SetDefaultWindowConfig({
+        .maximised = false,
+        .fullscreen = false,
+        .resizable = true,
+        .hidden = false,
+        .titleBarStyle = ETitleBarStyle::TransparentWithNativeControls,
+        .openCentered = true,
+        .windowFlags = EPlatformWindowFlags::DestroyOnClose
+    });
 
 #if FUSION_PLATFORM_MAC
 	app.SetInitialWindowSize(800, 600);

@@ -40,7 +40,7 @@ namespace Fusion
 
         virtual bool IsNativeSurface() const { return false; }
 
-        virtual FNativeChromeMetrics GetNativeChromeMetrics() const { return {}; }
+        virtual ETitleBarStyle GetNativeTitleBarStyle() const { return ETitleBarStyle::NoTitleBar; }
 
         Ref<FTheme> GetTheme() const;
 
