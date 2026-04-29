@@ -156,6 +156,8 @@ namespace Fusion
 			m_CachedStyle = nullptr;
 			m_StyleCached = false;
 
+		    RefreshStyle();
+
 			for (int i = 0; i < GetChildCount(); i++)
 			{
 				if (Ref<FWidget> child = GetChildAt(i))

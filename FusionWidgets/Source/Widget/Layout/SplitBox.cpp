@@ -70,18 +70,6 @@ namespace Fusion
 		}
 	}
 
-    TArray<f32> FSplitBox::GetChildrenWidths()
-    {
-	    TArray<f32> result;
-
-	    for (int i = 0; i < GetChildCount(); i++)
-	    {
-	        result.Add(GetChildAt(i)->GetLayoutSize().width);
-	    }
-
-	    return result;
-    }
-
     TArray<f32> FSplitBox::GetColumnBoundaries()
     {
         TArray<f32> result;

@@ -19,15 +19,22 @@ namespace Fusion
 
         Ref<FTreeView> GetTreeView() const { return m_TreeView.Lock(); }
 
+        int GetFlatRowIndex() const { return m_FlatRowIndex; }
+
         void Paint(FPainter& painter) override;
 
         void SetData(const TArray<FModelIndex>& columns);
+
+        void OnMouseEnter(FMouseEvent& event) override;
+        FEventReply OnMouseMove(FMouseEvent& event) override;
+        void OnMouseLeave(FMouseEvent& event) override;
 
     protected:
 
         Ref<FHorizontalStack> m_HStack;
         WeakRef<FTreeView> m_TreeView;
         TArray<FModelIndex> m_Columns;
+        int m_FlatRowIndex = 0;
 
     private:
 

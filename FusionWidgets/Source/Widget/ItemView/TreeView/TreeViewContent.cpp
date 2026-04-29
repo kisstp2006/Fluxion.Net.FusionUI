@@ -232,6 +232,8 @@ namespace Fusion
         {
             Ref<FTreeViewRow> row = m_Rows[i - firstRow];
             row->Excluded(false);
+            row->m_FlatRowIndex = i;
+            row->SubStyle(i % 2 == 0 ? "RowAlternate" : "Row");
             FModelIndex index = m_FlatRows[i].index;
             if (index.IsValid())
             {
@@ -248,7 +250,7 @@ namespace Fusion
             }
 
             f32 y = i * rowHeight;
-            f32 x = m_FlatRows[i].depth * treeView->IndentWidth();
+            f32 x = m_FlatRows[i].depth * treeView->RowIndentWidth();
             row->Padding(FMargin(x, 0, 0, 0));
             row->SetLayoutPosition(FVec2(0, y));
             row->ArrangeContent(FVec2(finalSize.x, rowHeight));  // full width, padding handles indent

@@ -49,7 +49,6 @@ namespace Fusion
         }
 
         FUSION_LAYOUT_PROPERTY(f32, RowHeight);
-        FUSION_LAYOUT_PROPERTY(f32, IndentWidth);
     };
     
 } // namespace Fusion

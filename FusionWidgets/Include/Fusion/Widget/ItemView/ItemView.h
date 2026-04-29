@@ -45,7 +45,12 @@ namespace Fusion
         FUSION_STATE_PROPERTY(Ref<FItemViewDelegate>, ItemDelegate);
 
         FUSION_STYLE_PROPERTIES(
-            (f32, IconWidth, Layout)
+            (f32, RowIconWidth,   Paint),
+            (f32, RowIconGap,     Paint),
+            (f32, RowChevronSize, Paint),
+            (f32, RowChevronGap,  Paint),
+            (f32, RowIndentWidth, Paint),
+            (f32, RowLeftPadding, Paint)
         );
     };
 }

@@ -23,8 +23,6 @@ namespace Fusion
 
         void ArrangeContent(FVec2 finalSize) override;
 
-        TArray<f32> GetChildrenWidths();
-
         // Returns the x positions of each column's LEFT edge (including margin)
         // plus the right edge of the last column, in FSplitBox-local space.
         // e.g. for 2 columns: [0, W/2, W]

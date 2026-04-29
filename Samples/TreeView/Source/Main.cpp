@@ -226,6 +226,7 @@ public:
 				.CanResizeColumns(true)
 				.Model(m_TreeModel)
 				.HAlign(EHAlign::Fill)
+				.RowHeight(32.0f)
 				.FillRatio(1.0f)
 				.ForcePaintBoundary(true)
 			)
@@ -477,9 +478,29 @@ int main(int argc, char* argv[])
 		    Padding    = FMargin(0, 0, 0, 0);
 		}
 
+	    FUSION_STYLE(FTreeViewRow, "FTreeView/ScrollBox/Content/Row_Base", Background, Shape)
+        {
+		    Background = FColor(0, 0, 0, 0);  // transparent, shows scrollbox background
+		    Shape = FRoundedRectangle(5.0f);
+
+		    FUSION_ON(Hovered)
+		    {
+		        Background = FColor(1.0f, 1.0f, 1.0f, 0.06f);
+		    }
+        }
+
 	    FUSION_STYLE(FTreeViewRow, "FTreeView/ScrollBox/Content/Row", Background)
         {
+		    Extends("FTreeView/ScrollBox/Content/Row_Base");
 
+            Background = FColor(0, 0, 0, 0);  // transparent, shows scrollbox background
+        }
+
+	    FUSION_STYLE(FTreeViewRow, "FTreeView/ScrollBox/Content/RowAlternate", Background)
+        {
+		    Extends("FTreeView/ScrollBox/Content/Row_Base");
+
+		    //Background = FColor(1.0f, 1.0f, 1.0f, 0.03f);  // 3% white overlay, subtle stripe
         }
 
 	    FUSION_STYLE(FSplitBox, "FTreeView/Header/Splitter", SplitterColor, SplitterHoverColor, Padding)
@@ -489,11 +510,11 @@ int main(int argc, char* argv[])
 		    Padding            = FMargin(0, 4, 0, 4);
 		}
 
-	    FUSION_STYLE(FScrollBox, "FTreeView/ScrollBox", Shape, ContentPadding)
+	    FUSION_STYLE(FScrollBox, "FTreeView/ScrollBox", Background, Shape, ContentPadding)
 		{
 		    Extends("ScrollBox/Base");
 
-		    ContentPadding = FMargin(0, 0, 0, 0);
+		    ContentPadding = FMargin(1, 1, 1, 1) * 10.0f;
 		    Shape = FRoundedRectangle(0, 0, 5.0f, 5.0f);
 		}
 

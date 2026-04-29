@@ -34,8 +34,11 @@ namespace Fusion
         if (!model)
             return;
 
+        Ref<FItemViewDelegate> delegate = treeView->ItemDelegate();
+        if (!delegate)
+            return;
+
         const FVec2 layoutSize = GetLayoutSize();
-        f32 cellPaddingX = 0.0f;
 
         // Column boundaries in header-local space: [0, col1_start, col2_start, ..., headerWidth]
         // Using boundaries instead of child widths gives pixel-accurate alignment with the
@@ -44,7 +47,6 @@ namespace Fusion
 
         if (Ref<FTreeViewHeader> header = treeView->GetHeader())
         {
-            cellPaddingX = header->CellPadding().left;
             boundaries   = header->GetColumnBoundaries();
 
             // The row is narrower than the header by the scrollbar width.
@@ -72,10 +74,6 @@ namespace Fusion
             }
         }
 
-        Ref<FItemViewDelegate> delegate = treeView->ItemDelegate();
-        if (!delegate)
-            return;
-
         const f32 colY        = Padding().top;
         const f32 colH        = layoutSize.y - Padding().top - Padding().bottom;
         const f32 depthIndent = Padding().left;  // set by UpdateVisibleRows: depth * indentWidth
@@ -100,6 +98,25 @@ namespace Fusion
     void FTreeViewRow::SetData(const TArray<FModelIndex>& columns)
     {
         m_Columns = columns;
+    }
+
+    void FTreeViewRow::OnMouseEnter(FMouseEvent& event)
+    {
+        Super::OnMouseEnter(event);
+
+        SetStyleStateFlag(EStyleState::Hovered, true);
+    }
+
+    FEventReply FTreeViewRow::OnMouseMove(FMouseEvent& event)
+    {
+        return Super::OnMouseMove(event);
+    }
+
+    void FTreeViewRow::OnMouseLeave(FMouseEvent& event)
+    {
+        Super::OnMouseLeave(event);
+
+        SetStyleStateFlag(EStyleState::Hovered, false);
     }
 
 } // namespace Fusion

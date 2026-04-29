@@ -10,5 +10,11 @@ namespace Fusion
         m_ClipContent = true;
         m_ClipShape = FRectangle();
         m_ItemDelegate = CreateSubobject<FItemViewDelegate>();
+
+        m_RowChevronSize = 10.0f;
+        m_RowChevronGap = 6.0f;
+        m_RowIconGap = 6.0f;
+        m_RowIconWidth = 16.0f;
+        m_RowLeftPadding = 4.0f;
     }
 }
