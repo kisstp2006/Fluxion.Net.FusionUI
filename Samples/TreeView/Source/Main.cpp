@@ -223,7 +223,6 @@ public:
 				),
 
 				FNew(FTreeView)
-				.Style("TreeView")
 				.CanResizeColumns(true)
 				.Model(m_TreeModel)
 				.HAlign(EHAlign::Fill)
@@ -471,21 +470,26 @@ int main(int argc, char* argv[])
 			Padding = FMargin(1, 1, 1, 1) * 10.0f;
 		}
 
-	    FUSION_STYLE(FTreeViewHeader, "TreeView/Header", Background, Border, Padding)
+	    FUSION_STYLE(FTreeViewHeader, "FTreeView/Header", Background, Border, Padding)
 		{
 		    Background = FColor(0.15f, 0.15f, 0.18f);
 		    Border     = FColor(0.22f, 0.22f, 0.26f);
 		    Padding    = FMargin(0, 0, 0, 0);
 		}
 
-	    FUSION_STYLE(FSplitBox, "TreeView/Header/Splitter", SplitterColor, SplitterHoverColor, Padding)
+	    FUSION_STYLE(FTreeViewRow, "FTreeView/ScrollBox/Content/Row", Background)
+        {
+
+        }
+
+	    FUSION_STYLE(FSplitBox, "FTreeView/Header/Splitter", SplitterColor, SplitterHoverColor, Padding)
 		{
 		    SplitterColor      = FColor(0.28f, 0.28f, 0.33f);
 		    SplitterHoverColor = FColor(0.47f, 0.73f, 1.0f, 0.85f);
 		    Padding            = FMargin(0, 4, 0, 4);
 		}
 
-	    FUSION_STYLE(FScrollBox, "TreeView/ScrollBox", Shape, ContentPadding)
+	    FUSION_STYLE(FScrollBox, "FTreeView/ScrollBox", Shape, ContentPadding)
 		{
 		    Extends("ScrollBox/Base");
 

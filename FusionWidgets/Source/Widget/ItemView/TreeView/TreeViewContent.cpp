@@ -214,7 +214,8 @@ namespace Fusion
         while ((int)m_Rows.Size() < needed)
         {
             Ref<FTreeViewRow> row;
-            FAssignNew(FTreeViewRow, row);
+            FAssignNew(FTreeViewRow, row)
+            .SubStyle("Row");
             row->m_TreeView = treeView;
             AddChildWidget(row);
             m_Rows.Add(row);
